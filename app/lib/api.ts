@@ -116,3 +116,8 @@ export const getTeams = async (
 
   return request('/teams', token, params)
 }
+
+export const getGames = async (token: string) => {
+    return request('/videogames', token);
+};
+  

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
 import { mockMatches, mockTournaments, mockTeams } from '@/lib/data'
 
 const token = process.env.NEXT_PUBLIC_PANDASCORE_TOKEN
@@ -42,7 +42,7 @@ export function useMatches(filters?: {
     }
 
     fetchData()
-  }, [filters?.game, filters?.status, filters?.page])
+  }, [filters?.game, filters?.status, filters?.page, filters?.per_page])
 
   return { data, loading, error }
 }
@@ -120,3 +120,36 @@ export function useTeams(filters?: {
 
   return { data, loading, error }
 }
+
+export function useGames() {
+    const [games, setGames] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null)
+  
+    useEffect(() => {
+      const fetchGames = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+
+            if (!token) {
+                await new Promise(resolve => setTimeout(resolve, 500))
+                return
+            }
+
+            const result = await getGames(token);
+            setGames(result);
+        } catch (err) {
+            console.error('Error fetching games:', err)
+            setError(err instanceof Error ? err.message : 'An error occurred')
+        } finally {
+            setLoading(false);
+        }
+      };
+  
+      fetchGames();
+    }, []);
+  
+    return { games, loading, error };
+};
+  
