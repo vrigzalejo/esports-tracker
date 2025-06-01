@@ -13,8 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'EsportsTracker - Live Esports Matches & Tournaments',
-  description: 'Track live esports matches, tournaments, and team statistics across multiple games.',
+  title: 'Esports Hub - Live Matches, Tournaments & Stats',
+  description: 'Your ultimate destination for esports matches, tournaments, teams, and statistics',
+  keywords: ['esports', 'gaming', 'tournaments', 'matches', 'teams', 'statistics'],
+  authors: [{ name: 'Esports Hub' }],
+  viewport: 'width=device-width, initial-scale=1',
+  openGraph: {
+    title: 'Esports Hub',
+    description: 'Your ultimate destination for esports matches, tournaments, teams, and statistics',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({

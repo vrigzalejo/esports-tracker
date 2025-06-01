@@ -1,76 +1,120 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Match, Tournament, Team } from '@/types/esports'
+import { getMatches, getTournaments, getTeams } from '@/lib/api'
 import { mockMatches, mockTournaments, mockTeams } from '@/lib/data'
 
-interface UseEsportsDataReturn {
-  matches: Match[]
-  tournaments: Tournament[]
-  teams: Team[]
-  loading: boolean
-  error: string | null
-  refetch: () => void
-}
-
-export function useEsportsData(): UseEsportsDataReturn {
-  const [matches, setMatches] = useState<Match[]>([])
-  const [tournaments, setTournaments] = useState<Tournament[]>([])
-  const [teams, setTeams] = useState<Team[]>([])
+export function useMatches(filters?: {
+  game?: string
+  status?: string
+  page?: number
+}) {
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchData = async () => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      // In production, replace with actual API calls:
-      /*
-      const [matchesRes, tournamentsRes, teamsRes] = await Promise.all([
-        fetch('https://api.pandascore.co/matches?token=YOUR_TOKEN'),
-        fetch('https://api.pandascore.co/tournaments?token=YOUR_TOKEN'),
-        fetch('https://api.pandascore.co/teams?token=YOUR_TOKEN')
-      ])
-      
-      if (!matchesRes.ok || !tournamentsRes.ok || !teamsRes.ok) {
-        throw new Error('Failed to fetch data')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Use mock data if no API token is available
+        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 500))
+          setData(mockMatches)
+          return
+        }
+
+        const result = await getMatches(filters)
+        setData(result)
+      } catch (err) {
+        console.error('Error fetching matches:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        // Fallback to mock data on error
+        setData(mockMatches)
+      } finally {
+        setLoading(false)
       }
-      
-      const [matchesData, tournamentsData, teamsData] = await Promise.all([
-        matchesRes.json(),
-        tournamentsRes.json(),
-        teamsRes.json()
-      ])
-      
-      setMatches(matchesData)
-      setTournaments(tournamentsData)
-      setTeams(teamsData)
-      */
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setMatches(mockMatches)
-      setTournaments(mockTournaments)
-      setTeams(mockTeams)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
     }
-  }
+
+    fetchData()
+  }, [filters?.game, filters?.status, filters?.page])
+
+  return { data, loading, error }
+}
+
+export function useTournaments(filters?: {
+  game?: string
+  page?: number
+}) {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+          await new Promise(resolve => setTimeout(resolve, 500))
+          setData(mockTournaments)
+          return
+        }
 
-  return {
-    matches,
-    tournaments,
-    teams,
-    loading,
-    error,
-    refetch: fetchData
-  }
+        const result = await getTournaments(filters)
+        setData(result)
+      } catch (err) {
+        console.error('Error fetching tournaments:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        setData(mockTournaments)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters?.game, filters?.page])
+
+  return { data, loading, error }
+}
+
+export function useTeams(filters?: {
+  game?: string
+  page?: number
+}) {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+          await new Promise(resolve => setTimeout(resolve, 500))
+          setData(mockTeams)
+          return
+        }
+
+        const result = await getTeams(filters)
+        setData(result)
+      } catch (err) {
+        console.error('Error fetching teams:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        setData(mockTeams)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters?.game, filters?.page])
+
+  return { data, loading, error }
 }

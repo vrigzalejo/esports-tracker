@@ -1,38 +1,46 @@
 'use client'
 
-import { Play, Trophy, Users, TrendingUp } from 'lucide-react'
-import type { TabType } from '@/types/esports'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Home, Play, Trophy, Users, BarChart3 } from 'lucide-react'
 
 interface NavigationProps {
-    activeTab: TabType
-    onTabChange: (tab: TabType) => void
+    activeTab: string
 }
 
-const tabs = [
-    { id: 'matches' as const, label: 'Live Matches', icon: Play },
-    { id: 'tournaments' as const, label: 'Tournaments', icon: Trophy },
-    { id: 'teams' as const, label: 'Teams', icon: Users },
-    { id: 'stats' as const, label: 'Statistics', icon: TrendingUp }
-]
+export default function Navigation({ activeTab }: NavigationProps) {
+    const pathname = usePathname()
 
-export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
+    const navigationItems = [
+        { id: 'home', label: 'Home', icon: Home, path: '/' },
+        { id: 'matches', label: 'Matches', icon: Play, path: '/matches' },
+        { id: 'tournaments', label: 'Tournaments', icon: Trophy, path: '/tournaments' },
+        { id: 'teams', label: 'Teams', icon: Users, path: '/teams' },
+        { id: 'stats', label: 'Statistics', icon: BarChart3, path: '/stats' },
+    ]
+
     return (
         <nav className="bg-gray-800 border-b border-gray-700">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex space-x-8">
-                    {tabs.map(({ id, label, icon: Icon }) => (
-                        <button
-                            key={id}
-                            onClick={() => onTabChange(id)}
-                            className={`flex items-center space-x-2 px-3 py-4 border-b-2 font-medium text-sm transition-all duration-200 ${activeTab === id
-                                    ? 'border-blue-500 text-blue-400'
-                                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                                }`}
-                        >
-                            <Icon className="w-4 h-4" />
-                            <span>{label}</span>
-                        </button>
-                    ))}
+                <div className="flex space-x-8 overflow-x-auto">
+                    {navigationItems.map((item) => {
+                        const Icon = item.icon
+                        const isActive = pathname === item.path
+
+                        return (
+                            <Link
+                                key={item.id}
+                                href={item.path}
+                                className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${isActive
+                                        ? 'border-blue-500 text-blue-400'
+                                        : 'border-transparent text-gray-300 hover:text-white hover:border-gray-300'
+                                    }`}
+                            >
+                                <Icon className="w-4 h-4" />
+                                <span>{item.label}</span>
+                            </Link>
+                        )
+                    })}
                 </div>
             </div>
         </nav>

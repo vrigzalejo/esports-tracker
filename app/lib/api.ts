@@ -1,88 +1,118 @@
-const API_BASE_URL = 'https://api.pandascore.co'
+const BASE_URL = 'https://api.pandascore.co'
 
-export class PandaScoreAPI {
-  private token: string
+const buildUrl = (endpoint: string, token: string, params?: Record<string, string>) => {
+  const url = new URL(`${BASE_URL}${endpoint}`)
 
-  constructor(token: string) {
-    this.token = token
-  }
-
-  private async request<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
-    const url = new URL(`${API_BASE_URL}${endpoint}`)
-    url.searchParams.append('token', this.token)
-    
+  if (params) {
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value)
     })
+  }
 
-    const response = await fetch(url.toString())
-    
+  url.searchParams.append('token', token)
+
+  return url
+}
+
+const request = async (endpoint: string, token: string, params?: Record<string, string>) => {
+  const url = buildUrl(endpoint, token, params)
+
+  try {
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 60 }, // Next.js 15 cache control
+    })
+
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`)
     }
 
     return response.json()
+  } catch (error) {
+    console.error('API Error:', error)
+    throw error
   }
+}
 
-  async getMatches(params: {
+export const getMatches = async (
+  token: string,
+  filters?: {
+    game?: string
+    status?: string
     page?: number
     per_page?: number
-    filter?: Record<string, any>
-  } = {}) {
-    return this.request('/matches', {
-      page: params.page?.toString() || '1',
-      per_page: params.per_page?.toString() || '50',
-      ...params.filter
-    })
+  }
+) => {
+  const params: Record<string, string> = {}
+
+  if (filters?.game && filters.game !== 'all') {
+    params['filter[videogame]'] = filters.game
   }
 
-  async getTournaments(params: {
+  if (filters?.status && filters.status !== 'all') {
+    params['filter[status]'] = filters.status
+  }
+
+  if (filters?.page) {
+    params['page'] = filters.page.toString()
+  }
+
+  if (filters?.per_page) {
+    params['per_page'] = filters.per_page.toString()
+  }
+
+  return request('/matches', token, params)
+}
+
+export const getTournaments = async (
+  token: string,
+  filters?: {
+    game?: string
     page?: number
     per_page?: number
-    filter?: Record<string, any>
-  } = {}) {
-    return this.request('/tournaments', {
-      page: params.page?.toString() || '1',
-      per_page: params.per_page?.toString() || '50',
-      ...params.filter
-    })
+  }
+) => {
+  const params: Record<string, string> = {}
+
+  if (filters?.game && filters.game !== 'all') {
+    params['filter[videogame]'] = filters.game
   }
 
-  async getTeams(params: {
+  if (filters?.page) {
+    params['page'] = filters.page.toString()
+  }
+
+  if (filters?.per_page) {
+    params['per_page'] = filters.per_page.toString()
+  }
+
+  return request('/tournaments', token, params)
+}
+
+export const getTeams = async (
+  token: string,
+  filters?: {
+    game?: string
     page?: number
     per_page?: number
-    filter?: Record<string, any>
-  } = {}) {
-    return this.request('/teams', {
-      page: params.page?.toString() || '1',
-      per_page: params.per_page?.toString() || '50',
-      ...params.filter
-    })
+  }
+) => {
+  const params: Record<string, string> = {}
+
+  if (filters?.game && filters.game !== 'all') {
+    params['filter[videogame]'] = filters.game
   }
 
-  async getPlayers(params: {
-    page?: number
-    per_page?: number
-    filter?: Record<string, any>
-  } = {}) {
-    return this.request('/players', {
-      page: params.page?.toString() || '1',
-      per_page: params.per_page?.toString() || '50',
-      ...params.filter
-    })
+  if (filters?.page) {
+    params['page'] = filters.page.toString()
   }
 
-  async getLeagues(params: {
-    page?: number
-    per_page?: number
-  } = {}) {
-    return this.request('/leagues', {
-      page: params.page?.toString() || '1',
-      per_page: params.per_page?.toString() || '50'
-    })
+  if (filters?.per_page) {
+    params['per_page'] = filters.per_page.toString()
   }
 
-  async getVideogames() {
-    return this.request('/videogames')
-  }
+  return request('/teams', token, params)
 }

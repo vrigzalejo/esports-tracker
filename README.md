@@ -112,37 +112,6 @@ const tournaments = await api.getTournaments({
 - `GET /leagues` - League information
 - `GET /videogames` - Supported games list
 
-## 🎨 Customization
-
-### Themes
-The application uses a dark theme by default. Customize colors in `tailwind.config.ts`:
-
-```typescript
-theme: {
-  extend: {
-    colors: {
-      // Add your custom colors
-      brand: {
-        50: '#...',
-        500: '#...',
-        900: '#...'
-      }
-    }
-  }
-}
-```
-
-### Animations
-Custom animations are defined in the Tailwind config:
-
-```typescript
-animation: {
-  'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-  'fade-in': 'fadeIn 0.5s ease-in-out',
-  'slide-up': 'slideUp 0.3s ease-out',
-}
-```
-
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
