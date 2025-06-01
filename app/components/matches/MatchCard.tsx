@@ -8,6 +8,14 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({ match }: MatchCardProps) {
+    const getTeamImage = (opponent: any) => {
+        return opponent?.opponent?.image_url || '/images/placeholder-team.svg'
+    }
+
+    const getTeamName = (opponent: any) => {
+        return opponent?.opponent?.name || 'TBD'
+    }
+
     return (
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition-all duration-200 cursor-pointer animate-slide-up">
             <div className="flex items-center justify-between mb-4">
@@ -23,27 +31,35 @@ export default function MatchCard({ match }: MatchCardProps) {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                        <div className="relative w-8 h-8">
+                        <div className="relative w-8 h-8 bg-gray-700 rounded overflow-hidden">
                             <Image
-                                src={match.opponents[0]?.opponent.image_url || '/api/placeholder/32/32'}
-                                alt={match.opponents[0]?.opponent.name || 'Team'}
+                                src={getTeamImage(match.opponents[0])}
+                                alt={getTeamName(match.opponents[0])}
                                 fill
-                                className="rounded object-cover"
+                                className="object-cover"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/placeholder-team.svg';
+                                }}
                             />
                         </div>
-                        <span className="text-white font-medium">{match.opponents[0]?.opponent.name}</span>
+                        <span className="text-white font-medium">{getTeamName(match.opponents[0])}</span>
                     </div>
                     <span className="text-gray-400 font-bold">vs</span>
                     <div className="flex items-center space-x-2">
-                        <div className="relative w-8 h-8">
+                        <div className="relative w-8 h-8 bg-gray-700 rounded overflow-hidden">
                             <Image
-                                src={match.opponents[1]?.opponent.image_url || '/api/placeholder/32/32'}
-                                alt={match.opponents[1]?.opponent.name || 'Team'}
+                                src={getTeamImage(match.opponents[1])}
+                                alt={getTeamName(match.opponents[1])}
                                 fill
-                                className="rounded object-cover"
+                                className="object-cover"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/placeholder-team.svg';
+                                }}
                             />
                         </div>
-                        <span className="text-white font-medium">{match.opponents[1]?.opponent.name}</span>
+                        <span className="text-white font-medium">{getTeamName(match.opponents[1])}</span>
                     </div>
                 </div>
                 {match.status === 'running' && (
@@ -55,7 +71,7 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">{match.tournament.league.name}</span>
+                <span className="text-gray-400">{match.league.name}</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
             </div>
         </div>

@@ -3,12 +3,9 @@ export interface Match {
     name: string
     status: 'running' | 'finished' | 'not_started'
     begin_at: string
-    tournament: {
+    league: {
       name: string
-      league: {
-        name: string
-        image_url: string
-      }
+      image_url: string
     }
     opponents: Array<{
       opponent: {

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { getMatches, getTournaments, getTeams } from '@/lib/api'
 import { mockMatches, mockTournaments, mockTeams } from '@/lib/data'
 
+const token = process.env.NEXT_PUBLIC_PANDASCORE_TOKEN
+
 export function useMatches(filters?: {
   game?: string
   status?: string
@@ -18,16 +20,16 @@ export function useMatches(filters?: {
       try {
         setLoading(true)
         setError(null)
-        
+
         // Use mock data if no API token is available
-        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+        if (!token) {
           // Simulate network delay
           await new Promise(resolve => setTimeout(resolve, 500))
           setData(mockMatches)
           return
         }
 
-        const result = await getMatches(filters)
+        const result = await getMatches(token, filters)
         setData(result)
       } catch (err) {
         console.error('Error fetching matches:', err)
@@ -59,13 +61,13 @@ export function useTournaments(filters?: {
         setLoading(true)
         setError(null)
         
-        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+        if (!token) {
           await new Promise(resolve => setTimeout(resolve, 500))
           setData(mockTournaments)
           return
         }
 
-        const result = await getTournaments(filters)
+        const result = await getTournaments(token, filters)
         setData(result)
       } catch (err) {
         console.error('Error fetching tournaments:', err)
@@ -96,13 +98,13 @@ export function useTeams(filters?: {
         setLoading(true)
         setError(null)
         
-        if (!process.env.NEXT_PUBLIC_PANDASCORE_TOKEN) {
+        if (!token) {
           await new Promise(resolve => setTimeout(resolve, 500))
           setData(mockTeams)
           return
         }
 
-        const result = await getTeams(filters)
+        const result = await getTeams(token, filters)
         setData(result)
       } catch (err) {
         console.error('Error fetching teams:', err)

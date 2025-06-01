@@ -21,7 +21,7 @@ const request = async (endpoint: string, token: string, params?: Record<string, 
     const response = await fetch(url.toString(), {
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       next: { revalidate: 60 }, // Next.js 15 cache control
     })

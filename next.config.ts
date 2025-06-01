@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
   /* config options here */
   productionBrowserSourceMaps: true,
   images: {
-    domains: ['api.placeholder.com'],
+    domains: [
+      'api.placeholder.com',
+      'cdn.pandascore.co'
+    ],
   }
 };
 
