@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="4" fill="#374151"/>
+  <g transform="translate(6, 6)">
+    <!-- Shield shape -->
+    <path d="M10 2L18 6V12C18 16.5 14.5 20 10 20C5.5 20 2 16.5 2 12V6L10 2Z" fill="#6B7280" stroke="#9CA3AF" stroke-width="1"/>
+    <!-- Inner design -->
+    <circle cx="10" cy="9" r="3" fill="#9CA3AF"/>
+    <path d="M7 14C7 13 8.5 12 10 12C11.5 12 13 13 13 14V16H7V14Z" fill="#9CA3AF"/>
+  </g>
+</svg>
