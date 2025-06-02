@@ -13,6 +13,25 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-tournament.svg';
     }
 
+    const formatPrizePool = (prizePool: string | undefined | null): string => {
+        if (!prizePool) return 'TBD';
+        
+        // Remove any currency symbols and commas, keep only numbers and decimal points
+        const numericValue = prizePool.replace(/[^0-9.]/g, '');
+        const value = parseFloat(numericValue);
+        
+        if (isNaN(value)) return 'TBD';
+        
+        // Format based on value size
+        if (value >= 1000000) {
+            return `$${(value / 1000000).toFixed(1)}M`;
+        } else if (value >= 1000) {
+            return `$${(value / 1000).toFixed(1)}K`;
+        } else {
+            return `$${value.toFixed(0)}`;
+        }
+    }
+
     return (
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer animate-slide-up">
             <div className="flex items-start justify-between mb-4">
@@ -36,7 +55,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-green-400 font-bold">{tournament.prize_pool}</p>
+                    <p className="text-green-400 font-bold">{formatPrizePool(tournament.prize_pool)}</p>
                     <p className="text-gray-400 text-xs">Prize Pool</p>
                 </div>
             </div>

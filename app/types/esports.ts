@@ -80,6 +80,13 @@ export interface Team {
     image_url: string
     acronym: string
     location: string
+    matches_played?: number
+    matches_won?: number
+    matches_lost?: number
+    matches_draw?: number
+    current_streak?: number
+    win_rate?: number
+    rating?: number
 }
   
 export interface StatCardProps {
