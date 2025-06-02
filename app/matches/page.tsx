@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
@@ -15,50 +15,90 @@ export default function MatchesPage() {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(20)
 
+    // Date filtering states
+    const [dateFilter, setDateFilter] = useState('all') // 'all', 'today', 'week', 'month', 'custom'
+    const [customDateRange, setCustomDateRange] = useState({
+        start: '',
+        end: ''
+    })
+
     // Fetch games data
     const { games, loading: gamesLoading } = useGames()
 
+    // Prepare date filters for the API
+    const getDateFilters = () => {
+        const now = new Date()
+        const filters: any = {}
+
+        switch (dateFilter) {
+            case 'today':
+                const todayStart = new Date(now)
+                todayStart.setHours(0, 0, 0, 0)
+                const todayEnd = new Date(now)
+                todayEnd.setHours(23, 59, 59, 999)
+                filters.since = todayStart.toISOString()
+                filters.until = todayEnd.toISOString()
+                break
+
+            case 'week':
+                const weekStart = new Date(now)
+                weekStart.setDate(now.getDate() - now.getDay()) // Start of week (Sunday)
+                weekStart.setHours(0, 0, 0, 0)
+                const weekEnd = new Date(weekStart)
+                weekEnd.setDate(weekStart.getDate() + 6) // End of week (Saturday)
+                weekEnd.setHours(23, 59, 59, 999)
+                filters.since = weekStart.toISOString()
+                filters.until = weekEnd.toISOString()
+                break
+
+            case 'month':
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+                filters.since = monthStart.toISOString()
+                filters.until = monthEnd.toISOString()
+                break
+
+            case 'custom':
+                if (customDateRange.start) {
+                    filters.since = new Date(customDateRange.start).toISOString()
+                }
+                if (customDateRange.end) {
+                    const endDate = new Date(customDateRange.end)
+                    endDate.setHours(23, 59, 59, 999)
+                    filters.until = endDate.toISOString()
+                }
+                break
+        }
+
+        return filters
+    }
+
+    // Pass all filters to the hook, including date filters
     const { data: matches, loading: matchesLoading } = useMatches({
         game: selectedGame,
         status: selectedStatus,
         page: currentPage,
-        per_page: itemsPerPage
+        per_page: itemsPerPage,
+        sort: 'proximity',
+        ...getDateFilters()
     })
 
-    // Client-side filtering and sorting
-    const filteredAndSortedMatches = useMemo(() => {
-        // First filter by search term
-        const filtered = matches.filter((match: any) => {
-            if (!searchTerm) return true
+    // Only filter by search term since sorting and pagination are handled by the hook
+    const filteredMatches = useMemo(() => {
+        if (!searchTerm) return matches
+
+        return matches.filter((match: any) => {
             const matchesSearch = match.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 match.opponents?.some((opp: any) =>
                     opp.opponent?.name?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
             return matchesSearch
         })
-
-        // Then sort by date - current/recent matches first
-        const sorted = filtered.sort((a: any, b: any) => {
-            const now = new Date()
-            const dateA = new Date(a.scheduled_at || a.begin_at)
-            const dateB = new Date(b.scheduled_at || b.begin_at)
-
-            // Calculate time difference from now (absolute value for proximity)
-            const diffA = Math.abs(now.getTime() - dateA.getTime())
-            const diffB = Math.abs(now.getTime() - dateB.getTime())
-
-            // Sort by proximity to current time (closest first)
-            return diffA - diffB
-        })
-
-        return sorted
     }, [matches, searchTerm])
 
-    // Since API handles pagination, we use the filtered and sorted results directly
-    const currentMatches = filteredAndSortedMatches
+    const currentMatches = filteredMatches
 
-    // For display purposes - in a real implementation, you'd get total count from API
-    // This is a simplified version assuming each page has itemsPerPage items
+    // Pagination logic - assuming we have consistent page sizes
     const hasMorePages = matches.length === itemsPerPage
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
@@ -107,11 +147,30 @@ export default function MatchesPage() {
         return pages
     }
 
+    // Format date for display
+    const formatDateFilter = () => {
+        switch (dateFilter) {
+            case 'today': return 'Today'
+            case 'week': return 'This Week'
+            case 'month': return 'This Month'
+            case 'custom':
+                if (customDateRange.start && customDateRange.end) {
+                    return `${customDateRange.start} to ${customDateRange.end}`
+                } else if (customDateRange.start) {
+                    return `From ${customDateRange.start}`
+                } else if (customDateRange.end) {
+                    return `Until ${customDateRange.end}`
+                }
+                return 'Custom Range'
+            default: return 'All Dates'
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gray-900 text-white">
             <Header searchTerm={searchTerm} onSearchChange={(term) => {
                 setSearchTerm(term)
-                resetPage()
+                // Don't reset page for search since it's client-side filtering
             }} />
             <Navigation activeTab="matches" />
 
@@ -121,7 +180,8 @@ export default function MatchesPage() {
                         Matches
                     </h1>
 
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 flex-wrap gap-2">
+                        {/* Game Filter */}
                         <div className="flex items-center space-x-2">
                             <Filter className="w-4 h-4 text-gray-400" />
                             <select
@@ -144,6 +204,7 @@ export default function MatchesPage() {
                             </select>
                         </div>
 
+                        {/* Status Filter */}
                         <select
                             value={selectedStatus}
                             onChange={(e) => {
@@ -158,6 +219,26 @@ export default function MatchesPage() {
                             <option value="finished">Finished</option>
                         </select>
 
+                        {/* Date Filter */}
+                        <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <select
+                                value={dateFilter}
+                                onChange={(e) => {
+                                    setDateFilter(e.target.value)
+                                    resetPage()
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                            >
+                                <option value="all">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+
+                        {/* Items per page */}
                         <select
                             value={itemsPerPage}
                             onChange={(e) => {
@@ -173,10 +254,53 @@ export default function MatchesPage() {
                     </div>
                 </div>
 
+                {/* Custom Date Range Inputs */}
+                {dateFilter === 'custom' && (
+                    <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
+                        <div className="flex items-center space-x-4 flex-wrap gap-2">
+                            <div className="flex items-center space-x-2">
+                                <label className="text-sm text-gray-300">From:</label>
+                                <input
+                                    type="date"
+                                    value={customDateRange.start}
+                                    onChange={(e) => {
+                                        setCustomDateRange(prev => ({ ...prev, start: e.target.value }))
+                                        resetPage()
+                                    }}
+                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="text-sm text-gray-300">To:</label>
+                                <input
+                                    type="date"
+                                    value={customDateRange.end}
+                                    onChange={(e) => {
+                                        setCustomDateRange(prev => ({ ...prev, end: e.target.value }))
+                                        resetPage()
+                                    }}
+                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setCustomDateRange({ start: '', end: '' })
+                                    resetPage()
+                                }}
+                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Results info */}
                 {!matchesLoading && currentMatches.length > 0 && (
                     <div className="mb-4 text-gray-400 text-sm">
                         Page {currentPage} - Showing {currentMatches.length} matches
+                        {searchTerm && ` (filtered by "${searchTerm}")`}
+                        {dateFilter !== 'all' && ` (${formatDateFilter()})`}
                         {hasMorePages && <span> (more available)</span>}
                     </div>
                 )}
@@ -206,7 +330,23 @@ export default function MatchesPage() {
                                 </button>
 
                                 <div className="flex items-center space-x-2 px-4">
-                                    <span className="text-gray-400 text-sm">Page {currentPage}</span>
+                                    {getPageNumbers().map((pageNum, index) => (
+                                        <span key={index}>
+                                            {pageNum === '...' ? (
+                                                <span className="text-gray-500 px-2">...</span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => goToPage(pageNum as number)}
+                                                    className={`px-3 py-1 text-sm rounded-md transition-all duration-200 ${currentPage === pageNum
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'text-gray-400 hover:text-white hover:bg-gray-600'
+                                                        }`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            )}
+                                        </span>
+                                    ))}
                                 </div>
 
                                 <button
@@ -222,9 +362,38 @@ export default function MatchesPage() {
                     </>
                 )}
 
-                {filteredAndSortedMatches.length === 0 && !matchesLoading && (
+                {currentMatches.length === 0 && !matchesLoading && (
                     <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">No matches found matching your criteria</p>
+                        <p className="text-gray-400 text-lg">
+                            {searchTerm
+                                ? `No matches found matching "${searchTerm}"`
+                                : "No matches found matching your criteria"
+                            }
+                        </p>
+                        {(searchTerm || dateFilter !== 'all') && (
+                            <div className="mt-4 space-x-2">
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                    >
+                                        Clear search
+                                    </button>
+                                )}
+                                {dateFilter !== 'all' && (
+                                    <button
+                                        onClick={() => {
+                                            setDateFilter('all')
+                                            setCustomDateRange({ start: '', end: '' })
+                                            resetPage()
+                                        }}
+                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                    >
+                                        Clear date filter
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

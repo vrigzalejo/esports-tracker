@@ -3,6 +3,7 @@ export interface Match {
     name: string
     status: 'running' | 'finished' | 'not_started'
     begin_at: string
+    scheduled_at: string
     league: {
       name: string
       image_url: string
