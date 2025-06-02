@@ -320,8 +320,51 @@ export default function MatchesPage() {
                 )}
 
                 {matchesLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 animate-pulse">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex gap-2">
+                                        <div className="h-6 w-20 bg-gray-700 rounded-full" />
+                                        <div className="h-6 w-24 bg-gray-700 rounded-full" />
+                                    </div>
+                                    <div className="h-6 w-16 bg-gray-700 rounded-full" />
+                                </div>
+                                
+                                {/* Teams */}
+                                <div className="flex items-center justify-center mb-6">
+                                    <div className="grid grid-cols-[auto_auto_auto] items-center gap-4 sm:gap-6">
+                                        {/* Team 1 */}
+                                        <div className="flex flex-col items-center space-y-3">
+                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
+                                            <div className="h-4 w-16 bg-gray-700 rounded" />
+                                        </div>
+                                        
+                                        {/* VS */}
+                                        <div className="h-6 w-8 bg-gray-700 rounded" />
+                                        
+                                        {/* Team 2 */}
+                                        <div className="flex flex-col items-center space-y-3">
+                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
+                                            <div className="h-4 w-16 bg-gray-700 rounded" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Date and Time */}
+                                <div className="flex items-center justify-center gap-4 mb-4">
+                                    <div className="h-6 w-28 bg-gray-700 rounded-full" />
+                                    <div className="h-6 w-28 bg-gray-700 rounded-full" />
+                                </div>
+                                
+                                {/* Tournament Info */}
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="h-6 w-32 bg-gray-700 rounded-full" />
+                                    <div className="h-6 w-40 bg-gray-700 rounded-full" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <>
