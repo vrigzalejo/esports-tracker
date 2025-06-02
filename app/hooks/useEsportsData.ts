@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
 
-const token = process.env.NEXT_PUBLIC_PANDASCORE_TOKEN
-
 export function useMatches(filters?: {
   game?: string
+  status?: string
   page?: number,
   per_page?: number,
   sort?: string,
@@ -19,6 +18,10 @@ export function useMatches(filters?: {
   // Alternative: specific date filters
   since?: string | Date,    // Matches after this date
   until?: string | Date,    // Matches before this date
+  // Time-based filters
+  past?: boolean,           // Only past matches
+  running?: boolean,        // Only currently running matches
+  upcoming?: boolean        // Only upcoming matches
 }) {
   const [data, setData] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,11 +33,6 @@ export function useMatches(filters?: {
         setLoading(true)
         setError(null)
 
-        if (!token) {
-          throw new Error('API token not found')
-        }
-
-        // Prepare API filters with date parameters
         const apiFilters = prepareApiFilters(filters)
         
         // Set default sorting to begin_at if not specified
@@ -42,7 +40,7 @@ export function useMatches(filters?: {
           apiFilters.sort = 'begin_at'
         }
 
-        const result = await getMatches(token, apiFilters) as Match[]
+        const result = await getMatches(apiFilters) as Match[]
         setData(result)
       } catch (err) {
         console.error('Error fetching matches:', err)
@@ -55,19 +53,36 @@ export function useMatches(filters?: {
     fetchData()
   }, [
     filters?.game, 
+    filters?.status,
     filters?.page, 
     filters?.per_page, 
     filters?.sort,
     filters?.range?.since,
     filters?.range?.until, 
     filters?.since, 
-    filters?.until
+    filters?.until,
+    filters?.past,
+    filters?.running,
+    filters?.upcoming
   ])
 
   return { data, loading, error }
 }
 
-export function useTournaments(filters?: TournamentFilters) {
+export function useTournaments(filters?: {
+  game?: string
+  page?: number,
+  // Date filtering options
+  range?: {
+    since?: string | Date,
+    until?: string | Date
+  },
+  since?: string | Date,
+  until?: string | Date,
+  past?: boolean,
+  running?: boolean,
+  upcoming?: boolean
+}) {
   const [data, setData] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,17 +92,10 @@ export function useTournaments(filters?: TournamentFilters) {
       try {
         setLoading(true)
         setError(null)
-        
-        if (!token) {
-          throw new Error('API token not found')
-        }
 
         const apiFilters = prepareApiFilters(filters)
-        const result = await getTournaments(token, apiFilters) as Tournament[]
-        
-        // Apply additional client-side date filtering
-        const processedData = applyDateFilters<Tournament>(result, filters)
-        setData(processedData)
+        const result = await getTournaments(apiFilters)
+        setData(result)
       } catch (err) {
         console.error('Error fetching tournaments:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -112,7 +120,10 @@ export function useTournaments(filters?: TournamentFilters) {
   return { data, loading, error }
 }
 
-export function useTeams(filters?: TeamFilters) {
+export function useTeams(filters?: {
+  game?: string
+  page?: number
+}) {
   const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -122,12 +133,8 @@ export function useTeams(filters?: TeamFilters) {
       try {
         setLoading(true)
         setError(null)
-        
-        if (!token) {
-          throw new Error('API token not found')
-        }
 
-        const result = await getTeams(token, filters)
+        const result = await getTeams(filters)
         setData(result)
       } catch (err) {
         console.error('Error fetching teams:', err)
@@ -144,40 +151,35 @@ export function useTeams(filters?: TeamFilters) {
 }
 
 export function useGames() {
-    const [games, setGames] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null)
-  
-    useEffect(() => {
-      const fetchGames = async () => {
-        try {
-            setLoading(true)
-            setError(null)
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-            if (!token) {
-                throw new Error('API token not found')
-            }
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        setLoading(true)
+        setError(null)
 
-            const result = await getGames(token);
-            setGames(result);
-        } catch (err) {
-            console.error('Error fetching games:', err)
-            setError(err instanceof Error ? err.message : 'An error occurred')
-        } finally {
-            setLoading(false);
-        }
-      };
-  
-      fetchGames();
-    }, []);
-  
-    return { games, loading, error };
+        const result = await getGames()
+        setGames(result)
+      } catch (err) {
+        console.error('Error fetching games:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchGames()
+  }, [])
+
+  return { games, loading, error }
 }
-
-type MatchesFilters = Parameters<typeof useMatches>[0]
 
 interface ApiFilters {
   game?: string
+  status?: string
   page?: number
   per_page?: number
   sort?: string
@@ -186,12 +188,30 @@ interface ApiFilters {
   [key: string]: string | number | undefined
 }
 
+interface FilterOptions {
+  game?: string
+  status?: string
+  page?: number
+  per_page?: number
+  sort?: string
+  range?: {
+    since?: string | Date
+    until?: string | Date
+  }
+  since?: string | Date
+  until?: string | Date
+  past?: boolean
+  running?: boolean
+  upcoming?: boolean
+}
+
 // Helper function to prepare API filters with date parameters
-function prepareApiFilters(filters: MatchesFilters | undefined): ApiFilters {
+function prepareApiFilters(filters: FilterOptions | undefined): ApiFilters {
   if (!filters) return {}
   
   const apiFilters: ApiFilters = { 
     game: filters.game,
+    status: filters.status,
     page: filters.page,
     per_page: filters.per_page,
     sort: filters.sort
@@ -218,69 +238,10 @@ function prepareApiFilters(filters: MatchesFilters | undefined): ApiFilters {
   return apiFilters
 }
 
-// Helper function to format dates for API (ISO string format)
+// Helper function to format dates for API (UTC date only)
 function formatDateForApi(date: string | Date): string {
   if (typeof date === 'string') {
-    return date
+    date = new Date(date)
   }
-  return date.toISOString()
-}
-
-// Add new type definitions at the top after imports
-interface DateFilters {
-  range?: {
-    since?: string | Date
-    until?: string | Date
-  }
-  since?: string | Date
-  until?: string | Date
-  past?: boolean
-  running?: boolean
-  upcoming?: boolean
-}
-
-interface TournamentFilters extends DateFilters {
-  game?: string
-  page?: number
-}
-
-interface TeamFilters {
-  game?: string
-  page?: number
-}
-
-function applyDateFilters<T extends Match | Tournament>(
-  data: T[],
-  filters: DateFilters | undefined
-): T[] {
-  if (!filters || (!filters.range && !filters.since && !filters.until && !filters.past && !filters.running && !filters.upcoming)) {
-    return data;
-  }
-
-  return data.filter(item => {
-    const itemDate = new Date(item.begin_at);
-    const now = new Date();
-
-    // Handle range filter
-    if (filters.range) {
-      if (filters.range.since && new Date(filters.range.since) > itemDate) return false;
-      if (filters.range.until && new Date(filters.range.until) < itemDate) return false;
-    }
-
-    // Handle individual date filters
-    if (filters.since && new Date(filters.since) > itemDate) return false;
-    if (filters.until && new Date(filters.until) < itemDate) return false;
-
-    // Handle time-based filters
-    if (filters.past && itemDate > now) return false;
-    if (filters.upcoming && itemDate < now) return false;
-    if (filters.running) {
-      if ('status' in item) {
-        return item.status === 'running';
-      }
-      return false;
-    }
-
-    return true;
-  });
+  return date.toISOString().split('T')[0]
 }
