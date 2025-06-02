@@ -118,4 +118,3 @@ export interface Tournament {
     status: string;
     prize_pool?: string;
 }
- 
