@@ -1,28 +1,62 @@
 export interface Match {
     id: number
     name: string
-    status: 'running' | 'finished' | 'not_started'
+    status: 'running' | 'finished' | 'not_started' | 'completed'
     begin_at: string
     scheduled_at: string
+    number_of_games: number
+    winner_id?: number
+    results: Array<{
+        score: number
+    }>
+    streams_list?: Array<{
+        raw_url?: string
+        embed_url?: string
+        url?: string
+        platform?: string
+        language?: string
+        official?: boolean
+        live?: boolean
+    }>
     league: {
-      name: string
-      image_url: string
-    }
-    opponents: Array<{
-      opponent: {
         name: string
         image_url: string
-      }
-    }>
-    games: Array<{
-      winner: {
-        id: number
-      }
+        region?: string
+        tier?: string
+        streams?: Array<{
+            raw_url?: string
+            embed_url?: string
+            url?: string
+        }>
+    }
+    serie: {
+        name: string
+        full_name?: string
+        region?: string
+        tier?: string
+    }
+    tournament: {
+        name: string
+        region?: string
+        tier?: string
+        streams?: Array<{
+            raw_url?: string
+            embed_url?: string
+            url?: string
+        }>
+    }
+    opponents: Array<{
+        opponent: {
+            id: number
+            name: string
+            image_url: string
+        }
     }>
     videogame: {
-      name: string
-      slug: string
+        name: string
+        slug: string
     }
+    region?: string
 }
   
 export interface Tournament {

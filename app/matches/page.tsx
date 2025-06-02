@@ -18,7 +18,6 @@ interface Game {
 export default function MatchesPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedGame, setSelectedGame] = useState('valorant')
-    const [selectedStatus, setSelectedStatus] = useState('all')
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(20)
 
@@ -34,7 +33,10 @@ export default function MatchesPage() {
 
     // Prepare date filters for the API
     const getDateFilters = () => {
-        const filters: Record<string, string> = {}
+        const filters: {
+            since?: string;
+            until?: string;
+        } = {}
 
         switch (dateFilter) {
             case 'today': {
@@ -94,9 +96,9 @@ export default function MatchesPage() {
     // Pass all filters to the hook, including date filters
     const { data: matches, loading: matchesLoading } = useMatches({
         game: selectedGame,
-        status: selectedStatus,
         page: currentPage,
         per_page: itemsPerPage,
+        sort: 'begin_at',
         ...getDateFilters()
     })
 
@@ -224,22 +226,6 @@ export default function MatchesPage() {
                                 ))}
                             </select>
                         </div>
-
-                        {/* Status Filter */}
-                        <select
-                            value={selectedStatus}
-                            onChange={(e) => {
-                                setSelectedStatus(e.target.value)
-                                resetPage()
-                            }}
-                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                            aria-label="Select match status"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="running">Live Now</option>
-                            <option value="not_started">Upcoming</option>
-                            <option value="finished">Completed</option>
-                        </select>
 
                         {/* Date Filter */}
                         <div className="flex items-center space-x-2">

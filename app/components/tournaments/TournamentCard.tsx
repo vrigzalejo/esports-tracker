@@ -8,16 +8,26 @@ interface TournamentCardProps {
 }
 
 export default function TournamentCard({ tournament }: TournamentCardProps) {
+    const getLeagueImage = () => {
+        const imageUrl = tournament.league.image_url;
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-tournament.svg';
+    }
+
     return (
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-purple-500 transition-all duration-200 cursor-pointer animate-slide-up">
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                    <div className="relative w-12 h-12">
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg">
                         <Image
-                            src={tournament.league.image_url}
+                            src={getLeagueImage()}
                             alt={tournament.league.name}
                             fill
                             className="rounded-lg object-cover"
+                            priority={false}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/images/placeholder-tournament.svg';
+                            }}
                         />
                     </div>
                     <div>

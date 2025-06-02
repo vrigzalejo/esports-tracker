@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
-import type { Match } from '@/types/esports'
+import type { Match, Tournament, Team } from '@/types/esports'
 
 const token = process.env.NEXT_PUBLIC_PANDASCORE_TOKEN
 
 export function useMatches(filters?: {
   game?: string
-  status?: string
   page?: number,
   per_page?: number,
   sort?: string,
@@ -20,10 +19,6 @@ export function useMatches(filters?: {
   // Alternative: specific date filters
   since?: string | Date,    // Matches after this date
   until?: string | Date,    // Matches before this date
-  // Time-based filters
-  past?: boolean,           // Only past matches
-  running?: boolean,        // Only currently running matches
-  upcoming?: boolean        // Only upcoming matches
 }) {
   const [data, setData] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,12 +43,7 @@ export function useMatches(filters?: {
         }
 
         const result = await getMatches(token, apiFilters) as Match[]
-        
-        // Only apply client-side filtering for running/past/upcoming
-        // since these are not supported by the API
-        const processedData = applyTimeBasedFilters(result, filters)
-        
-        setData(processedData)
+        setData(result)
       } catch (err) {
         console.error('Error fetching matches:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -65,37 +55,20 @@ export function useMatches(filters?: {
     fetchData()
   }, [
     filters?.game, 
-    filters?.status, 
     filters?.page, 
     filters?.per_page, 
     filters?.sort,
     filters?.range?.since,
     filters?.range?.until, 
     filters?.since, 
-    filters?.until,
-    filters?.past,
-    filters?.running,
-    filters?.upcoming
+    filters?.until
   ])
 
   return { data, loading, error }
 }
 
-export function useTournaments(filters?: {
-  game?: string
-  page?: number,
-  // Date filtering options
-  range?: {
-    since?: string | Date,
-    until?: string | Date
-  },
-  since?: string | Date,
-  until?: string | Date,
-  past?: boolean,
-  running?: boolean,
-  upcoming?: boolean
-}) {
-  const [data, setData] = useState([])
+export function useTournaments(filters?: TournamentFilters) {
+  const [data, setData] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -110,10 +83,10 @@ export function useTournaments(filters?: {
         }
 
         const apiFilters = prepareApiFilters(filters)
-        const result = await getTournaments(token, apiFilters)
+        const result = await getTournaments(token, apiFilters) as Tournament[]
         
         // Apply additional client-side date filtering
-        let processedData = applyDateFilters(result, filters, 'begin_at')
+        const processedData = applyDateFilters<Tournament>(result, filters)
         setData(processedData)
       } catch (err) {
         console.error('Error fetching tournaments:', err)
@@ -139,11 +112,8 @@ export function useTournaments(filters?: {
   return { data, loading, error }
 }
 
-export function useTeams(filters?: {
-  game?: string
-  page?: number
-}) {
-  const [data, setData] = useState([])
+export function useTeams(filters?: TeamFilters) {
+  const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -208,7 +178,6 @@ type MatchesFilters = Parameters<typeof useMatches>[0]
 
 interface ApiFilters {
   game?: string
-  status?: string
   page?: number
   per_page?: number
   sort?: string
@@ -223,7 +192,6 @@ function prepareApiFilters(filters: MatchesFilters | undefined): ApiFilters {
   
   const apiFilters: ApiFilters = { 
     game: filters.game,
-    status: filters.status,
     page: filters.page,
     per_page: filters.per_page,
     sort: filters.sort
@@ -250,26 +218,6 @@ function prepareApiFilters(filters: MatchesFilters | undefined): ApiFilters {
   return apiFilters
 }
 
-// Helper function to apply time-based filters client-side
-function applyTimeBasedFilters(data: Match[], filters: MatchesFilters | undefined): Match[] {
-  if (!filters || !data) return data
-  
-  const now = new Date()
-  
-  return data.filter(item => {
-    const itemDate = new Date(item.scheduled_at || item.begin_at)
-    
-    // Handle time-based filters
-    if (filters.past && itemDate >= now) return false
-    if (filters.upcoming && itemDate <= now) return false
-    if (filters.running) {
-      if (item.status !== 'running') return false
-    }
-    
-    return true
-  })
-}
-
 // Helper function to format dates for API (ISO string format)
 function formatDateForApi(date: string | Date): string {
   if (typeof date === 'string') {
@@ -278,45 +226,61 @@ function formatDateForApi(date: string | Date): string {
   return date.toISOString()
 }
 
-// Helper function to apply date filters client-side
-function applyDateFilters(data: any[], filters: any, dateField: string = 'scheduled_at') {
-  if (!filters || !data) return data
-  
-  const now = new Date()
-  
+// Add new type definitions at the top after imports
+interface DateFilters {
+  range?: {
+    since?: string | Date
+    until?: string | Date
+  }
+  since?: string | Date
+  until?: string | Date
+  past?: boolean
+  running?: boolean
+  upcoming?: boolean
+}
+
+interface TournamentFilters extends DateFilters {
+  game?: string
+  page?: number
+}
+
+interface TeamFilters {
+  game?: string
+  page?: number
+}
+
+function applyDateFilters<T extends Match | Tournament>(
+  data: T[],
+  filters: DateFilters | undefined
+): T[] {
+  if (!filters || (!filters.range && !filters.since && !filters.until && !filters.past && !filters.running && !filters.upcoming)) {
+    return data;
+  }
+
   return data.filter(item => {
-    const itemDate = new Date(item[dateField] || item.begin_at || item.end_at)
-    
-    // Handle range filters
+    const itemDate = new Date(item.begin_at);
+    const now = new Date();
+
+    // Handle range filter
     if (filters.range) {
-      if (filters.range.since) {
-        const sinceDate = new Date(filters.range.since)
-        if (itemDate < sinceDate) return false
-      }
-      if (filters.range.until) {
-        const untilDate = new Date(filters.range.until)
-        if (itemDate > untilDate) return false
-      }
+      if (filters.range.since && new Date(filters.range.since) > itemDate) return false;
+      if (filters.range.until && new Date(filters.range.until) < itemDate) return false;
     }
-    
-    // Handle direct date filters
-    if (filters.since) {
-      const sinceDate = new Date(filters.since)
-      if (itemDate < sinceDate) return false
-    }
-    if (filters.until) {
-      const untilDate = new Date(filters.until)
-      if (itemDate > untilDate) return false
-    }
-    
+
+    // Handle individual date filters
+    if (filters.since && new Date(filters.since) > itemDate) return false;
+    if (filters.until && new Date(filters.until) < itemDate) return false;
+
     // Handle time-based filters
-    if (filters.past && itemDate >= now) return false
-    if (filters.upcoming && itemDate <= now) return false
+    if (filters.past && itemDate > now) return false;
+    if (filters.upcoming && itemDate < now) return false;
     if (filters.running) {
-      // For running filter, check if item has a status field
-      if (item.status && item.status !== 'running') return false
+      if ('status' in item) {
+        return item.status === 'running';
+      }
+      return false;
     }
-    
-    return true
-  })
+
+    return true;
+  });
 }

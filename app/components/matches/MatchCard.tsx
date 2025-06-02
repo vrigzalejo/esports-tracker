@@ -1,21 +1,29 @@
 import Image from 'next/image'
-import { Calendar, Clock, Trophy, Users, Star, Globe, Crown, Play, ExternalLink, Tv } from 'lucide-react'
+import { Calendar, Clock, Trophy, Users, Star, Globe, Crown, ExternalLink, Tv, Play } from 'lucide-react'
 import type { Match } from '@/types/esports'
 import { getStatusColor, getStatusText } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 interface MatchCardProps {
     match: Match
 }
 
+interface Opponent {
+    opponent: {
+        name: string
+        image_url: string
+    }
+}
+
 export default function MatchCard({ match }: MatchCardProps) {
     const [showStreams, setShowStreams] = useState(false)
 
-    const getTeamImage = (opponent: any) => {
-        return opponent?.opponent?.image_url || '/images/placeholder-team.svg'
+    const getTeamImage = (opponent: Opponent) => {
+        const imageUrl = opponent?.opponent?.image_url;
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
     }
 
-    const getTeamName = (opponent: any) => {
+    const getTeamName = (opponent: Opponent) => {
         return opponent?.opponent?.name || 'TBD'
     }
 
@@ -24,7 +32,7 @@ export default function MatchCard({ match }: MatchCardProps) {
 
     // Format date and time with timezone
     const formatDateTime = (dateString: string) => {
-        if (!dateString) return 'TBD'
+        if (!dateString) return { date: 'TBD', time: 'TBD' }
 
         const date = new Date(dateString)
         const dateOptions: Intl.DateTimeFormatOptions = {
@@ -221,62 +229,67 @@ export default function MatchCard({ match }: MatchCardProps) {
 
     // Get video streams from match data
     const getVideoStreams = () => {
-        const streams = []
+        const streams: { url: string; platform: string }[] = []
 
         // Check for streams_list (primary location)
         if (match.streams_list && Array.isArray(match.streams_list)) {
-            streams.push(...match.streams_list)
+            streams.push(...match.streams_list.map(stream => ({
+                url: stream.raw_url || stream.url || '',
+                platform: getPlatformFromUrl(stream.raw_url || stream.url || '')
+            })))
         }
 
-        // Check for streams in various possible locations in the match object
-        if (match.streams) {
-            streams.push(...match.streams)
+        // Check tournament streams
+        if (match.tournament?.streams && Array.isArray(match.tournament.streams)) {
+            streams.push(...match.tournament.streams.map(stream => ({
+                url: stream.raw_url || stream.url || '',
+                platform: getPlatformFromUrl(stream.raw_url || stream.url || '')
+            })))
         }
 
-        if (match.live_streams) {
-            streams.push(...match.live_streams)
-        }
-
-        if (match.videos) {
-            streams.push(...match.videos)
-        }
-
-        // Check tournament/league streams
-        if (match.tournament?.streams) {
-            streams.push(...match.tournament.streams)
-        }
-
-        if (match.league?.streams) {
-            streams.push(...match.league.streams)
-        }
-
-        // Filter and format streams
-        return streams.filter((stream: any) => stream && (stream.raw_url || stream.embed_url || stream.url))
-            .map((stream: any, index: number) => ({
-                id: stream.id || `stream-${index}`,
-                name: stream.name || stream.language || `Stream ${index + 1}`,
-                url: stream.raw_url || stream.embed_url || stream.url,
-                language: stream.language || 'en',
-                official: stream.official || false,
-                live: stream.live !== undefined ? stream.live : match.status === 'running'
-            }))
+        // Remove duplicates and invalid streams
+        return streams
+            .filter(stream => !!stream.url)
+            .filter((stream, index, self) => 
+                index === self.findIndex((s) => s.url === stream.url)
+            );
     }
 
-    // Get stream platform from URL
-    const getStreamPlatform = (url: string) => {
+    const getPlatformFromUrl = (url: string) => {
+        if (!url) return 'External'
         if (url.includes('twitch.tv')) return 'Twitch'
         if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube'
-        if (url.includes('facebook.com')) return 'Facebook'
-        if (url.includes('twitter.com') || url.includes('x.com')) return 'X/Twitter'
+        if (url.includes('facebook.com') || url.includes('fb.gg')) return 'Facebook'
+        if (url.includes('afreecatv.com')) return 'AfreecaTV'
+        if (url.includes('huya.com')) return 'Huya'
+        if (url.includes('douyu.com')) return 'Douyu'
         return 'External'
     }
 
-    // Handle stream click
     const handleStreamClick = (streamUrl: string, e: React.MouseEvent) => {
-        e.stopPropagation()
+        e.preventDefault()
         window.open(streamUrl, '_blank', 'noopener,noreferrer')
     }
 
+    // Handle click outside to close streams dropdown
+    const streamsRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (streamsRef.current && !streamsRef.current.contains(event.target as Node)) {
+                setShowStreams(false)
+            }
+        }
+
+        if (showStreams) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [showStreams])
+
+    const videoStreams = getVideoStreams()
     const dateTime = formatDateTime(match.scheduled_at || match.begin_at)
     const tournamentStage = getTournamentStage()
     const gamesFormat = getGamesFormat()
@@ -286,7 +299,6 @@ export default function MatchCard({ match }: MatchCardProps) {
     const stageColor = getStageColor(tournamentStage)
     const matchResults = getMatchResults()
     const winnerFromMatch = getWinnerFromMatch()
-    const videoStreams = getVideoStreams()
 
     // Determine final winner (prefer results over winner_id, only for finished matches)
     const finalWinner = matchResults?.isLive ? -1 : (matchResults?.winnerIndex ?? winnerFromMatch)
@@ -294,120 +306,131 @@ export default function MatchCard({ match }: MatchCardProps) {
     const isMatchLive = match.status === 'running'
 
     return (
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition-all duration-200 cursor-pointer animate-slide-up shadow-lg">
+        <div className="group bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300 cursor-pointer animate-slide-up shadow-lg hover:shadow-blue-500/10 relative overflow-hidden">
+            {/* Glowing effect on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
             {/* Header with status and game */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getStatusColor(match.status)}`}>
-                        {getStatusText(match.status)}
+            <div className="flex items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+                        {match.status === 'running' ? (
+                            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+                        ) : (
+                            <div className={`w-2 h-2 rounded-full ml-2 ${getStatusColor(match.status)}`} />
+                        )}
+                        <span className="text-xs font-medium text-white">{getStatusText(match.status)}</span>
+                    </div>
+                    <span className="text-gray-400 text-xs sm:text-sm font-medium bg-gray-900/30 px-3 py-1 rounded-full">
+                        {match.videogame.name}
                     </span>
-                    <span className="text-gray-400 text-sm font-medium">{match.videogame.name}</span>
                     {gamesFormat && (
-                        <span className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium border border-blue-500/20">
                             {gamesFormat}
                         </span>
                     )}
                 </div>
-                <div className="flex items-center space-x-3">
-                    {videoStreams.length > 0 && (
+                {videoStreams.length > 0 && (
+                    <div className="relative" ref={streamsRef}>
                         <button
                             onClick={(e) => {
                                 e.stopPropagation()
                                 setShowStreams(!showStreams)
                             }}
-                            className="flex items-center space-x-2 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-full font-medium transition-colors duration-200"
+                            className="flex items-center space-x-2 px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 text-xs rounded-full font-medium transition-all duration-200 cursor-pointer group/stream whitespace-nowrap"
                         >
-                            <Tv className="w-3 h-3" />
+                            <Tv className="w-3 h-3 group-hover/stream:animate-pulse" />
                             <span>{videoStreams.length} Stream{videoStreams.length > 1 ? 's' : ''}</span>
                         </button>
-                    )}
-                    {match.status === 'running' && (
-                        <div className="flex items-center text-red-400">
-                            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse mr-2" />
-                            <span className="text-sm font-bold">LIVE</span>
-                        </div>
-                    )}
-                </div>
-            </div>
 
-            {/* Video Streams Section */}
-            {showStreams && videoStreams.length > 0 && (
-                <div className="mb-6 p-4 bg-gray-700 rounded-lg border border-gray-600">
-                    <h4 className="text-white font-semibold mb-3 flex items-center">
-                        <Tv className="w-4 h-4 mr-2" />
-                        Available Streams
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {videoStreams.map((stream: any) => (
-                            <button
-                                key={stream.id}
-                                onClick={(e) => handleStreamClick(stream.url, e)}
-                                className="flex items-center justify-between p-3 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-200 group"
-                            >
-                                <div className="flex items-center space-x-3 min-w-0">
-                                    <div className="flex items-center space-x-2">
-                                        <Play className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
-                                        {stream.live && (
-                                            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="text-white text-sm font-medium truncate">
-                                            {stream.name}
-                                        </div>
-                                        <div className="text-gray-400 text-xs">
-                                            {getStreamPlatform(stream.url)}
-                                            {stream.language && stream.language !== 'en' && (
-                                                <span className="ml-1">• {stream.language.toUpperCase()}</span>
-                                            )}
-                                            {stream.official && (
-                                                <span className="ml-1 text-yellow-400">• Official</span>
-                                            )}
-                                        </div>
+                        {/* Video Streams Dropdown */}
+                        {showStreams && (
+                            <div className="absolute right-0 top-full mt-2 w-72 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
+                                <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-white text-sm font-medium flex items-center">
+                                            <Tv className="w-4 h-4 mr-2 text-purple-400" />
+                                            Available Streams
+                                        </h4>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setShowStreams(false)
+                                            }}
+                                            className="text-gray-400 hover:text-gray-300"
+                                            aria-label="Close streams menu"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-300 flex-shrink-0" />
-                            </button>
-                        ))}
+                                <div className="overflow-y-auto">
+                                    {videoStreams.map((stream, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={(e) => handleStreamClick(stream.url, e)}
+                                            className="flex items-center w-full px-4 py-3 hover:bg-gray-700/50 transition-colors duration-200 group/item"
+                                        >
+                                            <div className="flex items-center min-w-0 flex-1">
+                                                <div className="flex items-center space-x-2 text-purple-400">
+                                                    <Play className="w-4 h-4 flex-shrink-0" />
+                                                    {stream.platform === 'Twitch' && (
+                                                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
+                                                    )}
+                                                </div>
+                                                <span className="ml-3 text-gray-300 text-sm font-medium truncate">
+                                                    {stream.platform}
+                                                </span>
+                                                <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Teams */}
             <div className="flex items-center justify-center mb-6">
-                <div className="flex items-center space-x-6">
+                <div className="grid grid-cols-[auto_auto_auto] items-center gap-4 sm:gap-6">
                     {/* Team 1 */}
-                    <div className="flex flex-col items-center space-y-3 min-w-0">
+                    <div className="flex flex-col items-center space-y-3">
                         <div className="relative">
-                            <div className="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl overflow-hidden border-2 border-gray-600 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                            <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl overflow-hidden border-2 border-gray-600/30 shadow-lg transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/30">
                                 <Image
-                                    src={getTeamImage(match.opponents[0])}
-                                    alt={getTeamName(match.opponents[0])}
+                                    src={getTeamImage(match.opponents[0] as Opponent)}
+                                    alt={getTeamName(match.opponents[0] as Opponent)}
                                     fill
                                     className="object-cover"
+                                    priority={false}
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
                                         target.src = '/images/placeholder-team.svg';
                                     }}
                                 />
                                 {finalWinner === 0 && (
-                                    <div className="absolute -top-2 -right-2 bg-yellow-500 rounded-full p-1">
-                                        <Crown className="w-3 h-3 text-gray-900" />
+                                    <div className="absolute -top-2 -right-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1 shadow-lg">
+                                        <Crown className="w-3 h-3 text-white" />
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div className="flex flex-col items-center space-y-1">
-                            <span className={`font-bold text-center text-sm ${finalWinner === 0 ? 'text-yellow-400' : 'text-white'} truncate max-w-24`}>
-                                {getTeamName(match.opponents[0])}
+                            <span className={`font-bold text-center text-xs sm:text-sm ${finalWinner === 0 ? 'text-yellow-400' : 'text-white'} truncate max-w-[6rem] sm:max-w-24`}>
+                                {getTeamName(match.opponents[0] as Opponent)}
                             </span>
                             {(isMatchFinished || isMatchLive) && matchResults && (
-                                <span className={`text-xl font-bold px-3 py-1 rounded-lg ${isMatchLive
-                                    ? 'bg-blue-600 text-white'
-                                    : finalWinner === 0
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-600 text-gray-300'
-                                    }`}>
+                                <span className={`text-lg sm:text-xl font-bold px-3 py-1 rounded-lg ${
+                                    isMatchLive
+                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                                        : finalWinner === 0
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                                            : 'bg-gray-700/30 text-gray-400 border border-gray-600/20'
+                                }`}>
                                     {matchResults.team1Score}
                                 </span>
                             )}
@@ -415,47 +438,49 @@ export default function MatchCard({ match }: MatchCardProps) {
                     </div>
 
                     {/* VS */}
-                    <div className="flex flex-col items-center space-y-2">
-                        <span className="text-gray-400 font-bold text-lg">VS</span>
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                        <span className="text-gray-500 font-bold text-base sm:text-lg">VS</span>
                         {isMatchFinished && matchResults?.isDraw && (
-                            <div className="flex items-center text-orange-400 text-xs font-medium">
+                            <div className="flex items-center text-orange-400 text-xs font-medium px-2 py-1 bg-orange-500/20 rounded-full border border-orange-500/20">
                                 <span>DRAW</span>
                             </div>
                         )}
                     </div>
 
                     {/* Team 2 */}
-                    <div className="flex flex-col items-center space-y-3 min-w-0">
+                    <div className="flex flex-col items-center space-y-3">
                         <div className="relative">
-                            <div className="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl overflow-hidden border-2 border-gray-600 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                            <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl overflow-hidden border-2 border-gray-600/30 shadow-lg transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/30">
                                 <Image
-                                    src={getTeamImage(match.opponents[1])}
-                                    alt={getTeamName(match.opponents[1])}
+                                    src={getTeamImage(match.opponents[1] as Opponent)}
+                                    alt={getTeamName(match.opponents[1] as Opponent)}
                                     fill
                                     className="object-cover"
+                                    priority={false}
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
                                         target.src = '/images/placeholder-team.svg';
                                     }}
                                 />
                                 {finalWinner === 1 && (
-                                    <div className="absolute -top-2 -right-2 bg-yellow-500 rounded-full p-1">
-                                        <Crown className="w-3 h-3 text-gray-900" />
+                                    <div className="absolute -top-2 -right-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1 shadow-lg">
+                                        <Crown className="w-3 h-3 text-white" />
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div className="flex flex-col items-center space-y-1">
-                            <span className={`font-bold text-center text-sm ${finalWinner === 1 ? 'text-yellow-400' : 'text-white'} truncate max-w-24`}>
-                                {getTeamName(match.opponents[1])}
+                            <span className={`font-bold text-center text-xs sm:text-sm ${finalWinner === 1 ? 'text-yellow-400' : 'text-white'} truncate max-w-[6rem] sm:max-w-24`}>
+                                {getTeamName(match.opponents[1] as Opponent)}
                             </span>
                             {(isMatchFinished || isMatchLive) && matchResults && (
-                                <span className={`text-xl font-bold px-3 py-1 rounded-lg ${isMatchLive
-                                    ? 'bg-blue-600 text-white'
-                                    : finalWinner === 1
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-600 text-gray-300'
-                                    }`}>
+                                <span className={`text-lg sm:text-xl font-bold px-3 py-1 rounded-lg ${
+                                    isMatchLive
+                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                                        : finalWinner === 1
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                                            : 'bg-gray-700/30 text-gray-400 border border-gray-600/20'
+                                }`}>
                                     {matchResults.team2Score}
                                 </span>
                             )}
@@ -465,13 +490,13 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
 
             {/* Date and Time */}
-            <div className="flex items-center justify-center space-x-6 mb-4">
-                <div className="flex items-center text-gray-400 text-sm">
-                    <Calendar className="w-4 h-4 mr-2" />
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-6 mb-4">
+                <div className="flex items-center text-gray-400 text-xs sm:text-sm bg-gray-900/30 px-3 py-1 rounded-full">
+                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
                     <span>{dateTime.date}</span>
                 </div>
-                <div className="flex items-center text-gray-400 text-sm">
-                    <Clock className="w-4 h-4 mr-2" />
+                <div className="flex items-center text-gray-400 text-xs sm:text-sm bg-gray-900/30 px-3 py-1 rounded-full">
+                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
                     <span>{dateTime.time}</span>
                 </div>
             </div>
@@ -479,7 +504,7 @@ export default function MatchCard({ match }: MatchCardProps) {
             {/* Region */}
             {region && (
                 <div className="flex items-center justify-center mb-4">
-                    <div className="flex items-center text-emerald-400 text-sm">
+                    <div className="flex items-center text-emerald-400 text-xs sm:text-sm bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
                         <Globe className="w-4 h-4 mr-2" />
                         <span>{region}</span>
                     </div>
@@ -487,15 +512,15 @@ export default function MatchCard({ match }: MatchCardProps) {
             )}
 
             {/* Tournament Stage and League Tier */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
                 {tournamentStage && (
-                    <div className={`flex items-center text-sm ${stageColor}`}>
+                    <div className={`flex items-center text-xs sm:text-sm ${stageColor} bg-gray-900/30 px-3 py-1 rounded-full`}>
                         <Trophy className="w-4 h-4 mr-2" />
                         <span className="font-medium">{tournamentStage}</span>
                     </div>
                 )}
                 {leagueTier && (
-                    <div className="flex items-center text-yellow-400 text-sm">
+                    <div className="flex items-center text-yellow-400 text-xs sm:text-sm bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
                         <Star className="w-4 h-4 mr-2" />
                         <span>{leagueTier}</span>
                     </div>
@@ -503,12 +528,13 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
 
             {/* League Information */}
-            <div className="flex items-center justify-center text-sm">
-                <div className="flex items-center text-gray-400">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span className="text-center">{leagueInfo}</span>
+            <div className="flex items-center justify-center text-xs sm:text-sm">
+                <div className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full">
+                    <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
+                    <span className="text-center truncate">{leagueInfo}</span>
                 </div>
             </div>
         </div>
     )
 }
+

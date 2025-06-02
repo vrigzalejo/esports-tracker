@@ -1,11 +1,15 @@
-const BASE_URL = 'https://api.pandascore.co'
+const BASE_URL = 'https://api.pandascore.co/'
 
 const buildUrl = (endpoint: string, token: string, params?: Record<string, string>) => {
-  const url = new URL(`${BASE_URL}${endpoint}`)
+  // Remove leading slash if present in endpoint
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
+  const url = new URL(`${BASE_URL}${cleanEndpoint}`)
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, value)
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, value)
+      }
     })
   }
 
@@ -14,17 +18,29 @@ const buildUrl = (endpoint: string, token: string, params?: Record<string, strin
   return url
 }
 
+interface NetworkError extends Error {
+  cause?: {
+    code: string;
+  };
+}
+
 const request = async (endpoint: string, token: string, params?: Record<string, string>) => {
   const url = buildUrl(endpoint, token, params)
 
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
     const response = await fetch(url.toString(), {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       next: { revalidate: 60 }, // Next.js 15 cache control
+      signal: controller.signal
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       // Get the error response body if possible
@@ -44,6 +60,15 @@ const request = async (endpoint: string, token: string, params?: Record<string, 
 
     return response.json()
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out after 30 seconds')
+      }
+      const networkError = error as NetworkError
+      if (networkError.cause?.code === 'ECONNREFUSED') {
+        throw new Error('Could not connect to the API server')
+      }
+    }
     console.error('API Error:', error)
     throw error
   }

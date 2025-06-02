@@ -7,15 +7,25 @@ interface TeamCardProps {
 }
 
 export default function TeamCard({ team }: TeamCardProps) {
+    const getTeamImage = () => {
+        const imageUrl = team.image_url;
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
+    }
+
     return (
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-yellow-500 transition-all duration-200 cursor-pointer animate-slide-up">
             <div className="flex items-center space-x-4">
-                <div className="relative w-16 h-16">
+                <div className="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg">
                     <Image
-                        src={team.image_url}
+                        src={getTeamImage()}
                         alt={team.name}
                         fill
                         className="rounded-lg object-cover"
+                        priority={false}
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images/placeholder-team.svg';
+                        }}
                     />
                 </div>
                 <div className="flex-1">
