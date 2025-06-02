@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
+import type { Match } from '@/types/esports'
 
 const token = process.env.NEXT_PUBLIC_PANDASCORE_TOKEN
 
@@ -24,7 +25,7 @@ export function useMatches(filters?: {
   running?: boolean,        // Only currently running matches
   upcoming?: boolean        // Only upcoming matches
 }) {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,16 +41,17 @@ export function useMatches(filters?: {
 
         // Prepare API filters with date parameters
         const apiFilters = prepareApiFilters(filters)
-        const result = await getMatches(token, apiFilters)
         
-        // Process the real API data
-        let processedData = [...result]
+        // Set default sorting to begin_at if not specified
+        if (!apiFilters.sort) {
+          apiFilters.sort = 'begin_at'
+        }
+
+        const result = await getMatches(token, apiFilters) as Match[]
         
-        // Apply additional client-side date filtering if needed
-        processedData = applyDateFilters(processedData, filters)
-        
-        // Sort matches properly
-        processedData = sortMatches(processedData, filters?.game)
+        // Only apply client-side filtering for running/past/upcoming
+        // since these are not supported by the API
+        const processedData = applyTimeBasedFilters(result, filters)
         
         setData(processedData)
       } catch (err) {
@@ -202,11 +204,30 @@ export function useGames() {
     return { games, loading, error };
 }
 
+type MatchesFilters = Parameters<typeof useMatches>[0]
+
+interface ApiFilters {
+  game?: string
+  status?: string
+  page?: number
+  per_page?: number
+  sort?: string
+  since?: string
+  until?: string
+  [key: string]: string | number | undefined
+}
+
 // Helper function to prepare API filters with date parameters
-function prepareApiFilters(filters: any) {
+function prepareApiFilters(filters: MatchesFilters | undefined): ApiFilters {
   if (!filters) return {}
   
-  const apiFilters = { ...filters }
+  const apiFilters: ApiFilters = { 
+    game: filters.game,
+    status: filters.status,
+    page: filters.page,
+    per_page: filters.per_page,
+    sort: filters.sort
+  }
   
   // Handle range object
   if (filters.range) {
@@ -216,8 +237,6 @@ function prepareApiFilters(filters: any) {
     if (filters.range.until) {
       apiFilters.until = formatDateForApi(filters.range.until)
     }
-    // Remove the range object as it's not needed for API
-    delete apiFilters.range
   }
   
   // Handle direct date filters
@@ -229,6 +248,26 @@ function prepareApiFilters(filters: any) {
   }
   
   return apiFilters
+}
+
+// Helper function to apply time-based filters client-side
+function applyTimeBasedFilters(data: Match[], filters: MatchesFilters | undefined): Match[] {
+  if (!filters || !data) return data
+  
+  const now = new Date()
+  
+  return data.filter(item => {
+    const itemDate = new Date(item.scheduled_at || item.begin_at)
+    
+    // Handle time-based filters
+    if (filters.past && itemDate >= now) return false
+    if (filters.upcoming && itemDate <= now) return false
+    if (filters.running) {
+      if (item.status !== 'running') return false
+    }
+    
+    return true
+  })
 }
 
 // Helper function to format dates for API (ISO string format)
@@ -279,57 +318,5 @@ function applyDateFilters(data: any[], filters: any, dateField: string = 'schedu
     }
     
     return true
-  })
-}
-
-// Helper function to sort matches
-function sortMatches(matches: any[], selectedGame?: string) {
-  const now = new Date()
-  
-  return matches.sort((a, b) => {
-    const dateA = new Date(a.scheduled_at || a.begin_at)
-    const dateB = new Date(b.scheduled_at || b.begin_at)
-    
-    // If "All Games" is selected, prioritize by status and proximity to current time
-    if (!selectedGame || selectedGame === 'all') {
-      // Live matches first
-      const isLiveA = a.status === 'running'
-      const isLiveB = b.status === 'running'
-      
-      if (isLiveA && !isLiveB) return -1
-      if (!isLiveA && isLiveB) return 1
-      
-      // If both are live, sort by most recent start time
-      if (isLiveA && isLiveB) {
-        return dateB.getTime() - dateA.getTime()
-      }
-      
-      // For non-live matches, upcoming matches come first
-      const isUpcomingA = dateA > now
-      const isUpcomingB = dateB > now
-      
-      if (isUpcomingA && !isUpcomingB) return -1
-      if (!isUpcomingA && isUpcomingB) return 1
-      
-      // If both upcoming, sort by soonest first
-      if (isUpcomingA && isUpcomingB) {
-        return dateA.getTime() - dateB.getTime()
-      }
-      
-      // If both are past, sort by most recent first
-      return dateB.getTime() - dateA.getTime()
-    } 
-    // If a specific game is selected, sort only by date and time (ascending - soonest first)
-    else {
-      // Live matches still come first even for specific games
-      const isLiveA = a.status === 'running'
-      const isLiveB = b.status === 'running'
-      
-      if (isLiveA && !isLiveB) return -1
-      if (!isLiveA && isLiveB) return 1
-      
-      // For all other matches (live, upcoming, or past), sort by date ascending
-      return dateA.getTime() - dateB.getTime()
-    }
   })
 }

@@ -7,10 +7,17 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import MatchCard from '@/components/matches/MatchCard'
 import { useMatches, useGames } from '@/hooks/useEsportsData'
+import type { Match } from '@/types/esports'
+
+interface Game {
+    id: string | number
+    slug: string
+    name: string
+}
 
 export default function MatchesPage() {
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedGame, setSelectedGame] = useState('all')
+    const [selectedGame, setSelectedGame] = useState('valorant')
     const [selectedStatus, setSelectedStatus] = useState('all')
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(20)
@@ -27,47 +34,58 @@ export default function MatchesPage() {
 
     // Prepare date filters for the API
     const getDateFilters = () => {
-        const now = new Date()
-        const filters: any = {}
+        const filters: Record<string, string> = {}
 
         switch (dateFilter) {
-            case 'today':
-                const todayStart = new Date(now)
-                todayStart.setHours(0, 0, 0, 0)
-                const todayEnd = new Date(now)
-                todayEnd.setHours(23, 59, 59, 999)
-                filters.since = todayStart.toISOString()
-                filters.until = todayEnd.toISOString()
+            case 'today': {
+                // Get today's date at UTC midnight
+                const today = new Date()
+                today.setUTCHours(0, 0, 0, 0)
+                filters.since = today.toISOString().split('T')[0]
+                
+                // Get tomorrow's date at UTC midnight
+                const tomorrow = new Date(today)
+                tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+                filters.until = tomorrow.toISOString().split('T')[0]
                 break
-
-            case 'week':
+            }
+            case 'week': {
+                const now = new Date()
+                // Get the start of current week (Sunday) at UTC midnight
                 const weekStart = new Date(now)
-                weekStart.setDate(now.getDate() - now.getDay()) // Start of week (Sunday)
-                weekStart.setHours(0, 0, 0, 0)
+                weekStart.setUTCHours(0, 0, 0, 0)
+                weekStart.setUTCDate(now.getUTCDate() - now.getUTCDay())
+                filters.since = weekStart.toISOString().split('T')[0]
+                
+                // Get the end of current week (Saturday) at UTC midnight
                 const weekEnd = new Date(weekStart)
-                weekEnd.setDate(weekStart.getDate() + 6) // End of week (Saturday)
-                weekEnd.setHours(23, 59, 59, 999)
-                filters.since = weekStart.toISOString()
-                filters.until = weekEnd.toISOString()
+                weekEnd.setUTCDate(weekStart.getUTCDate() + 7)
+                filters.until = weekEnd.toISOString().split('T')[0]
                 break
-
-            case 'month':
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
-                filters.since = monthStart.toISOString()
-                filters.until = monthEnd.toISOString()
+            }
+            case 'month': {
+                const now = new Date()
+                // Get the start of current month at UTC midnight
+                const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+                filters.since = monthStart.toISOString().split('T')[0]
+                
+                // Get the start of next month at UTC midnight
+                const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))
+                filters.until = monthEnd.toISOString().split('T')[0]
                 break
-
-            case 'custom':
+            }
+            case 'custom': {
                 if (customDateRange.start) {
-                    filters.since = new Date(customDateRange.start).toISOString()
+                    filters.since = customDateRange.start // Already in YYYY-MM-DD format
                 }
                 if (customDateRange.end) {
-                    const endDate = new Date(customDateRange.end)
-                    endDate.setHours(23, 59, 59, 999)
-                    filters.until = endDate.toISOString()
+                    // For custom end date, include the entire day by using the next day as the until date
+                    const nextDay = new Date(customDateRange.end)
+                    nextDay.setDate(nextDay.getDate() + 1)
+                    filters.until = nextDay.toISOString().split('T')[0]
                 }
                 break
+            }
         }
 
         return filters
@@ -79,7 +97,6 @@ export default function MatchesPage() {
         status: selectedStatus,
         page: currentPage,
         per_page: itemsPerPage,
-        sort: 'proximity',
         ...getDateFilters()
     })
 
@@ -87,9 +104,9 @@ export default function MatchesPage() {
     const filteredMatches = useMemo(() => {
         if (!searchTerm) return matches
 
-        return matches.filter((match: any) => {
+        return matches.filter((match: Match) => {
             const matchesSearch = match.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                match.opponents?.some((opp: any) =>
+                match.opponents?.some((opp) =>
                     opp.opponent?.name?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
             return matchesSearch
@@ -122,20 +139,26 @@ export default function MatchesPage() {
                 pages.push(i)
             }
         } else {
-            let start = Math.max(1, currentPage - 2)
-            let end = Math.min(totalPages, start + maxVisiblePages - 1)
+            const start = Math.max(1, currentPage - 2)
+            const end = Math.min(totalPages, start + maxVisiblePages - 1)
 
             if (end - start < maxVisiblePages - 1) {
-                start = Math.max(1, end - maxVisiblePages + 1)
-            }
-
-            if (start > 1) {
-                pages.push(1)
-                if (start > 2) pages.push('...')
-            }
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i)
+                const newStart = Math.max(1, end - maxVisiblePages + 1)
+                if (newStart > 1) {
+                    pages.push(1)
+                    if (newStart > 2) pages.push('...')
+                }
+                for (let i = newStart; i <= end; i++) {
+                    pages.push(i)
+                }
+            } else {
+                if (start > 1) {
+                    pages.push(1)
+                    if (start > 2) pages.push('...')
+                }
+                for (let i = start; i <= end; i++) {
+                    pages.push(i)
+                }
             }
 
             if (end < totalPages) {
@@ -192,12 +215,10 @@ export default function MatchesPage() {
                                 }}
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                                 disabled={gamesLoading}
+                                aria-label="Select game"
                             >
-                                <option value="all">
-                                    {gamesLoading ? 'Loading games...' : 'All Games'}
-                                </option>
-                                {!gamesLoading && games.map((game: any) => (
-                                    <option key={game.id || game.slug} value={game.id || game.slug}>
+                                {!gamesLoading && games.map((game: Game) => (
+                                    <option key={game.id || game.slug} value={game.slug || game.id}>
                                         {game.name}
                                     </option>
                                 ))}
@@ -212,11 +233,12 @@ export default function MatchesPage() {
                                 resetPage()
                             }}
                             className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                            aria-label="Select match status"
                         >
                             <option value="all">All Status</option>
-                            <option value="running">Live</option>
+                            <option value="running">Live Now</option>
                             <option value="not_started">Upcoming</option>
-                            <option value="finished">Finished</option>
+                            <option value="finished">Completed</option>
                         </select>
 
                         {/* Date Filter */}
@@ -229,6 +251,7 @@ export default function MatchesPage() {
                                     resetPage()
                                 }}
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                aria-label="Select date filter"
                             >
                                 <option value="all">All Dates</option>
                                 <option value="today">Today</option>
@@ -246,6 +269,7 @@ export default function MatchesPage() {
                                 resetPage()
                             }}
                             className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                            aria-label="Select items per page"
                         >
                             <option value="10">10 per page</option>
                             <option value="20">20 per page</option>
@@ -259,8 +283,9 @@ export default function MatchesPage() {
                     <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
                         <div className="flex items-center space-x-4 flex-wrap gap-2">
                             <div className="flex items-center space-x-2">
-                                <label className="text-sm text-gray-300">From:</label>
+                                <label htmlFor="date-from" className="text-sm text-gray-300">From:</label>
                                 <input
+                                    id="date-from"
                                     type="date"
                                     value={customDateRange.start}
                                     onChange={(e) => {
@@ -268,11 +293,13 @@ export default function MatchesPage() {
                                         resetPage()
                                     }}
                                     className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                    aria-label="From date"
                                 />
                             </div>
                             <div className="flex items-center space-x-2">
-                                <label className="text-sm text-gray-300">To:</label>
+                                <label htmlFor="date-to" className="text-sm text-gray-300">To:</label>
                                 <input
+                                    id="date-to"
                                     type="date"
                                     value={customDateRange.end}
                                     onChange={(e) => {
@@ -280,6 +307,7 @@ export default function MatchesPage() {
                                         resetPage()
                                     }}
                                     className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                    aria-label="To date"
                                 />
                             </div>
                             <button
@@ -312,7 +340,7 @@ export default function MatchesPage() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {currentMatches.map((match: any) => (
+                            {currentMatches.map((match: Match) => (
                                 <MatchCard key={match.id} match={match} />
                             ))}
                         </div>
