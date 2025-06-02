@@ -1,9 +1,16 @@
-/**
- * Frontend API client for making requests to the Next.js API routes
- */
+import type { MatchFilters, TeamFilters, TournamentFilters } from './types';
+
+const BASE_URL = 'https://api.pandascore.co';
+
+function formatDateForApi(date: string | Date): string {
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    return date.toISOString().split('T')[0];
+}
 
 const request = async (endpoint: string, params?: Record<string, string>) => {
-    const url = new URL(`${window.location.origin}${endpoint}`);
+    const url = new URL(`${BASE_URL}${endpoint}`);
 
     if (params) {
         Object.entries(params).forEach(([key, value]) => {
@@ -12,6 +19,9 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
             }
         });
     }
+
+    // Add API token
+    url.searchParams.append('token', process.env.PANDASCORE_TOKEN || '');
 
     try {
         const controller = new AbortController();
@@ -22,7 +32,8 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            signal: controller.signal
+            signal: controller.signal,
+            next: { revalidate: 60 } // Cache for 60 seconds
         });
 
         clearTimeout(timeoutId);
@@ -47,39 +58,39 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
         console.error('API Error:', error);
         throw error;
     }
-};
-
-export interface MatchFilters {
-    game?: string;
-    status?: string;
-    page?: number;
-    per_page?: number;
-    sort?: string;
-    since?: string;
-    until?: string;
-}
-
-export interface TeamFilters {
-    game?: string;
-    page?: number;
-    per_page?: number;
-}
-
-export interface TournamentFilters {
-    game?: string;
-    page?: number;
-    per_page?: number;
 }
 
 export const getMatches = async (filters?: MatchFilters) => {
     const params: Record<string, string> = {};
 
     if (filters?.game && filters.game !== 'all') {
-        params['game'] = filters.game;
+        params['filter[videogame]'] = filters.game;
     }
 
     if (filters?.status && filters.status !== 'all') {
-        params['status'] = filters.status;
+        switch (filters.status) {
+            case 'running':
+                params['filter[status]'] = 'running';
+                break;
+            case 'finished':
+                params['filter[status]'] = 'finished';
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                params['range[begin_at]'] = `${formatDateForApi(thirtyDaysAgo)},${formatDateForApi(new Date())}`;
+                break;
+            case 'not_started':
+                params['filter[status]'] = 'not_started,postponed';
+                const today = formatDateForApi(new Date());
+                const farFuture = '2030-12-31';
+                params['range[begin_at]'] = `${today},${farFuture}`;
+                break;
+        }
+    } else {
+        const today = formatDateForApi(new Date());
+        const farFuture = '2030-12-31';
+        const start = filters?.since ? formatDateForApi(filters.since) : today;
+        const end = filters?.until ? formatDateForApi(filters.until) : farFuture;
+        params['range[begin_at]'] = `${start},${end}`;
     }
 
     if (filters?.page) {
@@ -90,26 +101,16 @@ export const getMatches = async (filters?: MatchFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
-    if (filters?.sort) {
-        params['sort'] = filters.sort;
-    }
+    params['sort'] = filters?.sort || '-begin_at';
 
-    if (filters?.since) {
-        params['since'] = filters.since;
-    }
-
-    if (filters?.until) {
-        params['until'] = filters.until;
-    }
-
-    return request('/api/matches', params);
+    return request('/matches', params);
 }
 
 export const getTournaments = async (filters?: TournamentFilters) => {
     const params: Record<string, string> = {};
 
     if (filters?.game && filters.game !== 'all') {
-        params['game'] = filters.game;
+        params['filter[videogame]'] = filters.game;
     }
 
     if (filters?.page) {
@@ -120,14 +121,14 @@ export const getTournaments = async (filters?: TournamentFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
-    return request('/api/tournaments', params);
+    return request('/tournaments', params);
 }
 
 export const getTeams = async (filters?: TeamFilters) => {
     const params: Record<string, string> = {};
 
     if (filters?.game && filters.game !== 'all') {
-        params['game'] = filters.game;
+        params['filter[videogame]'] = filters.game;
     }
 
     if (filters?.page) {
@@ -138,9 +139,9 @@ export const getTeams = async (filters?: TeamFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
-    return request('/api/teams', params);
+    return request('/teams', params);
 }
 
 export const getGames = async () => {
-    return request('/api/games');
+    return request('/videogames');
 }

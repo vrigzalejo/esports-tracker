@@ -380,7 +380,7 @@ export default function MatchesPage() {
                                 <button
                                     onClick={() => goToPage(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                 >
                                     <ChevronLeft className="w-4 h-4 mr-1" />
                                     Previous
@@ -394,7 +394,7 @@ export default function MatchesPage() {
                                             ) : (
                                                 <button
                                                     onClick={() => goToPage(pageNum as number)}
-                                                    className={`px-3 py-1 text-sm rounded-md transition-all duration-200 ${currentPage === pageNum
+                                                    className={`px-3 py-1 text-sm rounded-md cursor-pointer transition-all duration-200 ${currentPage === pageNum
                                                         ? 'bg-blue-600 text-white'
                                                         : 'text-gray-400 hover:text-white hover:bg-gray-600'
                                                         }`}
@@ -409,7 +409,7 @@ export default function MatchesPage() {
                                 <button
                                     onClick={() => goToPage(currentPage + 1)}
                                     disabled={!hasMorePages}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                 >
                                     Next
                                     <ChevronRight className="w-4 h-4 ml-1" />
