@@ -23,7 +23,7 @@ export default function TournamentsPage() {
     return (
         <div className="min-h-screen bg-gray-900 text-white">
             <Header searchTerm={searchQuery} onSearchChange={setSearchQuery} />
-            <Navigation activeTab="tournaments" />
+            <Navigation />
 
             <main className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">

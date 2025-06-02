@@ -4,11 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Play, Trophy, Users, BarChart3 } from 'lucide-react'
 
-interface NavigationProps {
-    activeTab: string
-}
-
-export default function Navigation({ activeTab }: NavigationProps) {
+export default function Navigation() {
     const pathname = usePathname()
 
     const navigationItems = [
