@@ -345,10 +345,10 @@ export default function MatchCard({ match }: MatchCardProps) {
 
                         {/* Video Streams Dropdown */}
                         {showStreams && (
-                            <div className="absolute right-0 top-full mt-2 w-72 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
+                            <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
                                 <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-white text-sm font-medium flex items-center">
+                                        <h4 className="text-white text-sm font-medium flex items-center whitespace-nowrap">
                                             <Tv className="w-4 h-4 mr-2 text-purple-400" />
                                             Available Streams
                                         </h4>
@@ -357,7 +357,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                                                 e.stopPropagation()
                                                 setShowStreams(false)
                                             }}
-                                            className="text-gray-400 hover:text-gray-300"
+                                            className="text-gray-400 hover:text-gray-300 ml-3"
                                             aria-label="Close streams menu"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
