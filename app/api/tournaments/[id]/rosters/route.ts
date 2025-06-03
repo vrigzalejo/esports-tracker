@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTournamentRosters } from '@/lib/pandaScore';
 
 type Props = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(

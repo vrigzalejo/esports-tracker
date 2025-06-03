@@ -36,6 +36,7 @@ export interface Match {
         tier?: string
     }
     tournament: {
+        id: number
         name: string
         region?: string
         tier?: string

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
 

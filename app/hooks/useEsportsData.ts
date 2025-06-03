@@ -64,7 +64,7 @@ export function useMatches(filters?: {
     filters?.past,
     filters?.running,
     filters?.upcoming
-  ])
+  ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }
@@ -115,7 +115,7 @@ export function useTournaments(filters?: {
     filters?.past,
     filters?.running,
     filters?.upcoming
-  ])
+  ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }
@@ -145,7 +145,7 @@ export function useTeams(filters?: {
     }
 
     fetchData()
-  }, [filters?.game, filters?.page])
+  }, [filters?.game, filters?.page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }
