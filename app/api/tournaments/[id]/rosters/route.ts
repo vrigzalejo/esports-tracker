@@ -1,19 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getTournamentRosters } from '@/lib/pandaScore';
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: Props
 ) {
+  const { id } = await params;
+
   try {
-    if (!params.id) {
+    if (!id) {
       return NextResponse.json(
         { error: 'Tournament ID is required' },
         { status: 400 }
       );
     }
 
-    const data = await getTournamentRosters(params.id);
+    const data = await getTournamentRosters(id);
     return NextResponse.json(data);
   } catch (error) {
     console.error('API Error:', error);
