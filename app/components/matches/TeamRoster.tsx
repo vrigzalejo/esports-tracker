@@ -119,12 +119,6 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
                                 </div>
 
                                 <div className="flex items-center flex-wrap gap-2 text-sm">
-                                    {player.role && (
-                                        <span className="text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded text-xs font-medium">
-                                            {player.role.toUpperCase()}
-                                        </span>
-                                    )}
-
                                     {player.nationality && (
                                         <div
                                             className="flex items-center space-x-1 cursor-default"
