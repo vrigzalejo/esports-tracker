@@ -394,7 +394,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                             }}
                             className="flex items-center space-x-2 px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 text-xs rounded-full font-medium transition-all duration-200 cursor-pointer group/stream whitespace-nowrap"
                         >
-                            <Tv className="w-3 h-3 group-hover/stream:animate-pulse" />
+                            <Tv className="w-3 h-3 group-hover/stream:animate-pulse" size={12} />
                             <span>{videoStreams.length} Stream{videoStreams.length > 1 ? 's' : ''}</span>
                         </button>
 
@@ -404,7 +404,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                                 <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
                                     <div className="flex items-center justify-between">
                                         <h4 className="text-white text-sm font-medium flex items-center whitespace-nowrap">
-                                            <Tv className="w-4 h-4 mr-2 text-purple-400" />
+                                            <Tv className="w-4 h-4 mr-2 text-purple-400" size={16} />
                                             Available Streams
                                         </h4>
                                         <button
@@ -430,7 +430,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                                         >
                                             <div className="flex items-center min-w-0 flex-1">
                                                 <div className="flex items-center space-x-2 text-purple-400">
-                                                    <Play className="w-4 h-4 flex-shrink-0" />
+                                                    <Play className="w-4 h-4 flex-shrink-0" size={16} />
                                                     {stream.platform === 'Twitch' && (
                                                         <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
                                                     )}
@@ -438,7 +438,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                                                 <span className="ml-3 text-gray-300 text-sm font-medium truncate">
                                                     {stream.platform}
                                                 </span>
-                                                <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" />
+                                                <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" size={16} />
                                             </div>
                                         </button>
                                     ))}
@@ -470,7 +470,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                             </div>
                             {finalWinner === 0 && (
                                 <div className="absolute -top-2 -right-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1 shadow-lg z-10">
-                                    <Crown className="w-3 h-3 text-white" />
+                                    <Crown className="w-3 h-3 text-white" size={12} />
                                 </div>
                             )}
                         </div>
@@ -520,7 +520,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                             </div>
                             {finalWinner === 1 && (
                                 <div className="absolute -top-2 -right-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1 shadow-lg z-10">
-                                    <Crown className="w-3 h-3 text-white" />
+                                    <Crown className="w-3 h-3 text-white" size={12} />
                                 </div>
                             )}
                         </div>
@@ -547,26 +547,30 @@ export default function MatchCard({ match }: MatchCardProps) {
             {/* Date and Time */}
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-6 mb-4">
                 <div className="flex items-center text-gray-400 text-xs sm:text-sm bg-gray-900/30 px-3 py-1 rounded-full">
-                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                    <Calendar className="w-4 h-4 mr-2 text-gray-500" size={16} />
                     <span>{dateTime.date}</span>
                 </div>
-                <div className={`flex items-center text-xs sm:text-sm px-3 py-1 rounded-full ${
-                    isLive 
-                        ? 'bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse'
-                        : isPast
-                            ? 'bg-gray-900/30 text-gray-400'
-                            : 'bg-green-500/20 text-green-400 border border-green-500/20'
-                }`}>
-                    <Clock className={`w-4 h-4 mr-2 ${isLive ? 'text-red-400' : isPast ? 'text-gray-500' : 'text-green-400'}`} />
-                    <span>{countdown || dateTime.time}</span>
+                <div className="flex items-center text-gray-400 text-xs sm:text-sm bg-gray-900/30 px-3 py-1 rounded-full">
+                    <Clock className="w-4 h-4 mr-2 text-gray-500" size={16} />
+                    <span>{dateTime.time}</span>
                 </div>
+                {!isPast && countdown && (
+                    <div className={`flex items-center text-xs sm:text-sm px-3 py-1 rounded-full ${
+                        isLive 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse'
+                            : 'bg-green-500/20 text-green-400 border border-green-500/20'
+                    }`}>
+                        <Clock className={`w-4 h-4 mr-2 ${isLive ? 'text-red-400' : 'text-green-400'}`} size={16} />
+                        <span>{countdown}</span>
+                    </div>
+                )}
             </div>
 
             {/* Region */}
             {region && (
                 <div className="flex items-center justify-center mb-4">
                     <div className="flex items-center text-emerald-400 text-xs sm:text-sm bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                        <Globe className="w-4 h-4 mr-2" />
+                        <Globe className="w-4 h-4 mr-2" size={16} />
                         <span>{region}</span>
                     </div>
                 </div>
@@ -576,13 +580,13 @@ export default function MatchCard({ match }: MatchCardProps) {
             <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
                 {tournamentStage && (
                     <div className={`flex items-center text-xs sm:text-sm ${stageColor} bg-gray-900/30 px-3 py-1 rounded-full`}>
-                        <Trophy className="w-4 h-4 mr-2" />
+                        <Trophy className="w-4 h-4 mr-2" size={16} />
                         <span className="font-medium">{tournamentStage}</span>
                     </div>
                 )}
                 {leagueTier && (
                     <div className="flex items-center text-yellow-400 text-xs sm:text-sm bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
-                        <Star className="w-4 h-4 mr-2" />
+                        <Star className="w-4 h-4 mr-2" size={16} />
                         <span>{leagueTier}</span>
                     </div>
                 )}
@@ -591,7 +595,7 @@ export default function MatchCard({ match }: MatchCardProps) {
             {/* League Information */}
             <div className="flex items-center justify-center text-xs sm:text-sm">
                 <div className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full">
-                    <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
+                    <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" size={16} />
                     <span className="text-center truncate">{leagueInfo}</span>
                 </div>
             </div>

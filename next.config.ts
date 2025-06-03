@@ -4,9 +4,15 @@ const nextConfig: NextConfig = {
   /* config options here */
   productionBrowserSourceMaps: true,
   images: {
-    domains: [
-      'api.placeholder.com',
-      'cdn.pandascore.co'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.placeholder.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pandascore.co',
+      },
     ],
   }
 };
