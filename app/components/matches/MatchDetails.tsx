@@ -15,7 +15,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     <h2 className="text-xl font-bold text-white">Match Details</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                         aria-label="Close details"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
