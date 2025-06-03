@@ -2,12 +2,19 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { Roster, Player } from '@/types/roster';
 import { Users } from 'lucide-react';
+// Import country flags - you'll need to install: npm install country-flag-icons
+// import '/node_modules/country-flag-icons/3x2/US.svg' - this is how you'd import specific flags
 
 interface TeamRosterProps {
     teamId?: number;
     teamName: string;
     tournamentId?: number;
 }
+
+// Helper function to get flag component from country name
+const getFlagPath = (countryCode: string): string => {
+    return countryCode ? `/flags/3x2/${countryCode}.svg` : '';
+};
 
 export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRosterProps) {
     const [roster, setRoster] = useState<Player[]>([]);
@@ -83,7 +90,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
                 <Users className="w-5 h-5 text-blue-400" />
                 <h3 className="text-lg font-bold text-white">{teamName} Roster</h3>
             </div>
-            
+
             {roster.length === 0 ? (
                 <p className="text-gray-400 text-sm">No roster information available</p>
             ) : (
@@ -103,16 +110,59 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
                                 />
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-white font-medium">{player.name}</h4>
-                                <div className="flex items-center space-x-2 text-sm">
+                                <div className="flex items-center space-x-2 mb-1">
+                                    <h4 className="text-white font-medium">{player.name}</h4>
+                                    {player.active !== undefined && (
+                                        <div className={`w-2 h-2 rounded-full ${player.active ? 'bg-green-400' : 'bg-red-400'}`}
+                                            title={player.active ? 'Active' : 'Inactive'} />
+                                    )}
+                                </div>
+
+                                <div className="flex items-center flex-wrap gap-2 text-sm">
                                     {player.role && (
-                                        <span className="text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded">
+                                        <span className="text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded text-xs font-medium">
                                             {player.role.toUpperCase()}
                                         </span>
                                     )}
+
                                     {player.nationality && (
-                                        <span className="text-gray-400">
-                                            {player.nationality}
+                                        <div
+                                            className="flex items-center space-x-1 cursor-default"
+                                            title={player.nationality}
+                                        >
+                                            <div className="relative w-4 h-3">
+                                                {getFlagPath(player.nationality) ? (
+                                                    <Image
+                                                        src={getFlagPath(player.nationality)}
+                                                        alt={`${player.nationality} flag`}
+                                                        width={16}
+                                                        height={12}
+                                                        className="object-cover rounded-sm"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const parent = target.parentElement?.parentElement;
+                                                            if (parent) {
+                                                                parent.innerHTML = `<span class="text-xs text-gray-400">${player.nationality}</span>`;
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">{player.nationality}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(player.age || player.birthday) && (
+                                        <span className="text-gray-400 text-xs">
+                                            {player.age ? `${player.age}y` : ''}
+                                            {player.birthday && (
+                                                <span title={`Birthday: ${new Date(player.birthday).toLocaleDateString()}`}>
+                                                    {player.age ? ` (${new Date(player.birthday).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` :
+                                                        new Date(player.birthday).toLocaleDateString()}
+                                                </span>
+                                            )}
                                         </span>
                                     )}
                                 </div>
@@ -123,4 +173,4 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
             )}
         </div>
     );
-} 
+}
