@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
@@ -16,17 +17,67 @@ interface Game {
 }
 
 export default function MatchesPage() {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [selectedGame, setSelectedGame] = useState('valorant')
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(20)
-
-    // Date filtering states
-    const [dateFilter, setDateFilter] = useState('all') // 'all', 'today', 'week', 'month', 'custom'
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    
+    // Initialize state from URL parameters
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || 'valorant')
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
+    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
     const [customDateRange, setCustomDateRange] = useState({
-        start: '',
-        end: ''
+        start: searchParams.get('date_start') || '',
+        end: searchParams.get('date_end') || ''
     })
+
+    // Function to update URL parameters
+    const updateUrlParams = (updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(searchParams.toString())
+        
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null) {
+                params.delete(key)
+            } else {
+                params.set(key, value)
+            }
+        })
+
+        // Update the URL without reloading the page
+        router.push(`/matches?${params.toString()}`)
+    }
+
+    // Update URL when filters change
+    useEffect(() => {
+        const updates: Record<string, string | null> = {
+            search: searchTerm || null,
+            game: selectedGame,
+            page: currentPage.toString(),
+            per_page: itemsPerPage.toString(),
+            date_filter: dateFilter
+        }
+
+        if (dateFilter === 'custom') {
+            updates.date_start = customDateRange.start || null
+            updates.date_end = customDateRange.end || null
+        }
+
+        updateUrlParams(updates)
+    }, [searchTerm, selectedGame, currentPage, itemsPerPage, dateFilter, customDateRange])
+
+    // Modified filter handlers
+    const handleGameChange = (game: string) => {
+        setSelectedGame(game)
+        setCurrentPage(1) // Reset to first page
+    }
+
+    const handleDateFilterChange = (filter: string) => {
+        setDateFilter(filter)
+        setCurrentPage(1) // Reset to first page
+        if (filter !== 'custom') {
+            setCustomDateRange({ start: '', end: '' })
+        }
+    }
 
     // Fetch games data
     const { games, loading: gamesLoading } = useGames()
@@ -124,7 +175,7 @@ export default function MatchesPage() {
     // Reset to first page when filters change
     const resetPage = () => setCurrentPage(1)
 
-    // Handle page changes
+    // Modified pagination handler
     const goToPage = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page)
@@ -212,8 +263,7 @@ export default function MatchesPage() {
                             <select
                                 value={selectedGame}
                                 onChange={(e) => {
-                                    setSelectedGame(e.target.value)
-                                    resetPage()
+                                    handleGameChange(e.target.value)
                                 }}
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                                 disabled={gamesLoading}
@@ -233,8 +283,7 @@ export default function MatchesPage() {
                             <select
                                 value={dateFilter}
                                 onChange={(e) => {
-                                    setDateFilter(e.target.value)
-                                    resetPage()
+                                    handleDateFilterChange(e.target.value)
                                 }}
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                                 aria-label="Select date filter"

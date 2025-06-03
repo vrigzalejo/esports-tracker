@@ -205,19 +205,27 @@ interface FilterOptions {
   upcoming?: boolean
 }
 
-// Helper function to prepare API filters with date parameters
-function prepareApiFilters(filters: FilterOptions | undefined): ApiFilters {
-  if (!filters) return {}
-  
-  const apiFilters: ApiFilters = { 
-    game: filters.game,
-    status: filters.status,
-    page: filters.page,
-    per_page: filters.per_page,
-    sort: filters.sort
+// Helper function to format date for API
+const formatDateForApi = (date: string | Date): string => {
+  if (typeof date === 'string') {
+    return date
   }
-  
-  // Handle range object
+  return date.toISOString().split('T')[0]
+}
+
+// Helper function to prepare API filters
+function prepareApiFilters(filters?: FilterOptions): ApiFilters {
+  if (!filters) return {}
+
+  const apiFilters: ApiFilters = {
+    game: filters.game !== 'all' ? filters.game : undefined,
+    status: filters.status,
+    page: filters.page ? parseInt(filters.page.toString()) : undefined,
+    per_page: filters.per_page ? parseInt(filters.per_page.toString()) : undefined,
+    sort: filters.sort || 'begin_at'
+  }
+
+  // Handle date filtering
   if (filters.range) {
     if (filters.range.since) {
       apiFilters.since = formatDateForApi(filters.range.since)
@@ -226,22 +234,29 @@ function prepareApiFilters(filters: FilterOptions | undefined): ApiFilters {
       apiFilters.until = formatDateForApi(filters.range.until)
     }
   }
-  
-  // Handle direct date filters
+
+  // Direct date filters take precedence over range
   if (filters.since) {
     apiFilters.since = formatDateForApi(filters.since)
   }
   if (filters.until) {
     apiFilters.until = formatDateForApi(filters.until)
   }
-  
-  return apiFilters
-}
 
-// Helper function to format dates for API (UTC date only)
-function formatDateForApi(date: string | Date): string {
-  if (typeof date === 'string') {
-    date = new Date(date)
+  // Handle special time-based filters
+  if (filters.running) {
+    apiFilters.status = 'running'
+  } else if (filters.past) {
+    apiFilters.status = 'finished'
+    if (!apiFilters.until) {
+      apiFilters.until = formatDateForApi(new Date())
+    }
+  } else if (filters.upcoming) {
+    apiFilters.status = 'not_started'
+    if (!apiFilters.since) {
+      apiFilters.since = formatDateForApi(new Date())
+    }
   }
-  return date.toISOString().split('T')[0]
+
+  return apiFilters
 }
