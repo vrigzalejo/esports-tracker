@@ -1,459 +1,66 @@
-'use client'
+import { Suspense } from 'react'
+import MatchesContent from '@/components/matches/MatchesContent'
 
-import { useState, useMemo } from 'react'
-import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-
-import Header from '@/components/layout/Header'
-import Navigation from '@/components/layout/Navigation'
-import MatchCard from '@/components/matches/MatchCard'
-import { useMatches, useGames } from '@/hooks/useEsportsData'
-import type { Match } from '@/types/esports'
-
-interface Game {
-    id: string | number
-    slug: string
-    name: string
-}
-
-export default function MatchesPage() {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [selectedGame, setSelectedGame] = useState('valorant')
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(20)
-
-    // Date filtering states
-    const [dateFilter, setDateFilter] = useState('all') // 'all', 'today', 'week', 'month', 'custom'
-    const [customDateRange, setCustomDateRange] = useState({
-        start: '',
-        end: ''
-    })
-
-    // Fetch games data
-    const { games, loading: gamesLoading } = useGames()
-
-    // Prepare date filters for the API
-    const getDateFilters = () => {
-        const filters: {
-            since?: string;
-            until?: string;
-        } = {}
-
-        switch (dateFilter) {
-            case 'today': {
-                // Get today's date at UTC midnight
-                const today = new Date()
-                today.setUTCHours(0, 0, 0, 0)
-                filters.since = today.toISOString().split('T')[0]
-                
-                // Get tomorrow's date at UTC midnight
-                const tomorrow = new Date(today)
-                tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
-                filters.until = tomorrow.toISOString().split('T')[0]
-                break
-            }
-            case 'week': {
-                const now = new Date()
-                // Get the start of current week (Sunday) at UTC midnight
-                const weekStart = new Date(now)
-                weekStart.setUTCHours(0, 0, 0, 0)
-                weekStart.setUTCDate(now.getUTCDate() - now.getUTCDay())
-                filters.since = weekStart.toISOString().split('T')[0]
-                
-                // Get the end of current week (Saturday) at UTC midnight
-                const weekEnd = new Date(weekStart)
-                weekEnd.setUTCDate(weekStart.getUTCDate() + 7)
-                filters.until = weekEnd.toISOString().split('T')[0]
-                break
-            }
-            case 'month': {
-                const now = new Date()
-                // Get the start of current month at UTC midnight
-                const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-                filters.since = monthStart.toISOString().split('T')[0]
-                
-                // Get the start of next month at UTC midnight
-                const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))
-                filters.until = monthEnd.toISOString().split('T')[0]
-                break
-            }
-            case 'custom': {
-                if (customDateRange.start) {
-                    filters.since = customDateRange.start // Already in YYYY-MM-DD format
-                }
-                if (customDateRange.end) {
-                    // For custom end date, include the entire day by using the next day as the until date
-                    const nextDay = new Date(customDateRange.end)
-                    nextDay.setDate(nextDay.getDate() + 1)
-                    filters.until = nextDay.toISOString().split('T')[0]
-                }
-                break
-            }
-        }
-
-        return filters
-    }
-
-    // Pass all filters to the hook, including date filters
-    const { data: matches, loading: matchesLoading } = useMatches({
-        game: selectedGame,
-        page: currentPage,
-        per_page: itemsPerPage,
-        sort: 'begin_at',
-        ...getDateFilters()
-    })
-
-    // Only filter by search term since sorting and pagination are handled by the hook
-    const filteredMatches = useMemo(() => {
-        if (!searchTerm) return matches
-
-        return matches.filter((match: Match) => {
-            const matchesSearch = match.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                match.opponents?.some((opp) =>
-                    opp.opponent?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-            return matchesSearch
-        })
-    }, [matches, searchTerm])
-
-    const currentMatches = filteredMatches
-
-    // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = matches.length === itemsPerPage
-    const totalPages = hasMorePages ? currentPage + 1 : currentPage
-
-    // Reset to first page when filters change
-    const resetPage = () => setCurrentPage(1)
-
-    // Handle page changes
-    const goToPage = (page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page)
-        }
-    }
-
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pages = []
-        const maxVisiblePages = 5
-
-        if (totalPages <= maxVisiblePages) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i)
-            }
-        } else {
-            const start = Math.max(1, currentPage - 2)
-            const end = Math.min(totalPages, start + maxVisiblePages - 1)
-
-            if (end - start < maxVisiblePages - 1) {
-                const newStart = Math.max(1, end - maxVisiblePages + 1)
-                if (newStart > 1) {
-                    pages.push(1)
-                    if (newStart > 2) pages.push('...')
-                }
-                for (let i = newStart; i <= end; i++) {
-                    pages.push(i)
-                }
-            } else {
-                if (start > 1) {
-                    pages.push(1)
-                    if (start > 2) pages.push('...')
-                }
-                for (let i = start; i <= end; i++) {
-                    pages.push(i)
-                }
-            }
-
-            if (end < totalPages) {
-                if (end < totalPages - 1) pages.push('...')
-                pages.push(totalPages)
-            }
-        }
-
-        return pages
-    }
-
-    // Format date for display
-    const formatDateFilter = () => {
-        switch (dateFilter) {
-            case 'today': return 'Today'
-            case 'week': return 'This Week'
-            case 'month': return 'This Month'
-            case 'custom':
-                if (customDateRange.start && customDateRange.end) {
-                    return `${customDateRange.start} to ${customDateRange.end}`
-                } else if (customDateRange.start) {
-                    return `From ${customDateRange.start}`
-                } else if (customDateRange.end) {
-                    return `Until ${customDateRange.end}`
-                }
-                return 'Custom Range'
-            default: return 'All Dates'
-        }
-    }
-
+// Loading component for the suspense boundary
+function MatchesLoading() {
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={(term) => {
-                setSearchTerm(term)
-                // Don't reset page for search since it's client-side filtering
-            }} />
-            <Navigation />
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        Matches
-                    </h1>
-
-                    <div className="flex items-center space-x-4 flex-wrap gap-2">
-                        {/* Game Filter */}
-                        <div className="flex items-center space-x-2">
-                            <Filter className="w-4 h-4 text-gray-400" />
-                            <select
-                                value={selectedGame}
-                                onChange={(e) => {
-                                    setSelectedGame(e.target.value)
-                                    resetPage()
-                                }}
-                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                                disabled={gamesLoading}
-                                aria-label="Select game"
-                            >
-                                {!gamesLoading && games.map((game: Game) => (
-                                    <option key={game.id || game.slug} value={game.slug || game.id}>
-                                        {game.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Date Filter */}
-                        <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <select
-                                value={dateFilter}
-                                onChange={(e) => {
-                                    setDateFilter(e.target.value)
-                                    resetPage()
-                                }}
-                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                                aria-label="Select date filter"
-                            >
-                                <option value="all">All Dates</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
-                        </div>
-
-                        {/* Items per page */}
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value))
-                                resetPage()
-                            }}
-                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                            aria-label="Select items per page"
-                        >
-                            <option value="10">10 per page</option>
-                            <option value="20">20 per page</option>
-                            <option value="50">50 per page</option>
-                        </select>
+                    <div className="h-9 w-32 bg-gray-700 rounded animate-pulse" />
+                    <div className="flex items-center space-x-4">
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
                     </div>
                 </div>
 
-                {/* Custom Date Range Inputs */}
-                {dateFilter === 'custom' && (
-                    <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
-                        <div className="flex items-center space-x-4 flex-wrap gap-2">
-                            <div className="flex items-center space-x-2">
-                                <label htmlFor="date-from" className="text-sm text-gray-300">From:</label>
-                                <input
-                                    id="date-from"
-                                    type="date"
-                                    value={customDateRange.start}
-                                    onChange={(e) => {
-                                        setCustomDateRange(prev => ({ ...prev, start: e.target.value }))
-                                        resetPage()
-                                    }}
-                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                    aria-label="From date"
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label htmlFor="date-to" className="text-sm text-gray-300">To:</label>
-                                <input
-                                    id="date-to"
-                                    type="date"
-                                    value={customDateRange.end}
-                                    onChange={(e) => {
-                                        setCustomDateRange(prev => ({ ...prev, end: e.target.value }))
-                                        resetPage()
-                                    }}
-                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                    aria-label="To date"
-                                />
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setCustomDateRange({ start: '', end: '' })
-                                    resetPage()
-                                }}
-                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200"
-                            >
-                                Clear
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Results info */}
-                {!matchesLoading && currentMatches.length > 0 && (
-                    <div className="mb-4 text-gray-400 text-sm">
-                        Page {currentPage} - Showing {currentMatches.length} matches
-                        {searchTerm && ` (filtered by "${searchTerm}")`}
-                        {dateFilter !== 'all' && ` (${formatDateFilter()})`}
-                        {hasMorePages && <span> (more available)</span>}
-                    </div>
-                )}
-
-                {matchesLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 animate-pulse">
-                                {/* Header */}
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex gap-2">
-                                        <div className="h-6 w-20 bg-gray-700 rounded-full" />
-                                        <div className="h-6 w-24 bg-gray-700 rounded-full" />
-                                    </div>
-                                    <div className="h-6 w-16 bg-gray-700 rounded-full" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 animate-pulse">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex gap-2">
+                                    <div className="h-6 w-20 bg-gray-700 rounded-full" />
+                                    <div className="h-6 w-24 bg-gray-700 rounded-full" />
                                 </div>
-                                
-                                {/* Teams */}
-                                <div className="flex items-center justify-center mb-6">
-                                    <div className="grid grid-cols-[auto_auto_auto] items-center gap-4 sm:gap-6">
-                                        {/* Team 1 */}
-                                        <div className="flex flex-col items-center space-y-3">
-                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
-                                            <div className="h-4 w-16 bg-gray-700 rounded" />
-                                        </div>
-                                        
-                                        {/* VS */}
-                                        <div className="h-6 w-8 bg-gray-700 rounded" />
-                                        
-                                        {/* Team 2 */}
-                                        <div className="flex flex-col items-center space-y-3">
-                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
-                                            <div className="h-4 w-16 bg-gray-700 rounded" />
-                                        </div>
+                                <div className="h-6 w-16 bg-gray-700 rounded-full" />
+                            </div>
+
+                            <div className="flex items-center justify-center mb-6">
+                                <div className="grid grid-cols-[auto_auto_auto] items-center gap-4 sm:gap-6">
+                                    <div className="flex flex-col items-center space-y-3">
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
+                                        <div className="h-4 w-16 bg-gray-700 rounded" />
+                                    </div>
+                                    <div className="h-6 w-8 bg-gray-700 rounded" />
+                                    <div className="flex flex-col items-center space-y-3">
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-700 rounded-xl" />
+                                        <div className="h-4 w-16 bg-gray-700 rounded" />
                                     </div>
                                 </div>
-                                
-                                {/* Date and Time */}
-                                <div className="flex items-center justify-center gap-4 mb-4">
-                                    <div className="h-6 w-28 bg-gray-700 rounded-full" />
-                                    <div className="h-6 w-28 bg-gray-700 rounded-full" />
-                                </div>
-                                
-                                {/* Tournament Info */}
-                                <div className="flex flex-col items-center gap-3">
-                                    <div className="h-6 w-32 bg-gray-700 rounded-full" />
-                                    <div className="h-6 w-40 bg-gray-700 rounded-full" />
-                                </div>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {currentMatches.map((match: Match) => (
-                                <MatchCard key={match.id} match={match} />
-                            ))}
+
+                            <div className="flex items-center justify-center gap-4 mb-4">
+                                <div className="h-6 w-28 bg-gray-700 rounded-full" />
+                                <div className="h-6 w-28 bg-gray-700 rounded-full" />
+                            </div>
+
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="h-6 w-32 bg-gray-700 rounded-full" />
+                                <div className="h-6 w-40 bg-gray-700 rounded-full" />
+                            </div>
                         </div>
-
-                        {/* Pagination */}
-                        {(currentPage > 1 || hasMorePages) && (
-                            <div className="flex items-center justify-center mt-8 space-x-2">
-                                <button
-                                    onClick={() => goToPage(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
-                                >
-                                    <ChevronLeft className="w-4 h-4 mr-1" />
-                                    Previous
-                                </button>
-
-                                <div className="flex items-center space-x-2 px-4">
-                                    {getPageNumbers().map((pageNum, index) => (
-                                        <span key={index}>
-                                            {pageNum === '...' ? (
-                                                <span className="text-gray-500 px-2">...</span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => goToPage(pageNum as number)}
-                                                    className={`px-3 py-1 text-sm rounded-md cursor-pointer transition-all duration-200 ${currentPage === pageNum
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'text-gray-400 hover:text-white hover:bg-gray-600'
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={() => goToPage(currentPage + 1)}
-                                    disabled={!hasMorePages}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
-                                >
-                                    Next
-                                    <ChevronRight className="w-4 h-4 ml-1" />
-                                </button>
-                            </div>
-                        )}
-                    </>
-                )}
-
-                {currentMatches.length === 0 && !matchesLoading && (
-                    <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">
-                            {searchTerm
-                                ? `No matches found matching "${searchTerm}"`
-                                : "No matches found matching your criteria"
-                            }
-                        </p>
-                        {(searchTerm || dateFilter !== 'all') && (
-                            <div className="mt-4 space-x-2">
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                                    >
-                                        Clear search
-                                    </button>
-                                )}
-                                {dateFilter !== 'all' && (
-                                    <button
-                                        onClick={() => {
-                                            setDateFilter('all')
-                                            setCustomDateRange({ start: '', end: '' })
-                                            resetPage()
-                                        }}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                                    >
-                                        Clear date filter
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-            </main>
+                    ))}
+                </div>
+            </div>
         </div>
+    )
+}
+
+export default function MatchesPage() {
+    return (
+        <Suspense fallback={<MatchesLoading />}>
+            <MatchesContent />
+        </Suspense>
     )
 }
