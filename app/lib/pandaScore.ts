@@ -145,3 +145,7 @@ export const getTeams = async (filters?: TeamFilters) => {
 export const getGames = async () => {
     return request('/videogames');
 }
+
+export const getTournamentRosters = async (tournamentId: string) => {
+    return request(`/tournaments/${tournamentId}/rosters`);
+}
