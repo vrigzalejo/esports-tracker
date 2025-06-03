@@ -90,4 +90,3 @@ export default function MatchCard({ match }: MatchCardProps) {
         </>
     )
 }
-
