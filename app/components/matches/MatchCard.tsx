@@ -17,6 +17,10 @@ interface Opponent {
 
 export default function MatchCard({ match }: MatchCardProps) {
     const [showStreams, setShowStreams] = useState(false)
+    const [countdown, setCountdown] = useState('')
+    const [isLive, setIsLive] = useState(false)
+    const [isPast, setIsPast] = useState(false)
+    const countdownInterval = useRef<NodeJS.Timeout>()
 
     const getTeamImage = (opponent: Opponent) => {
         const imageUrl = opponent?.opponent?.image_url;
@@ -29,6 +33,57 @@ export default function MatchCard({ match }: MatchCardProps) {
 
     // Get user's timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    // Calculate countdown
+    const calculateCountdown = (matchData: Match) => {
+        const now = new Date()
+        const matchDate = new Date(matchData.scheduled_at || matchData.begin_at)
+        const diff = matchDate.getTime() - now.getTime()
+
+        // Check if match is in the past
+        if (diff < 0) {
+            if (matchData.status === 'running') {
+                setIsLive(true)
+                setIsPast(false)
+                setCountdown('LIVE')
+            } else {
+                setIsLive(false)
+                setIsPast(true)
+                setCountdown('Completed')
+            }
+            return
+        }
+
+        setIsLive(false)
+        setIsPast(false)
+
+        // Calculate time units
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+        // Format countdown string
+        if (days > 0) {
+            setCountdown(`${days}d ${hours}h ${minutes}m`)
+        } else if (hours > 0) {
+            setCountdown(`${hours}h ${minutes}m ${seconds}s`)
+        } else {
+            setCountdown(`${minutes}m ${seconds}s`)
+        }
+    }
+
+    // Set up countdown timer
+    useEffect(() => {
+        calculateCountdown(match)
+        countdownInterval.current = setInterval(() => calculateCountdown(match), 1000)
+
+        return () => {
+            if (countdownInterval.current) {
+                clearInterval(countdownInterval.current)
+            }
+        }
+    }, [match])
 
     // Format date and time with timezone
     const formatDateTime = (dateString: string) => {
@@ -495,9 +550,15 @@ export default function MatchCard({ match }: MatchCardProps) {
                     <Calendar className="w-4 h-4 mr-2 text-gray-500" />
                     <span>{dateTime.date}</span>
                 </div>
-                <div className="flex items-center text-gray-400 text-xs sm:text-sm bg-gray-900/30 px-3 py-1 rounded-full">
-                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                    <span>{dateTime.time}</span>
+                <div className={`flex items-center text-xs sm:text-sm px-3 py-1 rounded-full ${
+                    isLive 
+                        ? 'bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse'
+                        : isPast
+                            ? 'bg-gray-900/30 text-gray-400'
+                            : 'bg-green-500/20 text-green-400 border border-green-500/20'
+                }`}>
+                    <Clock className={`w-4 h-4 mr-2 ${isLive ? 'text-red-400' : isPast ? 'text-gray-500' : 'text-green-400'}`} />
+                    <span>{countdown || dateTime.time}</span>
                 </div>
             </div>
 
