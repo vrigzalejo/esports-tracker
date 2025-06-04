@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { TeamMatch } from '@/types/esports';
+import type { TeamMatch, Match } from '@/types/esports';
 
 interface TeamMatchesProps {
     teamId: number;
     teamName: string;
+    currentMatch?: Match; // Add current match for comparison
 }
 
-export default function TeamMatches({ teamId, teamName }: TeamMatchesProps) {
+export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatchesProps) {
     const [matches, setMatches] = useState<TeamMatch[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -73,6 +74,40 @@ export default function TeamMatches({ teamId, teamName }: TeamMatchesProps) {
         return isWinner ? 'W' : 'L';
     };
 
+    // Check if match details are different from current match
+    const isDifferentCompetition = (match: TeamMatch) => {
+        if (!currentMatch) return true;
+        
+        return (
+            match.league.name !== currentMatch.league?.name ||
+            match.serie.full_name !== currentMatch.serie?.full_name ||
+            match.tournament.id !== currentMatch.tournament?.id
+        );
+    };
+
+    // Get competition info to display
+    const getCompetitionInfo = (match: TeamMatch) => {
+        if (!isDifferentCompetition(match)) {
+            return null; // Don't show if same as current match
+        }
+
+        const parts = [];
+        
+        if (match.league.name) {
+            parts.push(match.league.name);
+        }
+        
+        if (match.serie.full_name && match.serie.full_name !== match.league.name) {
+            parts.push(match.serie.full_name);
+        }
+        
+        if (match.tournament.name && match.tournament.name !== match.serie.name) {
+            parts.push(match.tournament.name);
+        }
+
+        return parts.length > 0 ? parts.join(' • ') : null;
+    };
+
     if (loading) {
         return (
             <div className="bg-gray-700 rounded-lg p-4">
@@ -91,16 +126,7 @@ export default function TeamMatches({ teamId, teamName }: TeamMatchesProps) {
     }
 
     if (error) {
-        return (
-            <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">
-                    Recent Matches - {teamName}
-                </h3>
-                <div className="text-red-400 text-sm">
-                    Error loading matches: {error}
-                </div>
-            </div>
-        );
+        return null;
     }
 
     if (matches.length === 0) {
@@ -125,6 +151,7 @@ export default function TeamMatches({ teamId, teamName }: TeamMatchesProps) {
                 {matches.map((match) => {
                     const opponent = match.opponents.find(opp => opp.opponent.id !== teamId)?.opponent;
                     const result = getMatchResult(match, teamId);
+                    const competitionInfo = getCompetitionInfo(match);
                     
                     return (
                         <div
@@ -140,12 +167,17 @@ export default function TeamMatches({ teamId, teamName }: TeamMatchesProps) {
                                             {result}
                                         </div>
                                     )}
-                                    <div>
+                                    <div className="flex-1">
                                         <div className="text-white font-medium text-sm">
                                             vs {opponent?.acronym || opponent?.name || 'TBD'}
                                         </div>
+                                        {competitionInfo && (
+                                            <div className="text-blue-300 text-xs mb-1">
+                                                {competitionInfo}
+                                            </div>
+                                        )}
                                         <div className="text-gray-300 text-xs">
-                                            {match.league.name} • {match.tournament.name}
+                                            {!competitionInfo && `${match.league.name} • ${match.tournament.name}`}
                                         </div>
                                     </div>
                                 </div>
