@@ -95,6 +95,13 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
         );
     }
 
+    // Check if we have meaningful W/L data
+    const hasWinLossData = standings.some(standing => 
+        (standing.wins > 0 || standing.losses > 0) && 
+        standing.wins !== undefined && 
+        standing.losses !== undefined
+    );
+
     return (
         <div className="bg-gray-700 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-white mb-4">
@@ -102,10 +109,17 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
             </h3>
             <div className="space-y-2">
                 {/* Header */}
-                <div className="grid grid-cols-4 gap-2 text-xs font-medium text-gray-400 pb-2 border-b border-gray-600">
-                    <div className="col-span-2">Team</div>
-                    <div className="text-center">W</div>
-                    <div className="text-center">L</div>
+                <div className={`grid gap-2 text-xs font-medium text-gray-400 pb-2 border-b border-gray-600 ${
+                    hasWinLossData ? 'grid-cols-4' : 'grid-cols-2'
+                }`}>
+                    <div className={hasWinLossData ? 'col-span-2' : 'col-span-1'}>Team</div>
+                    {hasWinLossData && (
+                        <>
+                            <div className="text-center">W</div>
+                            <div className="text-center">L</div>
+                        </>
+                    )}
+                    {!hasWinLossData && <div className="text-center">Rank</div>}
                 </div>
                 
                 {/* Standings */}
@@ -114,13 +128,17 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                     return (
                         <div
                             key={standing.team.id}
-                            className={`grid grid-cols-4 gap-2 items-center py-2 rounded transition-colors ${
+                            className={`grid gap-2 items-center py-2 rounded transition-colors ${
+                                hasWinLossData ? 'grid-cols-4' : 'grid-cols-2'
+                            } ${
                                 isRelevantTeam 
                                     ? 'bg-blue-900/30 border border-blue-500/30 hover:bg-blue-800/40' 
                                     : 'hover:bg-gray-600'
                             }`}
                         >
-                            <div className="col-span-2 flex items-center space-x-3">
+                            <div className={`flex items-center space-x-3 ${
+                                hasWinLossData ? 'col-span-2' : 'col-span-1'
+                            }`}>
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                                     standing.rank <= 3 ? 'bg-yellow-500 text-black' : 
                                     isRelevantTeam ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'
@@ -142,12 +160,21 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-center text-green-400 text-sm font-medium">
-                                {standing.wins}
-                            </div>
-                            <div className="text-center text-red-400 text-sm font-medium">
-                                {standing.losses}
-                            </div>
+                            {hasWinLossData && (
+                                <>
+                                    <div className="text-center text-green-400 text-sm font-medium">
+                                        {standing.wins}
+                                    </div>
+                                    <div className="text-center text-red-400 text-sm font-medium">
+                                        {standing.losses}
+                                    </div>
+                                </>
+                            )}
+                            {!hasWinLossData && (
+                                <div className="text-center text-gray-300 text-sm font-medium">
+                                    #{standing.rank || index + 1}
+                                </div>
+                            )}
                         </div>
                     );
                 })}
