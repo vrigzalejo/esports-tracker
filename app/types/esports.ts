@@ -99,3 +99,135 @@ export interface StatCardProps {
 }
 
 export type TabType = 'matches' | 'tournaments' | 'teams' | 'stats'
+
+export interface TeamMatch {
+    id: number
+    name: string
+    status: 'running' | 'finished' | 'not_started' | 'completed'
+    begin_at: string
+    scheduled_at: string
+    end_at?: string
+    number_of_games: number
+    match_type: string
+    winner_id?: number
+    results: Array<{
+        score: number
+        team_id: number
+    }>
+    opponents: Array<{
+        opponent: {
+            id: number
+            name: string
+            acronym: string
+            image_url?: string
+            location: string
+        }
+        type: string
+    }>
+    league: {
+        id: number
+        name: string
+        image_url?: string
+        slug: string
+    }
+    serie: {
+        id: number
+        name: string
+        full_name: string
+        slug: string
+        year: number
+    }
+    tournament: {
+        id: number
+        name: string
+        slug: string
+        tier: string
+        type: string
+        region: string
+    }
+    videogame: {
+        id: number
+        name: string
+        slug: string
+    }
+    games: Array<{
+        id: number
+        position: number
+        status: string
+        winner?: {
+            id?: number
+            type: string
+        }
+        finished: boolean
+        forfeit: boolean
+    }>
+}
+
+export interface TournamentStanding {
+    rank: number
+    team: {
+        id: number
+        name: string
+        acronym: string
+        image_url?: string
+        location: string
+    }
+    wins: number
+    losses: number
+    draws: number
+    points: number
+    matches_played: number
+    win_rate: number
+}
+
+export interface TournamentMatch {
+    id: number
+    name: string
+    status: 'running' | 'finished' | 'not_started' | 'completed'
+    begin_at: string
+    scheduled_at: string
+    end_at?: string
+    number_of_games: number
+    match_type: string
+    winner_id?: number
+    results: Array<{
+        score: number
+        team_id: number
+    }>
+    opponents: Array<{
+        opponent: {
+            id: number
+            name: string
+            acronym: string
+            image_url?: string
+            location: string
+        }
+        type: string
+    }>
+    league: {
+        id: number
+        name: string
+        image_url?: string
+        slug: string
+    }
+    serie: {
+        id: number
+        name: string
+        full_name: string
+        slug: string
+        year: number
+    }
+    tournament: {
+        id: number
+        name: string
+        slug: string
+        tier: string
+        type: string
+        region: string
+    }
+    videogame: {
+        id: number
+        name: string
+        slug: string
+    }
+}
