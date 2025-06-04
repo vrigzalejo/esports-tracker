@@ -74,7 +74,7 @@ export default function MatchHeader({ match, gamesFormat, videoStreams, onShowDe
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform -translate-x-full group-hover/roster:translate-x-full transition-transform duration-700 ease-in-out" />
 
                     <UserCheck className="w-4 h-4 group-hover/roster:animate-pulse relative z-10" size={16} />
-                    <span className="relative z-10 font-semibold">Rosters</span>
+                    <span className="relative z-10 font-semibold">Match Details</span>
                     <Zap className="w-3 h-3 group-hover/roster:animate-bounce relative z-10" size={12} />
                 </button>
 
