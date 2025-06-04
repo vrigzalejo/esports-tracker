@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Match } from '@/types/esports'
 import MatchDetails from './MatchDetails'
 import MatchHeader from './MatchHeader'
@@ -20,7 +20,7 @@ interface Opponent {
 
 export default function MatchCard({ match }: MatchCardProps) {
     const [showDetails, setShowDetails] = useState(false)
-    
+
     const {
         countdown,
         isLive,
@@ -38,6 +38,23 @@ export default function MatchCard({ match }: MatchCardProps) {
         isMatchFinished,
         isMatchLive
     } = useMatchData(match)
+
+    // Handle escape key to close modal
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && showDetails) {
+                setShowDetails(false)
+            }
+        }
+
+        if (showDetails) {
+            document.addEventListener('keydown', handleEscape)
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape)
+        }
+    }, [showDetails])
 
     return (
         <>
