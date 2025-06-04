@@ -1,6 +1,8 @@
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
 import TeamMatches from './TeamMatches';
+import TournamentStandings from '../tournaments/TournamentStandings';
+import TournamentMatches from '../tournaments/TournamentMatches';
 
 interface MatchDetailsProps {
     match: Match;
@@ -142,8 +144,21 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         <div className="text-sm text-yellow-400 font-medium">
                             {match.tournament?.name}
                         </div>
-                        <div className="text-xs text-gray-400">
-                            {match.name} • {match.videogame?.name}
+                        <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-400">
+                                {match.name} • {match.videogame?.name}
+                            </div>
+                            <div className="text-xs text-gray-300">
+                                {new Date(match.begin_at).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZoneName: 'short'
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -178,6 +193,25 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     />
                                 ) : null
                             ))}
+                        </div>
+
+                        {/* Tournament Information */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {match.tournament?.id && (
+                                <>
+                                    <TournamentStandings
+                                        tournamentId={match.tournament.id}
+                                        tournamentName={match.tournament.name || 'Tournament'}
+                                        teamIds={match.opponents.map(opp => opp.opponent?.id).filter(Boolean) as number[]}
+                                    />
+                                    <TournamentMatches
+                                        tournamentId={match.tournament.id}
+                                        tournamentName={match.tournament.name || 'Tournament'}
+                                        teamIds={match.opponents.map(opp => opp.opponent?.id).filter(Boolean) as number[]}
+                                        teamNames={match.opponents.map(opp => opp.opponent?.name).filter(Boolean) as string[]}
+                                    />
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
