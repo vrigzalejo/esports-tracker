@@ -149,3 +149,7 @@ export const getGames = async () => {
 export const getTournamentRosters = async (tournamentId: string) => {
     return request(`/tournaments/${tournamentId}/rosters`);
 }
+
+export const getTeamMatches = async (teamId: string | number) => {
+    return request(`/teams/${teamId}/matches`);
+}

@@ -1,5 +1,6 @@
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
+import TeamMatches from './TeamMatches';
 
 interface MatchDetailsProps {
     match: Match;
@@ -9,7 +10,7 @@ interface MatchDetailsProps {
 export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-700 relative">
+            <div className="bg-gray-800 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-700 relative">
                 {/* Header */}
                 <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between z-10">
                     <h2 className="text-xl font-bold text-white">Match Details</h2>
@@ -28,7 +29,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
                     <div className="p-6 space-y-8">
                         {/* Team Rosters */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {match.opponents.map((opponent, index) => (
                                 <TeamRoster
                                     key={opponent.opponent?.id || index}
@@ -36,6 +37,19 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     teamName={opponent.opponent?.name || 'TBD'}
                                     tournamentId={match.tournament?.id}
                                 />
+                            ))}
+                        </div>
+
+                        {/* Team Recent Matches */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {match.opponents.map((opponent) => (
+                                opponent.opponent?.id ? (
+                                    <TeamMatches
+                                        key={`matches-${opponent.opponent.id}`}
+                                        teamId={opponent.opponent.id}
+                                        teamName={opponent.opponent.name || 'TBD'}
+                                    />
+                                ) : null
                             ))}
                         </div>
                     </div>
