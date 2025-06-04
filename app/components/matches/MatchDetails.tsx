@@ -12,21 +12,40 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gray-800 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-700 relative">
                 {/* Header */}
-                <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between z-10">
-                    <h2 className="text-xl font-bold text-white">Match Details</h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
-                        aria-label="Close details"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 z-10">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xl font-bold text-white">Match Details</h2>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                            aria-label="Close details"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    {/* Match Information */}
+                    <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-blue-400 font-medium">{match.league?.name}</span>
+                            {match.league?.name && match.serie?.full_name && (
+                                <span className="text-gray-500">•</span>
+                            )}
+                            <span className="text-green-400 font-medium">{match.serie?.full_name}</span>
+                        </div>
+                        <div className="text-sm text-yellow-400 font-medium">
+                            {match.tournament?.name}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                            {match.name} • {match.videogame?.name}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
+                <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
                     <div className="p-6 space-y-8">
                         {/* Team Rosters */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
