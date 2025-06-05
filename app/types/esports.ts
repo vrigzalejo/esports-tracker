@@ -65,7 +65,7 @@ export interface Tournament {
     name: string
     begin_at: string
     end_at: string
-    prize_pool: string
+    prizepool: string
     league: {
       name: string
       image_url: string

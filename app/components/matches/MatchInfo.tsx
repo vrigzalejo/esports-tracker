@@ -1,4 +1,5 @@
 import { Globe, Trophy, Star, Users } from 'lucide-react'
+import { parseLeagueInfo } from '@/lib/textUtils'
 
 interface MatchInfoProps {
     region: string | null
@@ -15,6 +16,8 @@ export default function MatchInfo({
     leagueTier, 
     leagueInfo 
 }: MatchInfoProps) {
+    const cleanedLeagueInfo = parseLeagueInfo(leagueInfo);
+    
     return (
         <>
             {/* Region */}
@@ -47,7 +50,7 @@ export default function MatchInfo({
             <div className="flex items-center justify-center text-xs sm:text-sm">
                 <div className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full">
                     <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" size={16} />
-                    <span className="text-center">{leagueInfo}</span>
+                    <span className="text-center break-words">{cleanedLeagueInfo}</span>
                 </div>
             </div>
         </>

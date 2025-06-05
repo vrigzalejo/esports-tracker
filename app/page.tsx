@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import StatCard from '@/components/ui/StatCard'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
+import { parseLeagueInfo } from '@/lib/textUtils'
 import type { Match, Tournament } from '@/types/esports'
 
 export default function HomePage() {
@@ -34,7 +35,7 @@ export default function HomePage() {
     }).length,
     totalTeams: teams.length,
     totalPrizePool: tournaments.reduce((sum: number, tournament: Tournament) => {
-      const prizePool = tournament.prize_pool?.replace(/[^0-9.]/g, '')
+      const prizePool = tournament.prizepool?.replace(/[^0-9.]/g, '')
       return sum + (parseFloat(prizePool) || 0)
     }, 0)
   }
@@ -122,7 +123,6 @@ export default function HomePage() {
               title="Total Prize Pool"
               value={`$${(stats.totalPrizePool / 1000000).toFixed(1)}M`}
               subtitle="Active tournaments"
-              trend="+15%"
             />
           )}
         </div>
@@ -172,35 +172,67 @@ export default function HomePage() {
             <Play className="w-5 h-5 text-blue-400 mr-2" />
             Latest Matches
           </h2>
-          <div className="space-y-4">
-            {matchesLoading ? (
-              [...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-gray-700/50 animate-pulse">
-                  <div className="h-6 w-48 bg-gray-700 rounded" />
-                  <div className="h-6 w-24 bg-gray-700 rounded" />
-                </div>
-              ))
-            ) : (
-              matches.slice(0, 3).map((match: Match) => (
-                <button
-                  key={match.id}
-                  onClick={() => router.push('/matches')}
-                  className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      match.status === 'running' ? 'bg-green-500' :
-                      match.status === 'finished' ? 'bg-blue-500' : 'bg-yellow-500'
-                    }`} />
-                    <span className="text-gray-300">{match.name}</span>
+          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+            <div className="space-y-4 pr-2">
+              {matchesLoading ? (
+                [...Array(20)].map((_, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 border-b border-gray-700/50 animate-pulse">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-gray-700 rounded-full" />
+                      <div className="flex flex-col space-y-1">
+                        <div className="h-4 w-48 bg-gray-700 rounded" />
+                        <div className="h-3 w-24 bg-gray-700 rounded" />
+                      </div>
+                    </div>
+                    <div className="h-4 w-16 bg-gray-700 rounded" />
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {match.status === 'running' ? 'LIVE' :
-                     match.status === 'finished' ? 'Completed' : 'Upcoming'}
-                  </span>
-                </button>
-              ))
-            )}
+                ))
+              ) : (
+                matches.slice(0, 20).map((match: Match) => (
+                  <button
+                    key={match.id}
+                    onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
+                    className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className={`w-2 h-2 rounded-full ${
+                          match.status === 'running' ? 'bg-red-500' :
+                          match.status === 'finished' ? 'bg-blue-500' : 'bg-yellow-500'
+                        }`} />
+                        {match.status === 'running' && (
+                          <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray-300">{parseLeagueInfo(match.name)}</span>
+                        <span className="text-xs text-gray-500">{match.videogame.name}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {match.status === 'running' && (
+                        <div className="flex items-center space-x-1 bg-red-500/20 px-2 py-1 rounded-full border border-red-500/30">
+                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                          <span className="text-xs font-medium text-red-400">LIVE</span>
+                        </div>
+                      )}
+                      {match.status === 'finished' && (
+                        <div className="flex items-center space-x-1 bg-blue-500/20 px-2 py-1 rounded-full border border-blue-500/30">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                          <span className="text-xs font-medium text-blue-400">COMPLETED</span>
+                        </div>
+                      )}
+                      {match.status === 'not_started' && (
+                        <div className="flex items-center space-x-1 bg-yellow-500/20 px-2 py-1 rounded-full border border-yellow-500/30">
+                          <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-bounce" />
+                          <span className="text-xs font-medium text-yellow-400">UPCOMING</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>
