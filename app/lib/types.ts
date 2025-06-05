@@ -116,5 +116,5 @@ export interface Tournament {
     teams_count: number;
     matches_count: number;
     status: string;
-    prize_pool?: string;
+    prizepool?: string;
 }

@@ -76,12 +76,12 @@ export default function StatsPage() {
             }).length,
             totalTeams: filteredData.teams.length,
             totalPrizePool: filteredData.tournaments.reduce((sum: number, tournament: Tournament) => {
-                const prizePool = tournament.prize_pool?.replace(/[^0-9.]/g, '')
+                const prizePool = tournament.prizepool?.replace(/[^0-9.]/g, '')
                 return sum + (parseFloat(prizePool) || 0)
             }, 0),
             avgPrizePool: filteredData.tournaments.length > 0 ? 
                 filteredData.tournaments.reduce((sum: number, tournament: Tournament) => {
-                    const prizePool = tournament.prize_pool?.replace(/[^0-9.]/g, '')
+                    const prizePool = tournament.prizepool?.replace(/[^0-9.]/g, '')
                     return sum + (parseFloat(prizePool) || 0)
                 }, 0) / filteredData.tournaments.length : 0,
             countries: new Set(filteredData.teams.map((team: Team) => team.location)).size,

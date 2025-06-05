@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { TournamentMatch } from '@/types/esports';
+import { formatMatchDateRange } from '@/lib/textUtils';
 
 interface TournamentMatchesProps {
     tournamentId: number;
@@ -57,15 +58,7 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
         }
     }, [tournamentId, memoizedTeamIds.length, fetchMatches]);
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -194,7 +187,7 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                     {match.status.replace('_', ' ').toUpperCase()}
                                                 </div>
                                                 <div className="text-gray-400 text-xs">
-                                                    {formatDate(match.begin_at)}
+                                                    {formatMatchDateRange(match)}
                                                 </div>
                                             </div>
                                         </div>

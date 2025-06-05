@@ -55,7 +55,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-green-400 font-bold">{formatPrizePool(tournament.prize_pool)}</p>
+                    <p className="text-green-400 font-bold">{formatPrizePool(tournament.prizepool)}</p>
                     <p className="text-gray-400 text-xs">Prize Pool</p>
                 </div>
             </div>

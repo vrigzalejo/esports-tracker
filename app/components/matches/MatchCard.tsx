@@ -27,6 +27,7 @@ export default function MatchCard({ match }: MatchCardProps) {
         isPast,
         videoStreams,
         dateTime,
+        endDateTime,
         tournamentStage,
         gamesFormat,
         leagueInfo,
@@ -82,9 +83,11 @@ export default function MatchCard({ match }: MatchCardProps) {
                 {/* Date and Time */}
                 <MatchDateTime
                     dateTime={dateTime}
+                    endDateTime={endDateTime}
                     countdown={countdown}
                     isLive={isLive}
                     isPast={isPast}
+                    isMatchFinished={isMatchFinished}
                 />
 
                 {/* Match Information */}

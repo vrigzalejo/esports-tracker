@@ -4,6 +4,7 @@ export interface Match {
     status: 'running' | 'finished' | 'not_started' | 'completed'
     begin_at: string
     scheduled_at: string
+    end_at?: string
     number_of_games: number
     winner_id?: number
     results: Array<{
@@ -65,7 +66,7 @@ export interface Tournament {
     name: string
     begin_at: string
     end_at: string
-    prize_pool: string
+    prizepool: string
     league: {
       name: string
       image_url: string
