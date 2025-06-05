@@ -295,6 +295,7 @@ export function useMatchData(match: Match) {
 
     const videoStreams = getVideoStreams()
     const dateTime = formatDateTime(match.scheduled_at || match.begin_at)
+    const endDateTime = match.end_at ? formatDateTime(match.end_at) : null
     const tournamentStage = getTournamentStage()
     const gamesFormat = getGamesFormat()
     const leagueInfo = getLeagueInfo()
@@ -315,6 +316,7 @@ export function useMatchData(match: Match) {
         isPast,
         videoStreams,
         dateTime,
+        endDateTime,
         tournamentStage,
         gamesFormat,
         leagueInfo,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { TeamMatch, Match } from '@/types/esports';
+import { formatMatchDateRange, parseLeagueInfo } from '@/lib/textUtils';
 
 interface TeamMatchesProps {
     teamId: number;
@@ -42,15 +43,9 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
         }
     }, [teamId]);
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+
+
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -105,7 +100,8 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
             parts.push(match.tournament.name);
         }
 
-        return parts.length > 0 ? parts.join(' • ') : null;
+        const rawInfo = parts.length > 0 ? parts.join(' • ') : null;
+        return rawInfo ? parseLeagueInfo(rawInfo) : null;
     };
 
     if (loading) {
@@ -177,7 +173,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                             </div>
                                         )}
                                         <div className="text-gray-300 text-xs">
-                                            {!competitionInfo && `${match.league.name} • ${match.tournament.name}`}
+                                            {!competitionInfo && parseLeagueInfo(`${match.league.name} • ${match.tournament.name}`)}
                                         </div>
                                     </div>
                                 </div>
@@ -186,7 +182,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                         {match.status.replace('_', ' ').toUpperCase()}
                                     </div>
                                     <div className="text-gray-400 text-xs">
-                                        {formatDate(match.begin_at)}
+                                        {formatMatchDateRange(match)}
                                     </div>
                                 </div>
                             </div>

@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import StatCard from '@/components/ui/StatCard'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
-import { parseLeagueInfo } from '@/lib/textUtils'
+import { parseLeagueInfo, formatMatchDateRange } from '@/lib/textUtils'
 import type { Match, Tournament } from '@/types/esports'
 
 export default function HomePage() {
@@ -175,20 +175,24 @@ export default function HomePage() {
           <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
             <div className="space-y-4 pr-2">
               {matchesLoading ? (
-                [...Array(20)].map((_, i) => (
+                [...Array(50)].map((_, i) => (
                   <div key={i} className="flex items-center justify-between py-3 border-b border-gray-700/50 animate-pulse">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gray-700 rounded-full" />
-                      <div className="flex flex-col space-y-1">
-                        <div className="h-4 w-48 bg-gray-700 rounded" />
-                        <div className="h-3 w-24 bg-gray-700 rounded" />
+                                          <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-gray-700 rounded-full" />
+                        <div className="flex flex-col space-y-1">
+                          <div className="h-4 w-48 bg-gray-700 rounded" />
+                          <div className="flex items-center space-x-2">
+                            <div className="h-3 w-24 bg-gray-700 rounded" />
+                            <div className="h-3 w-1 bg-gray-700 rounded" />
+                            <div className="h-3 w-20 bg-gray-700 rounded" />
+                          </div>
+                        </div>
                       </div>
-                    </div>
                     <div className="h-4 w-16 bg-gray-700 rounded" />
                   </div>
                 ))
               ) : (
-                matches.slice(0, 20).map((match: Match) => (
+                matches.slice(0, 50).map((match: Match) => (
                   <button
                     key={match.id}
                     onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
@@ -206,7 +210,13 @@ export default function HomePage() {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-gray-300">{parseLeagueInfo(match.name)}</span>
-                        <span className="text-xs text-gray-500">{match.videogame.name}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-500">{match.videogame.name}</span>
+                          <span className="text-xs text-gray-600">•</span>
+                          <span className="text-xs text-gray-500">
+                            {formatMatchDateRange(match, { includeYear: true })}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">

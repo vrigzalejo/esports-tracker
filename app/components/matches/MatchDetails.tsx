@@ -3,6 +3,7 @@ import TeamRoster from './TeamRoster';
 import TeamMatches from './TeamMatches';
 import TournamentStandings from '../tournaments/TournamentStandings';
 import TournamentMatches from '../tournaments/TournamentMatches';
+import { formatMatchDateRange, parseLeagueInfo } from '@/lib/textUtils';
 
 interface MatchDetailsProps {
     match: Match;
@@ -135,29 +136,21 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Match Information */}
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-blue-400 font-medium">{match.league?.name}</span>
+                            <span className="text-blue-400 font-medium">{parseLeagueInfo(match.league?.name || '')}</span>
                             {match.league?.name && match.serie?.full_name && (
                                 <span className="text-gray-500">•</span>
                             )}
-                            <span className="text-green-400 font-medium">{match.serie?.full_name}</span>
+                            <span className="text-green-400 font-medium">{parseLeagueInfo(match.serie?.full_name || '')}</span>
                         </div>
                         <div className="text-sm text-yellow-400 font-medium">
-                            {match.tournament?.name}
+                            {parseLeagueInfo(match.tournament?.name || '')}
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-400">
-                                {match.name} • {match.videogame?.name}
+                                {parseLeagueInfo(match.name)} • {match.videogame?.name}
                             </div>
                             <div className="text-xs text-gray-300">
-                                {new Date(match.begin_at).toLocaleDateString('en-US', {
-                                    weekday: 'short',
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    timeZoneName: 'short'
-                                })}
+                                {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
                             </div>
                         </div>
                     </div>
