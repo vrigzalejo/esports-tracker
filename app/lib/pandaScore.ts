@@ -23,6 +23,13 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
     // Add API token
     url.searchParams.append('token', process.env.PANDASCORE_TOKEN || '');
 
+    // Log the request details
+    console.log('🚀 PandaScore API Request:', {
+        endpoint,
+        params,
+        fullUrl: url.toString()
+    });
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
@@ -38,6 +45,14 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
 
         clearTimeout(timeoutId);
 
+        // Log response status
+        console.log('📡 PandaScore API Response:', {
+            endpoint,
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+
         if (!response.ok) {
             let errorBody = null;
             try {
@@ -46,6 +61,14 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
                 // Ignore JSON parse error
             }
 
+            console.error('❌ PandaScore API Error:', {
+                endpoint,
+                status: response.status,
+                statusText: response.statusText,
+                url: url.toString(),
+                errorBody
+            });
+
             throw new Error(
                 `API request failed: ${response.status} ${response.statusText}\n` +
                 `URL: ${url.toString()}\n` +
@@ -53,9 +76,20 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
             );
         }
 
-        return response.json();
+        const data = await response.json();
+        console.log('✅ PandaScore API Success:', {
+            endpoint,
+            dataLength: Array.isArray(data) ? data.length : 'N/A (not array)',
+            hasData: !!data
+        });
+
+        return data;
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('💥 PandaScore API Exception:', {
+            endpoint,
+            error: error instanceof Error ? error.message : error,
+            params
+        });
         throw error;
     }
 }
@@ -109,17 +143,33 @@ export const getMatches = async (filters?: MatchFilters) => {
 export const getTournaments = async (filters?: TournamentFilters) => {
     const params: Record<string, string> = {};
 
-    if (filters?.game && filters.game !== 'all') {
-        params['filter[videogame]'] = filters.game;
+    // Don't use game filtering in API call - will be handled client-side
+    // The tournaments endpoint doesn't support videogame filtering
+
+    // Always fetch more data since we'll be filtering client-side
+    // Use a larger per_page to get more tournaments for filtering
+    const perPage = filters?.per_page || 50;
+    params['per_page'] = Math.max(perPage * 3, 100).toString(); // Get 3x more data for filtering
+
+    // Don't use page parameter when game filtering - we need all data for client-side filtering
+    if (!filters?.game || filters.game === 'all') {
+        if (filters?.page) {
+            params['page'] = filters.page.toString();
+        }
     }
 
-    if (filters?.page) {
-        params['page'] = filters.page.toString();
+    // Add date filtering for tournaments
+    if (filters?.since || filters?.until) {
+        const today = formatDateForApi(new Date());
+        const farFuture = '2030-12-31';
+        const start = filters?.since ? formatDateForApi(filters.since) : today;
+        const end = filters?.until ? formatDateForApi(filters.until) : farFuture;
+        params['range[begin_at]'] = `${start},${end}`;
+        params['sort'] = 'begin_at'; // Sort by begin date ascending (earliest first)
     }
 
-    if (filters?.per_page) {
-        params['per_page'] = filters.per_page.toString();
-    }
+    // Include teams data in the response
+    params['include'] = 'teams';
 
     return request('/tournaments', params);
 }

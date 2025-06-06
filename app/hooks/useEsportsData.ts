@@ -72,6 +72,7 @@ export function useMatches(filters?: {
 export function useTournaments(filters?: {
   game?: string
   page?: number,
+  per_page?: number,
   // Date filtering options
   range?: {
     since?: string | Date,
@@ -95,7 +96,15 @@ export function useTournaments(filters?: {
 
         const apiFilters = prepareApiFilters(filters)
         const result = await getTournaments(apiFilters)
-        setData(result)
+        
+        // Handle different response formats
+        // When game filtering is applied, API returns { data: [], pagination: {} }
+        // Otherwise, it returns the array directly
+        if (result && typeof result === 'object' && 'data' in result) {
+          setData(result.data)
+        } else {
+          setData(result)
+        }
       } catch (err) {
         console.error('Error fetching tournaments:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -108,6 +117,7 @@ export function useTournaments(filters?: {
   }, [
     filters?.game, 
     filters?.page,
+    filters?.per_page,
     filters?.range?.since,
     filters?.range?.until,
     filters?.since,
