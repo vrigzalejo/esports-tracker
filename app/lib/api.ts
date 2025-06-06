@@ -69,6 +69,8 @@ export interface TournamentFilters {
     game?: string;
     page?: number;
     per_page?: number;
+    since?: string;
+    until?: string;
 }
 
 export const getMatches = async (filters?: MatchFilters) => {
@@ -118,6 +120,14 @@ export const getTournaments = async (filters?: TournamentFilters) => {
 
     if (filters?.per_page) {
         params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.since) {
+        params['since'] = filters.since;
+    }
+
+    if (filters?.until) {
+        params['until'] = filters.until;
     }
 
     return request('/api/tournaments', params);

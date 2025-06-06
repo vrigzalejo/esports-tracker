@@ -18,6 +18,8 @@ export interface TournamentFilters {
     game?: string;
     page?: number;
     per_page?: number;
+    since?: string;
+    until?: string;
 }
 
 export interface Match {

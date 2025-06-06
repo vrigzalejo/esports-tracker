@@ -67,13 +67,32 @@ export interface Tournament {
     begin_at: string
     end_at: string
     prizepool: string
+    tier?: string
     league: {
       name: string
       image_url: string
+      region?: string
+    }
+    serie?: {
+      id: number
+      name: string
+      full_name?: string
+      slug: string
+      year?: number
     }
     videogame: {
       name: string
+      slug: string
     }
+    region?: string
+    country?: string
+    teams?: Array<{
+      id: number
+      name: string
+      acronym?: string
+      image_url?: string
+      location?: string
+    }>
 }
   
 export interface Team {
