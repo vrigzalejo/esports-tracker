@@ -103,11 +103,6 @@ export const parseLeagueInformation = (tournament: Tournament): string => {
 
 // Get tournament type information
 export const parseTournamentType = (tournament: Tournament): string | null => {
-    // First check if type is directly available
-    if (tournament.type) {
-        return tournament.type
-    }
-
     // Tournament type can be inferred from the tournament name or serie information
     const tournamentName = tournament.name.toLowerCase()
     const serieName = tournament.serie?.name?.toLowerCase() || ''
