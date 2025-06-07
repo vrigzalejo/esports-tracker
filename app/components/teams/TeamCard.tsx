@@ -62,6 +62,11 @@ export default function TeamCard({ team }: TeamCardProps) {
             month: 'short', 
             day: 'numeric',
             year: 'numeric'
+        }) + ' ' + date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZoneName: 'short'
         });
     }
 
