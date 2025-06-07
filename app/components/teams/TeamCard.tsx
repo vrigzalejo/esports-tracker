@@ -24,9 +24,45 @@ export default function TeamCard({ team }: TeamCardProps) {
     const getTournamentInfo = () => {
         if (!team.tournaments || team.tournaments.length === 0) return null;
         
-        // Get the most recent tournament
-        const tournament = team.tournaments[0];
-        return tournament;
+        const now = new Date();
+        
+        // First, try to find a currently running tournament
+        const runningTournament = team.tournaments.find(tournament => {
+            const startDate = new Date(tournament.begin_at);
+            const endDate = new Date(tournament.end_at);
+            return now >= startDate && now <= endDate;
+        });
+        
+        if (runningTournament) {
+            return runningTournament;
+        }
+        
+        // If no running tournament, find the next upcoming tournament
+        const upcomingTournaments = team.tournaments
+            .filter(tournament => {
+                const startDate = new Date(tournament.begin_at);
+                return now < startDate;
+            })
+            .sort((a, b) => new Date(a.begin_at).getTime() - new Date(b.begin_at).getTime());
+        
+        if (upcomingTournaments.length > 0) {
+            return upcomingTournaments[0];
+        }
+        
+        // If no upcoming tournaments, get the most recent finished tournament
+        const finishedTournaments = team.tournaments
+            .filter(tournament => {
+                const endDate = new Date(tournament.end_at);
+                return now > endDate;
+            })
+            .sort((a, b) => new Date(b.end_at).getTime() - new Date(a.end_at).getTime());
+        
+        if (finishedTournaments.length > 0) {
+            return finishedTournaments[0];
+        }
+        
+        // Fallback to the first tournament
+        return team.tournaments[0];
     }
 
     const formatPlayerName = (player: NonNullable<Team['players']>[0]) => {
@@ -76,11 +112,11 @@ export default function TeamCard({ team }: TeamCardProps) {
         const endDate = new Date(tournament.end_at);
         
         if (now < startDate) {
-            return { status: 'upcoming', color: 'text-blue-400' };
+            return { status: 'upcoming', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-blue-500/30' };
         } else if (now >= startDate && now <= endDate) {
-            return { status: 'live', color: 'text-green-400' };
+            return { status: 'ongoing', color: 'text-green-400', bgColor: 'bg-green-500/20', borderColor: 'border-green-500/30' };
         } else {
-            return { status: 'finished', color: 'text-gray-400' };
+            return { status: 'finished', color: 'text-gray-400', bgColor: 'bg-gray-500/20', borderColor: 'border-gray-500/30' };
         }
     }
 
@@ -171,7 +207,8 @@ export default function TeamCard({ team }: TeamCardProps) {
                                         {(() => {
                                             const statusInfo = getTournamentStatus(tournamentInfo);
                                             return (
-                                                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusInfo.color} bg-gray-800/50`}>
+                                                <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1`}>
+                                                    <Clock className="w-3 h-3" />
                                                     {statusInfo.status.toUpperCase()}
                                                 </span>
                                             );

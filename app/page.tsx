@@ -150,7 +150,7 @@ export default function HomePage() {
               <ExternalLink className="w-5 h-5 text-white/0 group-hover:text-white/100 transition-all duration-200" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">Live Matches</h3>
-            <p className="text-blue-100">Watch ongoing matches and get real-time updates</p>
+                                            <p className="text-blue-100">Watch live matches and get real-time updates</p>
           </button>
 
           <button
@@ -182,7 +182,7 @@ export default function HomePage() {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
           <h2 className="text-xl font-semibold mb-6 flex items-center">
             <Play className="w-5 h-5 text-blue-400 mr-2" />
-            Latest Matches
+            {searchTerm ? `Search Results for "${searchTerm}"` : 'Latest Matches'}
           </h2>
           <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
             <div className="space-y-4 pr-2">
@@ -204,12 +204,68 @@ export default function HomePage() {
                   </div>
                 ))
               ) : (
-                matches.slice(0, 50).map((match: Match) => (
-                  <button
-                    key={match.id}
-                    onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
-                    className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
-                  >
+                // Filter and process matches
+                (() => {
+                  const filteredMatches = matches
+                    .filter((match: Match) => {
+                      if (!searchTerm || searchTerm.trim() === '') return true;
+                      
+                      const searchTermLower = searchTerm.toLowerCase().trim();
+                      
+                      // Search in match name
+                      const matchName = match.name?.toLowerCase() || '';
+                      
+                      // Search in league name
+                      const leagueName = match.league?.name?.toLowerCase() || '';
+                      
+                      // Search in serie name
+                      const serieName = match.serie?.name?.toLowerCase() || '';
+                      
+                      // Search in tournament name
+                      const tournamentName = match.tournament?.name?.toLowerCase() || '';
+                      
+                      // Search in videogame name
+                      const videogameName = match.videogame?.name?.toLowerCase() || '';
+                      
+                      // Search in opponents
+                      const opponentNames = match.opponents?.map(opp => opp.opponent.name.toLowerCase()).join(' ') || '';
+                      
+                      // Check if search term matches any of these fields
+                      return matchName.includes(searchTermLower) ||
+                             leagueName.includes(searchTermLower) ||
+                             serieName.includes(searchTermLower) ||
+                             tournamentName.includes(searchTermLower) ||
+                             videogameName.includes(searchTermLower) ||
+                             opponentNames.includes(searchTermLower);
+                    })
+                    .sort((a: Match, b: Match) => {
+                      // First priority: live matches
+                      if (a.status === 'running' && b.status !== 'running') return -1;
+                      if (b.status === 'running' && a.status !== 'running') return 1;
+                      
+                      // Second priority: sort by date (most recent first)
+                      const dateA = new Date(a.begin_at).getTime();
+                      const dateB = new Date(b.begin_at).getTime();
+                      return dateB - dateA;
+                    })
+                    .slice(0, 50);
+
+                  // Show no results message if search term exists but no matches found
+                  if (searchTerm && searchTerm.trim() !== '' && filteredMatches.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 mb-2">No matches found for &quot;{searchTerm}&quot;</div>
+                        <div className="text-gray-500 text-sm">Try searching for a different term or check your spelling</div>
+                      </div>
+                    );
+                  }
+
+                  return filteredMatches.map((match: Match) => (
+                    <button
+                      key={match.id}
+                      onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
+                      className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
+                    >
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <div className={`w-2 h-2 rounded-full ${
@@ -235,7 +291,7 @@ export default function HomePage() {
                       {match.status === 'running' && (
                         <div className="flex items-center space-x-1 bg-red-500/20 px-2 py-1 rounded-full border border-red-500/30">
                           <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                          <span className="text-xs font-medium text-red-400">LIVE</span>
+                                                                  <span className="text-xs font-medium text-red-400">LIVE</span>
                         </div>
                       )}
                       {match.status === 'finished' && (
@@ -252,7 +308,8 @@ export default function HomePage() {
                       )}
                     </div>
                   </button>
-                ))
+                  ));
+                })()
               )}
             </div>
           </div>
