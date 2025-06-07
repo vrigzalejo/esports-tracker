@@ -211,3 +211,7 @@ export const getTournamentStandings = async (tournamentId: string | number) => {
 export const getTournamentMatches = async (tournamentId: string | number) => {
     return request(`/tournaments/${tournamentId}/matches`);
 }
+
+export const getMatchDetails = async (matchId: string | number) => {
+    return request(`/matches/${matchId}`);
+}

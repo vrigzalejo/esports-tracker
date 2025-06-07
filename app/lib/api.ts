@@ -2,7 +2,18 @@
  * Frontend API client for making requests to the Next.js API routes
  */
 
+import { cacheManager } from './cache'
+
 const request = async (endpoint: string, params?: Record<string, string>) => {
+    // Check cache first
+    const cachedData = cacheManager.get(endpoint, params)
+    if (cachedData) {
+        console.log(`🎯 Cache HIT for ${endpoint}`, params)
+        return cachedData
+    }
+    
+    console.log(`🌐 Cache MISS for ${endpoint}, fetching...`, params)
+
     const url = new URL(`${window.location.origin}${endpoint}`);
 
     if (params) {
@@ -42,7 +53,13 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
             );
         }
 
-        return response.json();
+        const data = await response.json();
+        
+        // Cache the response
+        cacheManager.set(endpoint, data, params)
+        console.log(`💾 Cached response for ${endpoint}`, params)
+        
+        return data;
     } catch (error) {
         console.error('API Error:', error);
         throw error;
@@ -168,4 +185,8 @@ export const getTeams = async (filters?: TeamFilters) => {
 
 export const getGames = async () => {
     return request('/api/games');
+}
+
+export const getMatchDetails = async (matchId: string | number) => {
+    return request(`/api/matches/${matchId}`);
 }

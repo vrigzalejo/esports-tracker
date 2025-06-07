@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getMatchDetails } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
 
 export function useMatches(filters?: {
@@ -195,6 +195,40 @@ export function useTeams(filters?: {
 
 // useGames hook has been moved to GamesContext for caching
 // Use useGamesContext from '@/contexts/GamesContext' instead
+
+export function useMatchDetails(matchId: string | number | null) {
+  const [data, setData] = useState<Match | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!matchId) {
+      setData(null)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const result = await getMatchDetails(matchId)
+        setData(result)
+      } catch (err) {
+        console.error('Error fetching match details:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [matchId])
+
+  return { data, loading, error }
+}
 
 interface ApiFilters {
   game?: string

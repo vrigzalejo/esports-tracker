@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { getGames } from '@/lib/api'
+import { cacheManager } from '@/lib/cache'
 
 interface Game {
   id: string | number
@@ -14,6 +15,8 @@ interface GamesContextType {
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
+  clearCache: () => void
+  getCacheInfo: () => { size: number; entries: Array<{ key: string; expiresIn: number }> }
 }
 
 const GamesContext = createContext<GamesContextType | undefined>(undefined)
@@ -50,8 +53,16 @@ export function GamesProvider({ children }: GamesProviderProps) {
     await fetchGames()
   }
 
+  const clearCache = () => {
+    cacheManager.clear()
+  }
+
+  const getCacheInfo = () => {
+    return cacheManager.getCacheInfo()
+  }
+
   return (
-    <GamesContext.Provider value={{ games, loading, error, refetch }}>
+    <GamesContext.Provider value={{ games, loading, error, refetch, clearCache, getCacheInfo }}>
       {children}
     </GamesContext.Provider>
   )

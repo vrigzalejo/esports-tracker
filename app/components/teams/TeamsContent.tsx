@@ -277,32 +277,42 @@ export default function TeamsContent() {
             <Navigation />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Teams</h1>
-                    <div className="flex flex-wrap gap-4">
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-5 h-5 text-gray-400" />
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        Teams
+                    </h1>
+
+                    <div className="flex items-center space-x-4 flex-wrap gap-2">
+                        {/* Game Filter */}
+                        <div className="flex items-center space-x-2">
+                            <Filter className="w-4 h-4 text-gray-400" />
                             <select
                                 value={selectedGame}
-                                onChange={(e) => handleGameChange(e.target.value)}
-                                className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Filter by game"
+                                onChange={(e) => {
+                                    handleGameChange(e.target.value)
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                disabled={gamesLoading}
+                                aria-label="Select game"
                             >
                                 {!gamesLoading && games.map((game: Game) => (
-                                    <option key={game.slug} value={game.slug}>
+                                    <option key={game.id || game.slug} value={game.slug || game.id}>
                                         {game.name}
                                     </option>
                                 ))}
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-gray-400" />
+                        {/* Date Filter */}
+                        <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
                             <select
                                 value={dateFilter}
-                                onChange={(e) => handleDateFilterChange(e.target.value)}
-                                className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Filter by date"
+                                onChange={(e) => {
+                                    handleDateFilterChange(e.target.value)
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                aria-label="Select date filter"
                             >
                                 <option value="all">Most Recent</option>
                                 <option value="today">Today</option>
@@ -311,52 +321,65 @@ export default function TeamsContent() {
                                 <option value="custom">Custom Range</option>
                             </select>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <select
-                                value={itemsPerPage}
-                                onChange={(e) => {
-                                    setItemsPerPage(parseInt(e.target.value))
-                                    resetPage()
-                                }}
-                                className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Items per page"
-                            >
-                                <option value={10}>10 per page</option>
-                                <option value={20}>20 per page</option>
-                                <option value={50}>50 per page</option>
-                            </select>
-                        </div>
+
+                        {/* Items per page */}
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                setItemsPerPage(Number(e.target.value))
+                                resetPage()
+                            }}
+                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                            aria-label="Select items per page"
+                        >
+                            <option value="10">10 per page</option>
+                            <option value="20">20 per page</option>
+                            <option value="50">50 per page</option>
+                        </select>
                     </div>
                 </div>
 
                 {/* Custom Date Range Inputs */}
                 {dateFilter === 'custom' && (
                     <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
-                        <div className="flex flex-col sm:flex-row gap-4 items-center">
-                            <div className="flex items-center gap-2">
-                                <label htmlFor="start-date" className="text-sm text-gray-300 whitespace-nowrap">
-                                    Start Date:
-                                </label>
+                        <div className="flex items-center space-x-4 flex-wrap gap-2">
+                            <div className="flex items-center space-x-2">
+                                <label htmlFor="date-from" className="text-sm text-gray-300">From:</label>
                                 <input
-                                    id="start-date"
+                                    id="date-from"
                                     type="date"
                                     value={customDateRange.start}
-                                    onChange={(e) => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
-                                    className="bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={(e) => {
+                                        setCustomDateRange(prev => ({ ...prev, start: e.target.value }))
+                                        resetPage()
+                                    }}
+                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                    aria-label="From date"
                                 />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <label htmlFor="end-date" className="text-sm text-gray-300 whitespace-nowrap">
-                                    End Date:
-                                </label>
+                            <div className="flex items-center space-x-2">
+                                <label htmlFor="date-to" className="text-sm text-gray-300">To:</label>
                                 <input
-                                    id="end-date"
+                                    id="date-to"
                                     type="date"
                                     value={customDateRange.end}
-                                    onChange={(e) => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
-                                    className="bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={(e) => {
+                                        setCustomDateRange(prev => ({ ...prev, end: e.target.value }))
+                                        resetPage()
+                                    }}
+                                    className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                    aria-label="To date"
                                 />
                             </div>
+                            <button
+                                onClick={() => {
+                                    setCustomDateRange({ start: '', end: '' })
+                                    resetPage()
+                                }}
+                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200"
+                            >
+                                Clear
+                            </button>
                         </div>
                     </div>
                 )}
