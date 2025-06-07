@@ -277,7 +277,7 @@ export default function TeamsContent() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold mb-4 md:mb-0">Teams</h1>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Teams</h1>
                     <div className="flex flex-wrap gap-4">
                         <div className="flex items-center gap-2">
                             <Filter className="w-5 h-5 text-gray-400" />
@@ -287,7 +287,6 @@ export default function TeamsContent() {
                                 className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 aria-label="Filter by game"
                             >
-                                <option value="all">All Games</option>
                                 {!gamesLoading && games.map((game: Game) => (
                                     <option key={game.slug} value={game.slug}>
                                         {game.name}
@@ -364,17 +363,99 @@ export default function TeamsContent() {
                 {teamsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...Array(itemsPerPage)].map((_, i) => (
-                            <div key={i} className="bg-gray-800 rounded-lg p-6 animate-pulse">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-16 h-16 bg-gray-700 rounded-lg" />
-                                    <div className="flex-1">
-                                        <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-700 rounded w-1/2 mb-2" />
-                                        <div className="h-4 bg-gray-700 rounded w-1/3" />
+                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
+                                {/* Subtle background glow effect */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0" />
+                                
+                                <div className="relative z-10">
+                                    {/* Team Header */}
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
+                                            <div className="h-4 bg-gray-700 rounded w-1/2" />
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="h-6 w-12 bg-gray-700 rounded mb-1" />
-                                        <div className="h-4 w-16 bg-gray-700 rounded" />
+
+                                    <div className="space-y-4">
+                                        {/* Tournament Information */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center text-sm">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <div className="h-4 bg-gray-700 rounded w-full mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-3/4" />
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Tournament Details */}
+                                            <div className="grid grid-cols-1 gap-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3" />
+                                                    <div className="h-4 w-12 bg-gray-700 rounded-full px-2 py-1" />
+                                                </div>
+                                                
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-8" />
+                                                        <div className="h-3 bg-gray-700 rounded w-4" />
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-12" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Players */}
+                                        <div className="pt-3 border-t border-gray-700">
+                                            <div className="flex items-center justify-between text-sm mb-3">
+                                                <div className="flex items-center">
+                                                    <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
+                                                    <div className="h-4 bg-gray-700 rounded w-16" />
+                                                </div>
+                                                <div className="h-3 bg-gray-700 rounded w-12" />
+                                            </div>
+                                            <div className="space-y-3 max-h-64">
+                                                {[...Array(3)].map((_, j) => (
+                                                    <div key={j} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50">
+                                                        {/* Player Image */}
+                                                        <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0" />
+                                                        
+                                                        {/* Player Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <div className="h-4 bg-gray-700 rounded w-24" />
+                                                            </div>
+                                                            
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-4 h-3 bg-gray-700 rounded-sm" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-6" />
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-12" />
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-8" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
