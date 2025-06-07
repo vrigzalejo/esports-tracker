@@ -132,7 +132,19 @@ export function useTournaments(filters?: {
 
 export function useTeams(filters?: {
   game?: string
-  page?: number
+  page?: number,
+  per_page?: number,
+  region?: string,
+  // Date filtering options
+  range?: {
+    since?: string | Date,
+    until?: string | Date
+  },
+  since?: string | Date,
+  until?: string | Date,
+  past?: boolean,
+  running?: boolean,
+  upcoming?: boolean
 }) {
   const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
@@ -144,8 +156,17 @@ export function useTeams(filters?: {
         setLoading(true)
         setError(null)
 
-        const result = await getTeams(filters)
-        setData(result)
+        const apiFilters = prepareApiFilters(filters)
+        const result = await getTeams(apiFilters)
+        
+        // Handle different response formats
+        // When game filtering is applied, API returns { data: [], pagination: {} }
+        // Otherwise, it returns the array directly
+        if (result && typeof result === 'object' && 'data' in result) {
+          setData(result.data)
+        } else {
+          setData(result)
+        }
       } catch (err) {
         console.error('Error fetching teams:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -155,7 +176,19 @@ export function useTeams(filters?: {
     }
 
     fetchData()
-  }, [filters?.game, filters?.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    filters?.game, 
+    filters?.page,
+    filters?.per_page,
+    filters?.region,
+    filters?.range?.since,
+    filters?.range?.until,
+    filters?.since,
+    filters?.until,
+    filters?.past,
+    filters?.running,
+    filters?.upcoming
+  ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }
@@ -204,6 +237,7 @@ interface FilterOptions {
   page?: number
   per_page?: number
   sort?: string
+  region?: string
   range?: {
     since?: string | Date
     until?: string | Date
@@ -232,7 +266,8 @@ function prepareApiFilters(filters?: FilterOptions): ApiFilters {
     status: filters.status,
     page: filters.page ? parseInt(filters.page.toString()) : undefined,
     per_page: filters.per_page ? parseInt(filters.per_page.toString()) : undefined,
-    sort: filters.sort || 'begin_at'
+    sort: filters.sort || 'begin_at',
+    region: filters.region !== 'all' ? filters.region : undefined
   }
 
   // Handle date filtering

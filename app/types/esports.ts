@@ -68,6 +68,7 @@ export interface Tournament {
     end_at: string
     prizepool: string
     tier?: string
+    status?: string
     league: {
       name: string
       image_url: string
@@ -93,14 +94,39 @@ export interface Tournament {
       image_url?: string
       location?: string
     }>
+    expected_roster?: Array<{
+      team: {
+        id: number
+        name: string
+        acronym?: string
+        image_url?: string
+        location?: string
+        slug?: string
+        modified_at?: string
+      }
+      players: Array<{
+        id: number
+        name: string
+        first_name?: string
+        last_name?: string
+        nationality?: string
+        image_url?: string
+        role?: string
+        active?: boolean
+        slug?: string
+        modified_at?: string
+        age?: number
+        birthday?: string
+      }>
+    }>
 }
   
 export interface Team {
     id: number
     name: string
-    image_url: string
-    acronym: string
-    location: string
+    image_url?: string
+    acronym?: string
+    location?: string
     matches_played?: number
     matches_won?: number
     matches_lost?: number
@@ -108,6 +134,41 @@ export interface Team {
     current_streak?: number
     win_rate?: number
     rating?: number
+    players?: Array<{
+        id: number
+        name: string
+        first_name?: string
+        last_name?: string
+        nationality?: string
+        image_url?: string
+        role?: string
+        active?: boolean
+        slug?: string
+        modified_at?: string
+        age?: number
+        birthday?: string
+    }>
+    tournaments?: Array<{
+        id: number
+        name: string
+        begin_at: string
+        end_at: string
+        videogame?: {
+            name: string
+            slug: string
+        }
+        status?: string
+        tier?: string
+        region?: string
+        league?: {
+            name: string
+            region?: string
+        }
+        serie?: {
+            name: string
+            full_name?: string
+        }
+    }>
 }
   
 export interface StatCardProps {

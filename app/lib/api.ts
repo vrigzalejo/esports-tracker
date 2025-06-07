@@ -63,6 +63,9 @@ export interface TeamFilters {
     game?: string;
     page?: number;
     per_page?: number;
+    since?: string;
+    until?: string;
+    region?: string;
 }
 
 export interface TournamentFilters {
@@ -146,6 +149,18 @@ export const getTeams = async (filters?: TeamFilters) => {
 
     if (filters?.per_page) {
         params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.since) {
+        params['since'] = filters.since;
+    }
+
+    if (filters?.until) {
+        params['until'] = filters.until;
+    }
+
+    if (filters?.region && filters.region !== 'all') {
+        params['region'] = filters.region;
     }
 
     return request('/api/teams', params);
