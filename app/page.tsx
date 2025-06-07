@@ -1,46 +1,58 @@
 'use client'
 
 import { useState } from 'react'
-import { Play, Trophy, Users, TrendingUp, ExternalLink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Play, Trophy, Users, TrendingUp, ExternalLink } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
-import StatCard from '@/components/ui/StatCard'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
-import { parseLeagueInfo, formatMatchDateRange } from '@/lib/textUtils'
-import type { Match, Tournament } from '@/types/esports'
+import type { Match } from '@/types/esports'
+
+// StatCard component for displaying statistics
+function StatCard({ icon: Icon, title, value, subtitle, trend }: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  value: string
+  subtitle: string
+  trend?: string
+}) {
+  return (
+    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-all duration-300">
+      <div className="flex items-center justify-between mb-4">
+        <Icon className="w-8 h-8 text-purple-400" />
+        {trend && (
+          <span className="text-sm text-green-400 font-medium">
+            {trend}
+          </span>
+        )}
+      </div>
+      <h3 className="text-2xl font-bold text-white mb-1">{value}</h3>
+      <p className="text-gray-400 text-sm">{title}</p>
+      <p className="text-gray-500 text-xs">{subtitle}</p>
+    </div>
+  )
+}
 
 export default function HomePage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
-  
-  // Fetch data with appropriate filters
-  const { data: matches, loading: matchesLoading } = useMatches({
-    per_page: 50,  // Get enough matches to calculate statistics
-    sort: 'begin_at'
-  })
 
-  const { data: tournaments, loading: tournamentsLoading } = useTournaments()
-
-  const { data: teams, loading: teamsLoading } = useTeams()
+  // Fetch data for statistics
+  const { data: matches, loading: matchesLoading } = useMatches({ per_page: 100 })
+  const { data: tournaments, loading: tournamentsLoading } = useTournaments({ per_page: 50 })
+  const { data: teams, loading: teamsLoading } = useTeams({ per_page: 50 })
 
   // Calculate statistics
   const stats = {
-    liveMatches: matches.filter((match: Match) => match.status === 'running').length,
-    activeTournaments: tournaments.filter((tournament: Tournament) => {
-      const now = new Date()
-      const startDate = new Date(tournament.begin_at)
-      const endDate = new Date(tournament.end_at)
-      return now >= startDate && now <= endDate
-    }).length,
-    totalTeams: teams.length,
-    totalPrizePool: tournaments.reduce((sum: number, tournament: Tournament) => {
-      const prizePool = tournament.prizepool?.replace(/[^0-9.]/g, '')
-      return sum + (parseFloat(prizePool) || 0)
-    }, 0)
+    liveMatches: matches?.filter(match => match.status === 'running').length || 0,
+    activeTournaments: tournaments?.filter(tournament => tournament.status !== 'finished').length || 0,
+    totalTeams: teams?.length || 0,
+    totalPrizePool: tournaments?.reduce((total, tournament) => {
+      const prizepool = tournament.prizepool ? parseFloat(tournament.prizepool.replace(/[^0-9.]/g, '')) : 0
+      return total + prizepool
+    }, 0) || 0
   }
 
-  // Handle quick action clicks
   const handleQuickAction = (action: string) => {
     switch (action) {
       case 'matches':
@@ -248,4 +260,60 @@ export default function HomePage() {
       </main>
     </div>
   )
+}
+
+// Helper function to parse league information from match name
+function parseLeagueInfo(matchName: string): string {
+  // Remove common prefixes and clean up the match name
+  const cleaned = matchName
+    .replace(/^(Match \d+: |Game \d+: |Map \d+: )/i, '')
+    .replace(/\s+vs\s+/i, ' vs ')
+    .trim()
+  
+  return cleaned || matchName
+}
+
+// Helper function to format match date range
+function formatMatchDateRange(match: Match, options?: { includeYear?: boolean }): string {
+  const beginDate = new Date(match.begin_at)
+  const now = new Date()
+  
+  // Check if the match is today
+  const isToday = beginDate.toDateString() === now.toDateString()
+  
+  if (isToday) {
+    return `Today ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+  
+  // Check if the match is tomorrow
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const isTomorrow = beginDate.toDateString() === tomorrow.toDateString()
+  
+  if (isTomorrow) {
+    return `Tomorrow ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+  
+  // Check if the match is within this week
+  const weekFromNow = new Date(now)
+  weekFromNow.setDate(weekFromNow.getDate() + 7)
+  
+  if (beginDate < weekFromNow && beginDate > now) {
+    const dayName = beginDate.toLocaleDateString([], { weekday: 'short' })
+    return `${dayName} ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+  
+  // For dates further out, show the full date
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }
+  
+  if (options?.includeYear || beginDate.getFullYear() !== now.getFullYear()) {
+    dateOptions.year = 'numeric'
+  }
+  
+  return beginDate.toLocaleDateString([], dateOptions)
 }
