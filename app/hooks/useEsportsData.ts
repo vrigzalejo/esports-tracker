@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
+import { getMatches, getTournaments, getTeams } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
 
 export function useMatches(filters?: {
@@ -193,32 +193,8 @@ export function useTeams(filters?: {
   return { data, loading, error }
 }
 
-export function useGames() {
-  const [games, setGames] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const result = await getGames()
-        setGames(result)
-      } catch (err) {
-        console.error('Error fetching games:', err)
-        setError(err instanceof Error ? err.message : 'An error occurred')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchGames()
-  }, [])
-
-  return { games, loading, error }
-}
+// useGames hook has been moved to GamesContext for caching
+// Use useGamesContext from '@/contexts/GamesContext' instead
 
 interface ApiFilters {
   game?: string

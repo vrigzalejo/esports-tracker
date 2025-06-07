@@ -7,8 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import MatchCard from '@/components/matches/MatchCard'
-import { useMatches, useGames } from '@/hooks/useEsportsData'
+import { useMatches } from '@/hooks/useEsportsData'
 import type { Match } from '@/types/esports'
+import { useGamesContext } from '@/contexts/GamesContext'
 
 interface Game {
     id: string | number
@@ -80,7 +81,7 @@ export default function MatchesContent() {
     }
 
     // Fetch games data
-    const { games, loading: gamesLoading } = useGames()
+    const { games, loading: gamesLoading } = useGamesContext()
 
     // Prepare date filters for the API
     const getDateFilters = () => {
