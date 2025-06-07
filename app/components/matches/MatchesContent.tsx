@@ -154,17 +154,32 @@ export default function MatchesContent() {
         ...getDateFilters()
     })
 
-    // Only filter by search term since sorting and pagination are handled by the hook
+    // Filter by search term and sort to prioritize live matches
     const filteredMatches = useMemo(() => {
-        if (!searchTerm) return matches
+        let result = matches;
 
-        return matches.filter((match: Match) => {
-            const matchesSearch = match.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                match.opponents?.some((opp) =>
-                    opp.opponent?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-            return matchesSearch
-        })
+        // Filter by search term if provided
+        if (searchTerm) {
+            result = matches.filter((match: Match) => {
+                const matchesSearch = match.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    match.opponents?.some((opp) =>
+                        opp.opponent?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                return matchesSearch
+            })
+        }
+
+        // Sort to prioritize live matches first, then by date ascending
+        return result.sort((a: Match, b: Match) => {
+            // First priority: live matches (status === 'running')
+            if (a.status === 'running' && b.status !== 'running') return -1;
+            if (b.status === 'running' && a.status !== 'running') return 1;
+            
+            // Second priority: sort by date ascending (oldest first for same status)
+            const dateA = new Date(a.begin_at).getTime();
+            const dateB = new Date(b.begin_at).getTime();
+            return dateA - dateB;
+        });
     }, [matches, searchTerm])
 
     const currentMatches = filteredMatches

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Image from 'next/image'
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp } from 'lucide-react'
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
 import { formatDate } from '@/lib/utils'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
@@ -95,6 +95,20 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
         }
     }
 
+    const getTournamentStatus = (tournament: Tournament) => {
+        const now = new Date();
+        const startDate = new Date(tournament.begin_at);
+        const endDate = new Date(tournament.end_at);
+        
+        if (now < startDate) {
+            return { status: 'upcoming', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-blue-500/30' };
+        } else if (now >= startDate && now <= endDate) {
+            return { status: 'ongoing', color: 'text-green-400', bgColor: 'bg-green-500/20', borderColor: 'border-green-500/30' };
+        } else {
+            return { status: 'finished', color: 'text-gray-400', bgColor: 'bg-gray-500/20', borderColor: 'border-gray-500/30' };
+        }
+    }
+
     // Parse tournament data using utilities
     const region = parseRegion(tournament)
     const country = parseCountry(tournament)
@@ -130,6 +144,15 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                             </h3>
                             <p className="text-gray-400 text-sm mb-3">{tournament.videogame.name}</p>
                             <div className="flex items-center gap-2 flex-wrap">
+                                {(() => {
+                                    const statusInfo = getTournamentStatus(tournament);
+                                    return (
+                                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1`}>
+                                            <Clock className="w-3 h-3" />
+                                            {statusInfo.status.toUpperCase()}
+                                        </span>
+                                    );
+                                })()}
                                 {tournamentType && (
                                     <span className="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/25 rounded-lg text-xs font-medium">
                                         {tournamentType}
