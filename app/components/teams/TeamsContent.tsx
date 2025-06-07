@@ -262,7 +262,7 @@ export default function TeamsContent() {
                 }
             case 'all':
             default:
-                return 'All Dates'
+                return 'Most Recent'
         }
     }
 
@@ -303,7 +303,7 @@ export default function TeamsContent() {
                                 className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 aria-label="Filter by date"
                             >
-                                <option value="all">All Dates</option>
+                                <option value="all">Most Recent</option>
                                 <option value="today">Today</option>
                                 <option value="week">This Week</option>
                                 <option value="month">This Month</option>
