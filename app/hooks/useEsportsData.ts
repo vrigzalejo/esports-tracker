@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams, getGames } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getMatchDetails } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
 
 export function useMatches(filters?: {
@@ -132,7 +132,19 @@ export function useTournaments(filters?: {
 
 export function useTeams(filters?: {
   game?: string
-  page?: number
+  page?: number,
+  per_page?: number,
+  region?: string,
+  // Date filtering options
+  range?: {
+    since?: string | Date,
+    until?: string | Date
+  },
+  since?: string | Date,
+  until?: string | Date,
+  past?: boolean,
+  running?: boolean,
+  upcoming?: boolean
 }) {
   const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
@@ -144,8 +156,17 @@ export function useTeams(filters?: {
         setLoading(true)
         setError(null)
 
-        const result = await getTeams(filters)
-        setData(result)
+        const apiFilters = prepareApiFilters(filters)
+        const result = await getTeams(apiFilters)
+        
+        // Handle different response formats
+        // When game filtering is applied, API returns { data: [], pagination: {} }
+        // Otherwise, it returns the array directly
+        if (result && typeof result === 'object' && 'data' in result) {
+          setData(result.data)
+        } else {
+          setData(result)
+        }
       } catch (err) {
         console.error('Error fetching teams:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -155,36 +176,58 @@ export function useTeams(filters?: {
     }
 
     fetchData()
-  }, [filters?.game, filters?.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    filters?.game, 
+    filters?.page,
+    filters?.per_page,
+    filters?.region,
+    filters?.range?.since,
+    filters?.range?.until,
+    filters?.since,
+    filters?.until,
+    filters?.past,
+    filters?.running,
+    filters?.upcoming
+  ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }
 
-export function useGames() {
-  const [games, setGames] = useState([])
-  const [loading, setLoading] = useState(true)
+// useGames hook has been moved to GamesContext for caching
+// Use useGamesContext from '@/contexts/GamesContext' instead
+
+export function useMatchDetails(matchId: string | number | null) {
+  const [data, setData] = useState<Match | null>(null)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchGames = async () => {
+    if (!matchId) {
+      setData(null)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        const result = await getGames()
-        setGames(result)
+        const result = await getMatchDetails(matchId)
+        setData(result)
       } catch (err) {
-        console.error('Error fetching games:', err)
+        console.error('Error fetching match details:', err)
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchGames()
-  }, [])
+    fetchData()
+  }, [matchId])
 
-  return { games, loading, error }
+  return { data, loading, error }
 }
 
 interface ApiFilters {
@@ -204,6 +247,7 @@ interface FilterOptions {
   page?: number
   per_page?: number
   sort?: string
+  region?: string
   range?: {
     since?: string | Date
     until?: string | Date
@@ -232,7 +276,8 @@ function prepareApiFilters(filters?: FilterOptions): ApiFilters {
     status: filters.status,
     page: filters.page ? parseInt(filters.page.toString()) : undefined,
     per_page: filters.per_page ? parseInt(filters.per_page.toString()) : undefined,
-    sort: filters.sort || 'begin_at'
+    sort: filters.sort || 'begin_at',
+    region: filters.region !== 'all' ? filters.region : undefined
   }
 
   // Handle date filtering

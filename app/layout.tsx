@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import AlphaBanner from "@/components/ui/AlphaBanner";
+import { GamesProvider } from "@/contexts/GamesContext";
+import { DataProvider } from "@/contexts/DataContext";
+import CacheStatus from "@/components/debug/CacheStatus";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,11 +40,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <AlphaBanner />
-        <div className="flex-1">
-          {children}
-        </div>
-        <Footer />
+        <DataProvider>
+          <GamesProvider>
+            <AlphaBanner />
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+            {process.env.NODE_ENV === 'development' && <CacheStatus />}
+          </GamesProvider>
+        </DataProvider>
       </body>
     </html>
   );

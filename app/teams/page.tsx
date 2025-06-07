@@ -1,176 +1,124 @@
-'use client'
+import { Suspense } from 'react'
+import TeamsContent from '@/components/teams/TeamsContent'
 
-import { useState, useMemo } from 'react'
-import { Filter, Users } from 'lucide-react'
-import { useTeams, useMatches } from '@/hooks/useEsportsData'
-import { Team, Match } from '@/types/esports'
-import Header from '@/components/layout/Header'
-import Navigation from '@/components/layout/Navigation'
-import TeamCard from '@/components/teams/TeamCard'
-
-export default function TeamsPage() {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [selectedGame, setSelectedGame] = useState('all')
-    const [selectedRegion, setSelectedRegion] = useState('all')
-
-    const { data: teams, loading: teamsLoading } = useTeams()
-    const { data: matches, loading: matchesLoading } = useMatches({
-        per_page: 100, // Get enough matches to calculate meaningful statistics
-        sort: 'begin_at'
-    })
-
-    // Calculate team performance metrics
-    const teamsWithMetrics = useMemo(() => {
-        if (teamsLoading || matchesLoading) return teams;
-
-        return teams.map((team: Team) => {
-            // Filter matches for this team
-            const teamMatches = matches.filter((match: Match) => 
-                match.opponents?.some(opp => opp.opponent?.id === team.id)
-            );
-
-            if (teamMatches.length === 0) return team;
-
-            let wins = 0;
-            let losses = 0;
-            let draws = 0;
-            let currentStreak = 0;
-            let lastResult = '';
-
-            // Calculate match statistics
-            teamMatches.forEach((match: Match) => {
-                if (match.status !== 'finished' && match.status !== 'completed') return;
-
-                const teamOpponent = match.opponents?.find(opp => opp.opponent?.id === team.id);
-                if (!teamOpponent) return;
-
-                const teamIndex = match.opponents?.indexOf(teamOpponent);
-                if (teamIndex === undefined) return;
-
-                const results = match.results || [];
-                if (results.length < 2) return;
-
-                const teamScore = results[teamIndex]?.score || 0;
-                const otherScore = results[teamIndex === 0 ? 1 : 0]?.score || 0;
-
-                if (teamScore > otherScore) {
-                    wins++;
-                    if (lastResult === 'win') {
-                        currentStreak++;
-                    } else {
-                        currentStreak = 1;
-                    }
-                    lastResult = 'win';
-                } else if (teamScore < otherScore) {
-                    losses++;
-                    currentStreak = 0;
-                    lastResult = 'loss';
-                } else {
-                    draws++;
-                    currentStreak = 0;
-                    lastResult = 'draw';
-                }
-            });
-
-            const matches_played = wins + losses + draws;
-            const win_rate = matches_played > 0 ? (wins / matches_played) * 100 : 0;
-
-            return {
-                ...team,
-                matches_played,
-                matches_won: wins,
-                matches_lost: losses,
-                matches_draw: draws,
-                current_streak: currentStreak,
-                win_rate: Math.round(win_rate)
-            };
-        });
-    }, [teams, matches, teamsLoading, matchesLoading]);
-
-    // Apply filters
-    const filteredTeams = useMemo(() => {
-        return teamsWithMetrics.filter((team: Team) => {
-            const searchLower = searchQuery.toLowerCase().trim();
-            const matchesSearch = team.name.toLowerCase().includes(searchLower) ||
-                team.acronym?.toLowerCase().includes(searchLower) ||
-                team.location?.toLowerCase().includes(searchLower);
-
-            const matchesRegion = selectedRegion === 'all' || 
-                (team.location?.toLowerCase().includes(selectedRegion.toLowerCase()));
-
-            return matchesSearch && matchesRegion;
-        });
-    }, [teamsWithMetrics, searchQuery, selectedRegion]);
-
+// Loading component for the suspense boundary
+function TeamsLoading() {
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchQuery} onSearchChange={setSearchQuery} />
-            <Navigation />
-
-            <main className="container mx-auto px-4 py-8">
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold mb-4 md:mb-0">Teams</h1>
-                    <div className="flex gap-4">
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-5 h-5 text-gray-400" />
-                            <select
-                                value={selectedGame}
-                                onChange={(e) => setSelectedGame(e.target.value)}
-                                className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Filter by game"
-                            >
-                                <option value="all">All Games</option>
-                                <option value="csgo">CS:GO</option>
-                                <option value="dota2">Dota 2</option>
-                                <option value="lol">League of Legends</option>
-                                <option value="valorant">VALORANT</option>
-                            </select>
+            {/* Header skeleton */}
+            <header className="bg-gray-800 border-b border-gray-700">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-8 h-8 bg-blue-500 rounded" />
+                            <div className="h-6 w-32 bg-gray-700 rounded animate-pulse" />
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-gray-400" />
-                            <select
-                                value={selectedRegion}
-                                onChange={(e) => setSelectedRegion(e.target.value)}
-                                className="bg-gray-800 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Filter by region"
-                            >
-                                <option value="all">All Regions</option>
-                                <option value="na">North America</option>
-                                <option value="eu">Europe</option>
-                                <option value="asia">Asia</option>
-                                <option value="sa">South America</option>
-                            </select>
+                        <div className="flex-1 max-w-lg mx-8">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="h-5 w-5 bg-gray-600 rounded" />
+                                </div>
+                                <div className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-700 h-10 animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <div className="p-2 w-9 h-9 bg-gray-700 rounded-lg animate-pulse" />
+                            <div className="p-2 w-9 h-9 bg-gray-700 rounded-lg animate-pulse" />
                         </div>
                     </div>
                 </div>
+            </header>
+            
+            {/* Navigation skeleton */}
+            <nav className="bg-gray-800 border-b border-gray-700">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex space-x-8 h-12 items-center">
+                        <div className="h-5 w-16 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-5 w-20 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-5 w-24 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-5 w-16 bg-gray-700 rounded animate-pulse" />
+                    </div>
+                </div>
+            </nav>
+            
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="h-9 w-20 bg-gray-700 rounded animate-pulse" />
+                    <div className="flex items-center space-x-4">
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                    </div>
+                </div>
 
-                {teamsLoading || matchesLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-gray-800 rounded-lg p-6 animate-pulse">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-16 h-16 bg-gray-700 rounded-lg" />
-                                    <div className="flex-1">
-                                        <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-700 rounded w-1/2 mb-2" />
-                                        <div className="h-4 bg-gray-700 rounded w-1/3" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 animate-pulse">
+                            {/* Subtle background glow effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            
+                            <div className="relative z-10">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="h-5 w-32 bg-gray-700 rounded leading-tight group-hover:text-purple-100 transition-colors duration-200" />
+                                            <div className="h-4 w-20 bg-gray-700 rounded text-sm group-hover:text-gray-300 transition-colors duration-200" />
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="h-6 w-12 bg-gray-700 rounded mb-1" />
-                                        <div className="h-4 w-16 bg-gray-700 rounded" />
+                                    <div className="text-right flex flex-col items-end space-y-1">
+                                        <div className="h-5 w-16 bg-gray-700 rounded font-bold group-hover:text-green-300 transition-colors duration-200" />
+                                        <div className="h-3 w-12 bg-gray-700 rounded text-xs group-hover:text-gray-300 transition-colors duration-200" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {/* Location */}
+                                    <div className="flex items-center text-sm">
+                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
+                                        <div className="h-4 w-40 bg-gray-700 rounded" />
+                                    </div>
+
+                                    {/* Stats */}
+                                    <div className="flex items-start text-sm">
+                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0 mt-0.5" />
+                                        <div className="h-4 w-24 bg-gray-700 rounded leading-tight" />
+                                    </div>
+
+                                    {/* Tournaments */}
+                                    <div className="mt-4 pt-3 border-t border-gray-700">
+                                        <div className="flex items-center justify-between text-sm mb-2">
+                                            <div className="flex items-center">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
+                                                <div className="h-4 w-20 bg-gray-700 rounded font-medium" />
+                                            </div>
+                                            <div className="h-3 w-16 bg-gray-700 rounded" />
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-2 max-h-24 overflow-y-auto transition-all duration-300">
+                                            {[...Array(3)].map((_, j) => (
+                                                <div key={j} className="flex items-center space-x-2 text-xs">
+                                                    <div className="w-4 h-4 bg-gray-600 rounded-sm flex-shrink-0" />
+                                                    <div className="h-3 w-24 bg-gray-700 rounded truncate" />
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredTeams.map((team: Team) => (
-                            <TeamCard key={team.id} team={team} />
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ))}
+                </div>
             </main>
         </div>
+    )
+}
+
+export default function TeamsPage() {
+    return (
+        <Suspense fallback={<TeamsLoading />}>
+            <TeamsContent />
+        </Suspense>
     )
 }

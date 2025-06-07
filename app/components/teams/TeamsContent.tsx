@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
-import TournamentCard from '@/components/tournaments/TournamentCard'
-import { useTournaments } from '@/hooks/useEsportsData'
-import type { Tournament } from '@/types/esports'
+import TeamCard from '@/components/teams/TeamCard'
+import { useTeams } from '@/hooks/useEsportsData'
+import type { Team } from '@/types/esports'
 import { useGamesContext } from '@/contexts/GamesContext'
 
 interface Game {
@@ -17,7 +17,7 @@ interface Game {
     name: string
 }
 
-export default function TournamentsContent() {
+export default function TeamsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -26,6 +26,7 @@ export default function TournamentsContent() {
     const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || 'valorant')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
+
     const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
     const [customDateRange, setCustomDateRange] = useState({
         start: searchParams.get('date_start') || '',
@@ -45,7 +46,7 @@ export default function TournamentsContent() {
         })
 
         // Update the URL without reloading the page
-        router.push(`/tournaments?${params.toString()}`)
+        router.push(`/teams?${params.toString()}`)
     }
 
     // Update URL when filters change
@@ -71,6 +72,8 @@ export default function TournamentsContent() {
         setSelectedGame(game)
         setCurrentPage(1) // Reset to first page
     }
+
+
 
     const handleDateFilterChange = (filter: string) => {
         setDateFilter(filter)
@@ -153,56 +156,40 @@ export default function TournamentsContent() {
     }
 
     // Pass all filters to the hook, including date filters
-    const { data: tournaments, loading: tournamentsLoading } = useTournaments({
+    const { data: teams, loading: teamsLoading } = useTeams({
         game: selectedGame,
         page: currentPage,
         per_page: itemsPerPage,
         ...getDateFilters()
     })
 
-    // Only filter by search term since sorting and pagination are handled by the hook
-    const filteredTournaments = useMemo(() => {
-        if (!searchTerm || searchTerm.trim() === '') return tournaments
+    // Only filter by search term since other filtering is handled by the API
+    const filteredTeams = useMemo(() => {
+        if (!searchTerm || searchTerm.trim() === '') return teams
 
         const searchTermLower = searchTerm.toLowerCase().trim()
         
-        return tournaments.filter((tournament: Tournament) => {
-            // Search in tournament name
-            const tournamentName = tournament.name?.toLowerCase() || ''
+        return teams.filter((team: Team) => {
+            // Search in team name
+            const teamName = team.name?.toLowerCase() || ''
             
-            // Search in league name
-            const leagueName = tournament.league?.name?.toLowerCase() || ''
+            // Search in team acronym
+            const teamAcronym = team.acronym?.toLowerCase() || ''
             
-            // Search in serie name
-            const serieName = tournament.serie?.name?.toLowerCase() || ''
-            const serieFullName = tournament.serie?.full_name?.toLowerCase() || ''
-            
-            // Search in videogame name
-            const videogameName = tournament.videogame?.name?.toLowerCase() || ''
-            
-            // Search in region
-            const region = tournament.region?.toLowerCase() || ''
-            const leagueRegion = tournament.league?.region?.toLowerCase() || ''
-            
-            // Search in country
-            const country = tournament.country?.toLowerCase() || ''
+            // Search in team location
+            const teamLocation = team.location?.toLowerCase() || ''
             
             // Check if search term matches any of these fields
-            return tournamentName.includes(searchTermLower) ||
-                   leagueName.includes(searchTermLower) ||
-                   serieName.includes(searchTermLower) ||
-                   serieFullName.includes(searchTermLower) ||
-                   videogameName.includes(searchTermLower) ||
-                   region.includes(searchTermLower) ||
-                   leagueRegion.includes(searchTermLower) ||
-                   country.includes(searchTermLower)
+            return teamName.includes(searchTermLower) ||
+                   teamAcronym.includes(searchTermLower) ||
+                   teamLocation.includes(searchTermLower)
         })
-    }, [tournaments, searchTerm])
+    }, [teams, searchTerm])
 
-    const currentTournaments = filteredTournaments
+    const currentTeams = filteredTeams
 
     // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = tournaments.length === itemsPerPage
+    const hasMorePages = teams.length === itemsPerPage
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
     // Reset to first page when filters change
@@ -256,12 +243,14 @@ export default function TournamentsContent() {
         return pages
     }
 
-    // Format date for display
     const formatDateFilter = () => {
         switch (dateFilter) {
-            case 'today': return 'Today'
-            case 'week': return 'This Week'
-            case 'month': return 'This Month'
+            case 'today':
+                return 'Today'
+            case 'week':
+                return 'This Week'
+            case 'month':
+                return 'This Month'
             case 'custom':
                 if (customDateRange.start && customDateRange.end) {
                     return `${customDateRange.start} to ${customDateRange.end}`
@@ -269,24 +258,28 @@ export default function TournamentsContent() {
                     return `From ${customDateRange.start}`
                 } else if (customDateRange.end) {
                     return `Until ${customDateRange.end}`
+                } else {
+                    return 'Custom Range'
                 }
-                return 'Custom Range'
-            default: return 'Most Recent'
+            case 'all':
+            default:
+                return 'Most Recent'
         }
     }
 
+    // Calculate display indices for results info
+    const startIndex = (currentPage - 1) * itemsPerPage + 1
+    const endIndex = Math.min(currentPage * itemsPerPage, currentTeams.length)
+
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={(term) => {
-                setSearchTerm(term)
-                setCurrentPage(1) // Reset to first page when searching
-            }} />
+            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             <Navigation />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        Tournaments
+                        Teams
                     </h1>
 
                     <div className="flex items-center space-x-4 flex-wrap gap-2">
@@ -391,93 +384,98 @@ export default function TournamentsContent() {
                     </div>
                 )}
 
-                {/* Results info */}
-                {!tournamentsLoading && (
-                    <div className="mb-4 text-gray-400 text-sm">
-                        {currentTournaments.length > 0 ? (
-                            <>
-                                Page {currentPage} - Showing {currentTournaments.length} tournaments
-                                {searchTerm && ` (filtered by "${searchTerm}")`}
-                                {dateFilter !== 'all' && ` (${formatDateFilter()})`}
-                                {hasMorePages && <span> (more available)</span>}
-                            </>
-                        ) : (
-                            <>
-                                {searchTerm ? (
-                                    `No tournaments found matching "${searchTerm}"`
-                                ) : (
-                                    'No tournaments found'
-                                )}
-                                {dateFilter !== 'all' && ` for ${formatDateFilter()}`}
-                            </>
-                        )}
-                    </div>
-                )}
-
-                {tournamentsLoading ? (
+                {teamsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 animate-pulse">
+                        {[...Array(itemsPerPage)].map((_, i) => (
+                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
                                 {/* Subtle background glow effect */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0" />
                                 
                                 <div className="relative z-10">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300">
-                                                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="h-5 w-32 bg-gray-700 rounded leading-tight group-hover:text-purple-100 transition-colors duration-200" />
-                                                <div className="h-4 w-20 bg-gray-700 rounded text-sm group-hover:text-gray-300 transition-colors duration-200" />
-                                            </div>
+                                    {/* Team Header */}
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
                                         </div>
-                                        <div className="text-right flex flex-col items-end space-y-1">
-                                            <div className="h-5 w-16 bg-gray-700 rounded font-bold group-hover:text-green-300 transition-colors duration-200" />
-                                            <div className="h-3 w-12 bg-gray-700 rounded text-xs group-hover:text-gray-300 transition-colors duration-200" />
-                                            <div className="h-6 w-14 bg-gray-700 rounded-full px-2 py-1 text-xs font-semibold border group-hover:scale-105 transition-transform duration-200" />
+                                        <div className="flex-1">
+                                            <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
+                                            <div className="h-4 bg-gray-700 rounded w-1/2" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        {/* Date */}
-                                        <div className="flex items-center text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                            <div className="h-4 w-40 bg-gray-700 rounded" />
-                                        </div>
-
-                                        {/* Tournament Type/Stage Information */}
-                                        <div className="flex items-start text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0 mt-0.5" />
-                                            <div className="h-4 w-24 bg-gray-700 rounded leading-tight" />
-                                        </div>
-
-                                        {/* Location Information (Country and Region) */}
-                                        <div className="space-y-1">
+                                    <div className="space-y-4">
+                                        {/* Tournament Information */}
+                                        <div className="space-y-3">
                                             <div className="flex items-center text-sm">
                                                 <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                <div className="h-4 w-24 bg-gray-700 rounded" />
+                                                <div className="flex-1">
+                                                    <div className="h-4 bg-gray-700 rounded w-full mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-3/4" />
+                                                </div>
                                             </div>
-                                            <div className="flex items-center text-sm">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                <div className="h-4 w-28 bg-gray-700 rounded" />
+                                            
+                                            {/* Tournament Details */}
+                                            <div className="grid grid-cols-1 gap-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3" />
+                                                    <div className="h-4 w-12 bg-gray-700 rounded-full px-2 py-1" />
+                                                </div>
+                                                
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-8" />
+                                                        <div className="h-3 bg-gray-700 rounded w-4" />
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-12" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* Participating Teams */}
-                                        <div className="mt-4 pt-3 border-t border-gray-700">
-                                            <div className="flex items-center justify-between text-sm mb-2">
+                                        {/* Players */}
+                                        <div className="pt-3 border-t border-gray-700">
+                                            <div className="flex items-center justify-between text-sm mb-3">
                                                 <div className="flex items-center">
                                                     <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                    <div className="h-4 w-20 bg-gray-700 rounded font-medium" />
+                                                    <div className="h-4 bg-gray-700 rounded w-16" />
                                                 </div>
-                                                <div className="h-3 w-16 bg-gray-700 rounded" />
+                                                <div className="h-3 bg-gray-700 rounded w-12" />
                                             </div>
-                                            <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto transition-all duration-300">
-                                                {[...Array(6)].map((_, j) => (
-                                                    <div key={j} className="flex items-center space-x-2 text-xs">
-                                                        <div className="w-4 h-4 bg-gray-600 rounded-sm flex-shrink-0" />
-                                                        <div className="h-3 w-16 bg-gray-700 rounded truncate" />
+                                            <div className="space-y-3 max-h-64">
+                                                {[...Array(3)].map((_, j) => (
+                                                    <div key={j} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50">
+                                                        {/* Player Image */}
+                                                        <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0" />
+                                                        
+                                                        {/* Player Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <div className="h-4 bg-gray-700 rounded w-24" />
+                                                            </div>
+                                                            
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-4 h-3 bg-gray-700 rounded-sm" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-6" />
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-12" />
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-8" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -490,89 +488,63 @@ export default function TournamentsContent() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {currentTournaments.map((tournament: Tournament) => (
-                                <TournamentCard key={tournament.id} tournament={tournament} />
+                            {currentTeams.map((team: Team) => (
+                                <TeamCard key={team.id} team={team} />
                             ))}
                         </div>
 
                         {/* Pagination */}
-                        {(currentPage > 1 || hasMorePages) && (
-                            <div className="flex items-center justify-center mt-8 space-x-2">
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-center space-x-2 mt-8">
                                 <button
                                     onClick={() => goToPage(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                                    aria-label="Previous page"
                                 >
-                                    <ChevronLeft className="w-4 h-4 mr-1" />
-                                    Previous
+                                    <ChevronLeft className="w-5 h-5" />
                                 </button>
 
-                                <div className="flex items-center space-x-2 px-4">
-                                    {getPageNumbers().map((pageNum, index) => (
-                                        <span key={index}>
-                                            {pageNum === '...' ? (
-                                                <span className="text-gray-500 px-2">...</span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => goToPage(pageNum as number)}
-                                                    className={`px-3 py-1 text-sm rounded-md cursor-pointer transition-all duration-200 ${currentPage === pageNum
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'text-gray-400 hover:text-white hover:bg-gray-600'
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
+                                {getPageNumbers().map((pageNum, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => typeof pageNum === 'number' ? goToPage(pageNum) : undefined}
+                                        disabled={pageNum === '...'}
+                                        className={`px-3 py-2 rounded-lg transition-colors ${
+                                            pageNum === currentPage
+                                                ? 'bg-blue-600 text-white'
+                                                : pageNum === '...'
+                                                ? 'text-gray-400 cursor-default'
+                                                : 'bg-gray-800 text-white hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                ))}
 
                                 <button
                                     onClick={() => goToPage(currentPage + 1)}
-                                    disabled={!hasMorePages}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                                    aria-label="Next page"
                                 >
-                                    Next
-                                    <ChevronRight className="w-4 h-4 ml-1" />
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </div>
                         )}
-                    </>
-                )}
 
-                {currentTournaments.length === 0 && !tournamentsLoading && (
-                    <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">
-                            {searchTerm
-                                ? `No tournaments found matching "${searchTerm}"`
-                                : "No tournaments found matching your criteria"
-                            }
-                        </p>
-                        {(searchTerm || dateFilter !== 'all') && (
-                            <div className="mt-4 space-x-2">
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                                    >
-                                        Clear search
-                                    </button>
-                                )}
-                                {dateFilter !== 'all' && (
-                                    <button
-                                        onClick={() => {
-                                            setDateFilter('all')
-                                            setCustomDateRange({ start: '', end: '' })
-                                            resetPage()
-                                        }}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                                    >
-                                        Clear date filter
-                                    </button>
-                                )}
+                        {/* Results info */}
+                        <div className="text-center text-gray-400 mt-4">
+                            <div>
+                                Showing {startIndex}-{endIndex} of {currentTeams.length} teams
                             </div>
-                        )}
-                    </div>
+                            {dateFilter !== 'all' && (
+                                <div className="text-sm mt-1">
+                                    Filtered by: {formatDateFilter()}
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </main>
         </div>
