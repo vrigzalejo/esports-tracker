@@ -1,6 +1,6 @@
 'use client'
 
-import { Gamepad2, Search, Bell, User } from 'lucide-react'
+import { Gamepad2, Search } from 'lucide-react'
 import Link from 'next/link'
 
 interface HeaderProps {
@@ -35,20 +35,7 @@ export default function Header({ searchTerm, onSearchChange }: HeaderProps) {
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                        <button 
-                            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                            aria-label="Notifications"
-                        >
-                            <Bell className="h-5 w-5" />
-                        </button>
-                        <button 
-                            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                            aria-label="User profile"
-                        >
-                            <User className="h-5 w-5" />
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </header>
