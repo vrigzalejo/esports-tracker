@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { TeamMatch, Match } from '@/types/esports';
-import { formatMatchDateRange, parseLeagueInfo } from '@/lib/textUtils';
+import { formatMatchDateRange, parseLeagueInfo, cleanMatchName } from '@/lib/textUtils';
 
 interface TeamMatchesProps {
     teamId: number;
@@ -166,6 +166,11 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                         <div className="text-white font-medium text-sm">
                                             vs {opponent?.acronym || opponent?.name || 'TBD'}
                                         </div>
+                                        {match.name && (
+                                            <div className="text-purple-300 text-xs mb-1 font-medium">
+                                                {cleanMatchName(match.name)}
+                                            </div>
+                                        )}
                                         {competitionInfo && (
                                             <div className="text-blue-300 text-xs mb-1">
                                                 {competitionInfo}
