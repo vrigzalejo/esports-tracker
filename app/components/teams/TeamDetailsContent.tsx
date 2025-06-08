@@ -545,14 +545,6 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                     <span className="text-lg font-semibold text-blue-300">{team.acronym}</span>
                                 </div>
                             )}
-                            {team.location && (
-                                <div className="flex items-center space-x-2 text-gray-300">
-                                    <div className="p-1.5 bg-gray-700/50 rounded-lg">
-                                        <MapPin className="w-4 h-4 text-blue-400" />
-                                    </div>
-                                    <span className="font-medium">{team.location}</span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -806,11 +798,11 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                 
                                 {/* Championships Count */}
                                 <div className="mb-4">
-                                    <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 rounded-xl p-4 border border-yellow-500/20 shadow-lg text-center">
-                                        <div className="text-2xl font-bold text-yellow-400 mb-1">
+                                    <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 rounded-lg p-2 border border-yellow-500/20 shadow-lg text-center">
+                                        <div className="text-sm font-bold text-yellow-400 mb-0.5">
                                             {tournaments.filter(tournament => tournament.winner_id === parseInt(teamId)).length}
                                         </div>
-                                        <div className="text-sm text-yellow-200 font-medium">Total Championships</div>
+                                        <div className="text-xs text-yellow-200 font-medium">Championships</div>
                                     </div>
                                 </div>
                                 
@@ -976,8 +968,6 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             )}
                         </div>
 
-
-
                         {/* Recent Matches */}
                         <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
                             <div className="flex items-center space-x-3 mb-6">
@@ -991,13 +981,13 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             
                             {/* Match Statistics */}
                             {matches.length > 0 && (
-                                <div className="grid grid-cols-3 gap-3 text-center mb-6">
-                                    <div className="bg-gradient-to-br from-gray-600/30 to-gray-700/40 rounded-xl p-3 border border-gray-600/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-lg font-bold text-white mb-1">{matches.length}</div>
-                                        <div className="text-xs text-gray-300 font-medium">Total Matches</div>
+                                <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                                    <div className="bg-gradient-to-br from-gray-600/30 to-gray-700/40 rounded-lg p-2 border border-gray-600/20 shadow-lg hover:shadow-xl transition-all duration-200">
+                                        <div className="text-sm font-bold text-white mb-0.5">{matches.length}</div>
+                                        <div className="text-xs text-gray-300 font-medium">Matches</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-green-500/20 to-green-600/30 rounded-xl p-3 border border-green-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-lg font-bold text-green-400 mb-1">
+                                    <div className="bg-gradient-to-br from-green-500/20 to-green-600/30 rounded-lg p-2 border border-green-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
+                                        <div className="text-sm font-bold text-green-400 mb-0.5">
                                             {matches.filter(match => {
                                                 const result = getMatchResult(match, parseInt(teamId))
                                                 return result?.isWin
@@ -1005,8 +995,8 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                         </div>
                                         <div className="text-xs text-green-200 font-medium">Wins</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-red-500/20 to-red-600/30 rounded-xl p-3 border border-red-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-lg font-bold text-red-400 mb-1">
+                                    <div className="bg-gradient-to-br from-red-500/20 to-red-600/30 rounded-lg p-2 border border-red-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
+                                        <div className="text-sm font-bold text-red-400 mb-0.5">
                                             {matches.filter(match => {
                                                 const result = getMatchResult(match, parseInt(teamId))
                                                 return result && !result.isWin
@@ -1104,13 +1094,20 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     </div>
                                                     
                                                     {/* Match Result */}
-                                                    {result && (
+                                                    {result && new Date(match.begin_at) <= new Date() && (
                                                         <div className={`px-2 py-1 rounded-full text-xs font-bold ${
                                                             result.isWin 
                                                                 ? 'bg-green-500/20 text-green-400 border border-green-500/20'
                                                                 : 'bg-red-500/20 text-red-400 border border-red-500/20'
                                                         }`}>
                                                             {result.teamScore} - {result.opponentScore}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Upcoming Match Indicator */}
+                                                    {new Date(match.begin_at) > new Date() && (
+                                                        <div className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/20">
+                                                            Upcoming
                                                         </div>
                                                     )}
                                                 </div>
@@ -1145,46 +1142,20 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 </div>
 
                                                 {/* Match Date/Time Information */}
-                                                <div className="space-y-2">
-                                                    {/* Start Date/Time */}
-                                                    <div className="flex items-center justify-between text-xs text-gray-400">
-                                                        <div 
-                                                            className="flex items-center space-x-1 cursor-default"
-                                                            title={formatDateTime(match.begin_at).full}
-                                                        >
-                                                            <Calendar className="w-3 h-3" />
-                                                            <span className="text-gray-300">Start:</span>
-                                                            <span>{formatDateTime(match.begin_at).date}</span>
-                                                        </div>
-                                                        <div 
-                                                            className="flex items-center space-x-1 cursor-default"
-                                                            title={formatDateTime(match.begin_at).full}
-                                                        >
-                                                            <Clock className="w-3 h-3" />
-                                                            <span>{formatDateTime(match.begin_at).time}</span>
-                                                        </div>
-                                                    </div>
+                                                <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
+                                                    {/* Date */}
+                                                    <span className="text-gray-300">{formatDateTime(match.begin_at).date}</span>
                                                     
-                                                    {/* End Date/Time */}
-                                                    {match.end_at && (
-                                                        <div className="flex items-center justify-between text-xs text-gray-400">
-                                                            <div 
-                                                                className="flex items-center space-x-1 cursor-default"
-                                                                title={formatDateTime(match.end_at).full}
-                                                            >
-                                                                <Calendar className="w-3 h-3" />
-                                                                <span className="text-gray-300">End:</span>
-                                                                <span>{formatDateTime(match.end_at).date}</span>
-                                                            </div>
-                                                            <div 
-                                                                className="flex items-center space-x-1 cursor-default"
-                                                                title={formatDateTime(match.end_at).full}
-                                                            >
-                                                                <Clock className="w-3 h-3" />
+                                                    {/* Time Range */}
+                                                    <div className="flex items-center space-x-1">
+                                                        <span>{formatDateTime(match.begin_at).time}</span>
+                                                        {match.end_at && (
+                                                            <>
+                                                                <span className="text-gray-500">-</span>
                                                                 <span>{formatDateTime(match.end_at).time}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         )

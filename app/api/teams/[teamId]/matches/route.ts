@@ -83,6 +83,10 @@ export async function GET(
                 name: match.videogame.name,
                 slug: match.videogame.slug
             } : null,
+            videogame_version: match.videogame_version ? {
+                name: match.videogame_version.name,
+                current: match.videogame_version.current
+            } : null,
             opponents: match.opponents ? match.opponents.map((opp: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
                 type: opp.type,
                 opponent: {
