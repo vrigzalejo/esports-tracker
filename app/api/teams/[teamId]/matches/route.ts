@@ -1,54 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PANDASCORE_TOKEN = process.env.PANDASCORE_TOKEN
-
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ teamId: string }> }
 ) {
-    if (!PANDASCORE_TOKEN) {
-        return NextResponse.json(
-            { error: 'API token not configured' },
-            { status: 500 }
-        )
-    }
-
     try {
         const { teamId } = await params
-        const teamIdNum = parseInt(teamId)
-        console.log('Fetching matches for team ID:', teamIdNum)
+        const token = process.env.PANDASCORE_TOKEN
 
-        // Try to fetch team matches from the matches endpoint
-        try {
-            const response = await fetch(
-                `https://api.pandascore.co/matches?filter[opponent_id]=${teamIdNum}&sort=-begin_at&per_page=20&token=${PANDASCORE_TOKEN}`,
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                    next: { revalidate: 300 }
-                }
+        if (!token) {
+            return NextResponse.json(
+                { error: 'PandaScore API token not configured' },
+                { status: 500 }
             )
-
-            console.log('Matches API response status:', response.status)
-
-            if (response.ok) {
-                const matches = await response.json()
-                console.log('Found', matches.length, 'matches for team')
-                return NextResponse.json(matches)
-            }
-        } catch (matchesError) {
-            console.log('Matches API failed:', matchesError)
         }
 
-        // Fallback: return empty array if no matches found
-        console.log('No matches found, returning empty array')
-        return NextResponse.json([])
+        // Fetch matches for the specific team
+        const response = await fetch(
+            `https://api.pandascore.co/teams/${teamId}/matches?token=${token}`,
+            {
+                headers: {
+                    'Accept': 'application/json',
+                },
+                next: { revalidate: 300 } // Cache for 5 minutes
+            }
+        )
+
+        if (!response.ok) {
+            console.error('PandaScore API error:', response.status, response.statusText)
+            return NextResponse.json(
+                { error: 'Failed to fetch matches data' },
+                { status: response.status }
+            )
+        }
+
+        const matches = await response.json()
+
+        // Transform the data to match our interface
+        const transformedMatches = matches.map((match: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+            id: match.id,
+            name: match.name,
+            status: match.status,
+            begin_at: match.begin_at,
+            end_at: match.end_at,
+            scheduled_at: match.scheduled_at,
+            original_scheduled_at: match.original_scheduled_at,
+            winner_id: match.winner_id,
+            winner_type: match.winner_type,
+            match_type: match.match_type,
+            number_of_games: match.number_of_games,
+            detailed_stats: match.detailed_stats,
+            draw: match.draw,
+            forfeit: match.forfeit,
+            rescheduled: match.rescheduled,
+            slug: match.slug,
+            league: match.league ? {
+                id: match.league.id,
+                name: match.league.name,
+                image_url: match.league.image_url,
+                slug: match.league.slug,
+                url: match.league.url
+            } : null,
+            serie: match.serie ? {
+                id: match.serie.id,
+                name: match.serie.name,
+                full_name: match.serie.full_name,
+                slug: match.serie.slug,
+                year: match.serie.year,
+                begin_at: match.serie.begin_at,
+                end_at: match.serie.end_at
+            } : null,
+            tournament: match.tournament ? {
+                id: match.tournament.id,
+                name: match.tournament.name,
+                tier: match.tournament.tier,
+                prizepool: match.tournament.prizepool,
+                begin_at: match.tournament.begin_at,
+                end_at: match.tournament.end_at
+            } : null,
+            videogame: match.videogame ? {
+                id: match.videogame.id,
+                name: match.videogame.name,
+                slug: match.videogame.slug
+            } : null,
+            opponents: match.opponents ? match.opponents.map((opp: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+                type: opp.type,
+                opponent: {
+                    id: opp.opponent?.id || 0,
+                    name: opp.opponent?.name || 'TBD',
+                    image_url: opp.opponent?.image_url || '',
+                    location: opp.opponent?.location || '',
+                    slug: opp.opponent?.slug || '',
+                    acronym: opp.opponent?.acronym || ''
+                }
+            })) : [],
+            results: match.results ? match.results.map((result: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+                team_id: result.team_id,
+                score: result.score
+            })) : []
+        }))
+
+        return NextResponse.json(transformedMatches)
 
     } catch (error) {
-        console.error('Error fetching team matches:', error)
+        console.error('Error fetching matches:', error)
         return NextResponse.json(
-            { error: 'Failed to fetch team matches' },
+            { error: 'Internal server error' },
             { status: 500 }
         )
     }

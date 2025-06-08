@@ -161,7 +161,32 @@ export async function GET(
                         modified_at: player?.modified_at || ''
                     }))
                 };
-            }) : []
+            }) : [],
+            expected_roster: tournament.expected_roster ? tournament.expected_roster.map((rosterEntry: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+                team: {
+                    id: rosterEntry.team?.id || 0,
+                    name: rosterEntry.team?.name || 'Unknown Team',
+                    location: rosterEntry.team?.location || '',
+                    slug: rosterEntry.team?.slug || '',
+                    modified_at: rosterEntry.team?.modified_at || '',
+                    acronym: rosterEntry.team?.acronym || '',
+                    image_url: rosterEntry.team?.image_url || ''
+                },
+                players: rosterEntry.players ? rosterEntry.players.map((player: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+                    active: player?.active || false,
+                    id: player?.id || 0,
+                    name: player?.name || 'Unknown Player',
+                    role: player?.role || null,
+                    slug: player?.slug || '',
+                    modified_at: player?.modified_at || '',
+                    age: player?.age || 0,
+                    birthday: player?.birthday || null,
+                    first_name: player?.first_name || '',
+                    last_name: player?.last_name || '',
+                    nationality: player?.nationality || '',
+                    image_url: player?.image_url || null
+                })) : []
+            })) : []
         }))
 
         return NextResponse.json(transformedTournaments)
