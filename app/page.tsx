@@ -7,7 +7,7 @@ import { Play, Trophy, Users, TrendingUp, ExternalLink } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
-import { cleanMatchName } from '@/lib/textUtils'
+import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
 import type { Match } from '@/types/esports'
 
 // StatCard component for displaying statistics
@@ -321,7 +321,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-600">•</span>
                           )}
                           {match.serie?.full_name && (
-                            <span className="text-xs text-green-400 font-medium">{match.serie.full_name}</span>
+                            <span className="text-xs text-green-400 font-medium">{capitalizeWords(match.serie.full_name)}</span>
                           )}
                           {(match.league?.name || match.serie?.full_name) && match.tournament?.name && (
                             <span className="text-xs text-gray-600">•</span>

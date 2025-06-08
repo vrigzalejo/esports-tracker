@@ -229,12 +229,6 @@ export function cleanMatchName(matchName: string | undefined | null): string {
         return ''; // Return empty string if match type is just team names
     }
     
-    // Capitalize each word in the match type
-    const capitalizedMatchType = matchType
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    
-    return capitalizedMatchType;
+    // Use the capitalizeWords function for proper capitalization
+    return capitalizeWords(matchType);
 } 
