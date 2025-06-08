@@ -1328,4 +1328,4 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
             </div>
         </div>
     )
-} 
+}
