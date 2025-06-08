@@ -95,7 +95,7 @@ export default function HomePage() {
               title="Live Matches"
               value={stats.liveMatches.toString()}
               subtitle="Across all games"
-              trend={`${stats.liveMatches > 0 ? '+' : ''}${stats.liveMatches}`}
+              trend={stats.liveMatches > 0 ? `+${stats.liveMatches}` : undefined}
             />
           )}
 
