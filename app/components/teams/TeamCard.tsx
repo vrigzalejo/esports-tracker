@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Users, Trophy, User, Calendar, Clock, Globe, Star } from 'lucide-react'
 import type { Team } from '@/types/esports'
 
@@ -7,6 +8,18 @@ interface TeamCardProps {
 }
 
 export default function TeamCard({ team }: TeamCardProps) {
+    const router = useRouter()
+
+    const handleCardClick = () => {
+        router.push(`/teams/${team.id}`)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleCardClick()
+        }
+    }
     const getTeamImage = () => {
         const imageUrl = team.image_url;
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
@@ -147,7 +160,14 @@ export default function TeamCard({ team }: TeamCardProps) {
     const tournamentInfo = getTournamentInfo();
 
     return (
-        <div className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1">
+        <div 
+            onClick={handleCardClick}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+            role="button"
+            aria-label={`View details for ${team.name}`}
+            className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50"
+        >
             {/* Subtle background glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
