@@ -51,11 +51,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Team 1 */}
                     <div className={`flex items-center justify-end space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
                         {scoreInfo[0]?.image && (
-                            <img 
-                                src={scoreInfo[0].image} 
-                                alt={scoreInfo[0].name}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-gray-500"
-                            />
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                                <img 
+                                    src={scoreInfo[0].image} 
+                                    alt={scoreInfo[0].name}
+                                    className="w-full h-full object-contain p-1"
+                                />
+                            </div>
                         )}
                         <div className="text-right">
                             <div className="text-lg font-bold">{scoreInfo[0]?.name}</div>
@@ -89,11 +91,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             <div className="text-sm text-gray-400">{scoreInfo[1]?.acronym}</div>
                         </div>
                         {scoreInfo[1]?.image && (
-                            <img 
-                                src={scoreInfo[1].image} 
-                                alt={scoreInfo[1].name}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-gray-500"
-                            />
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                                <img 
+                                    src={scoreInfo[1].image} 
+                                    alt={scoreInfo[1].name}
+                                    className="w-full h-full object-contain p-1"
+                                />
+                            </div>
                         )}
                     </div>
                 </div>
@@ -136,7 +140,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Match Information */}
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-blue-400 font-medium">{parseLeagueInfo(match.league?.name || '')}</span>
+                            <span className="text-blue-400 font-medium">{match.league?.name || ''}</span>
                             {match.league?.name && match.serie?.full_name && (
                                 <span className="text-gray-500">•</span>
                             )}
@@ -147,11 +151,19 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-400">
-                                {parseLeagueInfo(match.name)} • {match.videogame?.name}
+                                {match.name}
+                                • {match.videogame?.name}
+                                {match.number_of_games && (
+                                    <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
+                                        BO{match.number_of_games}
+                                    </span>
+                                )}
                             </div>
+                            
                             <div className="text-xs text-gray-300">
                                 {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
                             </div>
+                            
                         </div>
                     </div>
                 </div>

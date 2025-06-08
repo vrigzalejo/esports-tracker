@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Play, Trophy, Users, TrendingUp, ExternalLink } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
+import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
 import type { Match } from '@/types/esports'
 
 // StatCard component for displaying statistics
@@ -95,7 +97,7 @@ export default function HomePage() {
               title="Live Matches"
               value={stats.liveMatches.toString()}
               subtitle="Across all games"
-              trend={`${stats.liveMatches > 0 ? '+' : ''}${stats.liveMatches}`}
+              trend={stats.liveMatches > 0 ? `+${stats.liveMatches}` : undefined}
             />
           )}
 
@@ -276,8 +278,59 @@ export default function HomePage() {
                           <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
                         )}
                       </div>
+                      
                       <div className="flex flex-col">
-                        <span className="text-gray-300">{parseLeagueInfo(match.name)}</span>
+                        {cleanMatchName(match.name) && (
+                          <div className="mb-1">
+                            <span className="text-sm font-bold text-purple-300">
+                              {cleanMatchName(match.name)}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Team Images and Names */}
+                        <div className="flex items-center space-x-2 mb-1">
+                          {match.opponents?.slice(0, 2).map((opponent, index) => (
+                            <div key={opponent.opponent.id || index} className="flex items-center space-x-2">
+                              <div className="relative w-5 h-5 bg-gray-700 rounded-full overflow-hidden">
+                                <Image
+                                  src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
+                                  alt={opponent.opponent.name}
+                                  fill
+                                  className="object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement
+                                    target.src = '/images/placeholder-team.svg'
+                                  }}
+                                />
+                              </div>
+                              <span className="text-sm text-gray-300 font-medium">{opponent.opponent.name}</span>
+                              {index === 0 && match.opponents.length > 1 && (
+                                <span className="text-xs text-gray-500 mx-1">vs</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* League, Serie, Tournament Info */}
+                        <div className="flex items-center space-x-2 mb-1">
+                          {match.league?.name && (
+                            <span className="text-xs text-blue-400 font-medium">{match.league.name}</span>
+                          )}
+                          {match.league?.name && match.serie?.full_name && (
+                            <span className="text-xs text-gray-600">•</span>
+                          )}
+                          {match.serie?.full_name && (
+                            <span className="text-xs text-green-400 font-medium">{capitalizeWords(match.serie.full_name)}</span>
+                          )}
+                          {(match.league?.name || match.serie?.full_name) && match.tournament?.name && (
+                            <span className="text-xs text-gray-600">•</span>
+                          )}
+                          {match.tournament?.name && (
+                            <span className="text-xs text-yellow-400 font-medium">{match.tournament.name}</span>
+                          )}
+                        </div>
+                        
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-gray-500">{match.videogame.name}</span>
                           <span className="text-xs text-gray-600">•</span>
@@ -319,16 +372,7 @@ export default function HomePage() {
   )
 }
 
-// Helper function to parse league information from match name
-function parseLeagueInfo(matchName: string): string {
-  // Remove common prefixes and clean up the match name
-  const cleaned = matchName
-    .replace(/^(Match \d+: |Game \d+: |Map \d+: )/i, '')
-    .replace(/\s+vs\s+/i, ' vs ')
-    .trim()
-  
-  return cleaned || matchName
-}
+
 
 // Helper function to format match date range
 function formatMatchDateRange(match: Match, options?: { includeYear?: boolean }): string {

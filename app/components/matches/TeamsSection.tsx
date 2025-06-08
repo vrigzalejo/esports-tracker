@@ -2,6 +2,7 @@ import TeamDisplay from './TeamDisplay'
 
 interface Opponent {
     opponent: {
+        id: number
         name: string
         image_url: string
     }
@@ -28,12 +29,12 @@ export default function TeamsSection({
     matchResults, 
     finalWinner, 
     isMatchFinished, 
-    isMatchLive 
+    isMatchLive
 }: TeamsSectionProps) {
     const showScore = (isMatchFinished || isMatchLive) && matchResults
 
     return (
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center">
             <div className="grid grid-cols-3 items-center gap-4 sm:gap-6 w-full max-w-md">
                 {/* Team 1 */}
                 <div className="flex justify-center">

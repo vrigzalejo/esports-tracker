@@ -157,7 +157,7 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                 return (
                                     <div
                                         key={match.id}
-                                        className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors"
+                                        className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
@@ -171,11 +171,13 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                 )}
                                                 <div className="flex items-center space-x-2">
                                                     {opponent?.image_url && (
-                                                        <img 
-                                                            src={opponent.image_url} 
-                                                            alt={opponent.name}
-                                                            className="w-5 h-5 rounded object-cover"
-                                                        />
+                                                        <div className="relative w-5 h-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded border border-gray-600/40 shadow-md overflow-hidden backdrop-blur-sm">
+                                                            <img 
+                                                                src={opponent.image_url} 
+                                                                alt={opponent.name}
+                                                                className="w-full h-full object-contain p-0.5"
+                                                            />
+                                                        </div>
                                                     )}
                                                     <span className="text-white text-sm font-medium">
                                                         vs {opponent?.acronym || opponent?.name || 'TBD'}

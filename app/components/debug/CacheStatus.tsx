@@ -12,7 +12,7 @@ export default function CacheStatus() {
     return (
       <button
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 right-4 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors z-50"
+        className="fixed bottom-4 right-4 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors z-50 cursor-pointer"
         title="Show Cache Status"
       >
         Cache
@@ -26,7 +26,7 @@ export default function CacheStatus() {
         <h3 className="font-semibold text-sm">Cache Status</h3>
         <button
           onClick={() => setIsVisible(false)}
-          className="text-gray-400 hover:text-white"
+          className="text-gray-400 hover:text-white cursor-pointer"
         >
           ×
         </button>
@@ -59,14 +59,14 @@ export default function CacheStatus() {
         <div className="pt-2 border-t border-gray-600 space-y-1">
           <button
             onClick={clearExpiredCache}
-            className="w-full bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs transition-colors"
+            className="w-full bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs transition-colors cursor-pointer"
           >
             Clear Expired
           </button>
           
           <button
             onClick={clearAllCache}
-            className="w-full bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs transition-colors"
+            className="w-full bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs transition-colors cursor-pointer"
           >
             Clear All Cache
           </button>

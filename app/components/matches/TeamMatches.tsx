@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { TeamMatch, Match } from '@/types/esports';
-import { formatMatchDateRange, parseLeagueInfo } from '@/lib/textUtils';
+import { formatMatchDateRange, parseLeagueInfo, cleanMatchName } from '@/lib/textUtils';
 
 interface TeamMatchesProps {
     teamId: number;
@@ -100,8 +100,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
             parts.push(match.tournament.name);
         }
 
-        const rawInfo = parts.length > 0 ? parts.join(' • ') : null;
-        return rawInfo ? parseLeagueInfo(rawInfo) : null;
+        return parts.length > 0 ? parts.join(' • ') : null;
     };
 
     if (loading) {
@@ -152,7 +151,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                     return (
                         <div
                             key={match.id}
-                            className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors"
+                            className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors cursor-pointer"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -167,13 +166,18 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                         <div className="text-white font-medium text-sm">
                                             vs {opponent?.acronym || opponent?.name || 'TBD'}
                                         </div>
+                                        {match.name && (
+                                            <div className="text-purple-300 text-xs mb-1 font-medium">
+                                                {cleanMatchName(match.name)}
+                                            </div>
+                                        )}
                                         {competitionInfo && (
                                             <div className="text-blue-300 text-xs mb-1">
                                                 {competitionInfo}
                                             </div>
                                         )}
                                         <div className="text-gray-300 text-xs">
-                                            {!competitionInfo && parseLeagueInfo(`${match.league.name} • ${match.tournament.name}`)}
+                                            {!competitionInfo && `${match.league.name} • ${parseLeagueInfo(match.tournament.name)}`}
                                         </div>
                                     </div>
                                 </div>

@@ -5,12 +5,11 @@ import { getStatusColor, getStatusText } from '@/lib/utils'
 
 interface MatchHeaderProps {
     match: Match
-    gamesFormat: string | null
     videoStreams: { url: string; platform: string }[]
     onShowDetails: () => void
 }
 
-export default function MatchHeader({ match, gamesFormat, videoStreams, onShowDetails }: MatchHeaderProps) {
+export default function MatchHeader({ match, videoStreams, onShowDetails }: MatchHeaderProps) {
     const [showStreams, setShowStreams] = useState(false)
     const streamsRef = useRef<HTMLDivElement>(null)
 
@@ -37,7 +36,7 @@ export default function MatchHeader({ match, gamesFormat, videoStreams, onShowDe
     }, [showStreams])
 
     return (
-        <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
                     {match.status === 'running' ? (
@@ -50,11 +49,6 @@ export default function MatchHeader({ match, gamesFormat, videoStreams, onShowDe
                 <span className="text-gray-400 text-xs sm:text-sm font-medium bg-gray-900/30 px-3 py-1 rounded-full">
                     {match.videogame.name}
                 </span>
-                {gamesFormat && (
-                    <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium border border-blue-500/20">
-                        {gamesFormat}
-                    </span>
-                )}
             </div>
 
             {/* Action Buttons */}

@@ -376,7 +376,7 @@ export default function TeamsContent() {
                                     setCustomDateRange({ start: '', end: '' })
                                     resetPage()
                                 }}
-                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200"
+                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200 cursor-pointer"
                             >
                                 Clear
                             </button>
@@ -499,7 +499,7 @@ export default function TeamsContent() {
                                 <button
                                     onClick={() => goToPage(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
                                     aria-label="Previous page"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
@@ -512,10 +512,10 @@ export default function TeamsContent() {
                                         disabled={pageNum === '...'}
                                         className={`px-3 py-2 rounded-lg transition-colors ${
                                             pageNum === currentPage
-                                                ? 'bg-blue-600 text-white'
+                                                ? 'bg-blue-600 text-white cursor-pointer'
                                                 : pageNum === '...'
                                                 ? 'text-gray-400 cursor-default'
-                                                : 'bg-gray-800 text-white hover:bg-gray-700'
+                                                : 'bg-gray-800 text-white hover:bg-gray-700 cursor-pointer'
                                         }`}
                                     >
                                         {pageNum}
@@ -525,7 +525,7 @@ export default function TeamsContent() {
                                 <button
                                     onClick={() => goToPage(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
                                     aria-label="Next page"
                                 >
                                     <ChevronRight className="w-5 h-5" />

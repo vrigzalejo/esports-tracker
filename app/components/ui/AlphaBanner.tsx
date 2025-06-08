@@ -21,7 +21,7 @@ export default function AlphaBanner() {
                     </div>
                     <button
                         onClick={() => setIsVisible(false)}
-                        className="flex items-center text-yellow-400 hover:text-yellow-300 transition-colors"
+                        className="flex items-center text-yellow-400 hover:text-yellow-300 transition-colors cursor-pointer"
                         aria-label="Dismiss alpha notification"
                     >
                         <X className="h-5 w-5" />
