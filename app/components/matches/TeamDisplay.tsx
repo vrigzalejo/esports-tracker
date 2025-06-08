@@ -1,8 +1,12 @@
+'use client'
+
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Crown } from 'lucide-react'
 
 interface Opponent {
     opponent: {
+        id: number
         name: string
         image_url: string
     }
@@ -23,6 +27,8 @@ export default function TeamDisplay({
     isLive, 
     showScore 
 }: TeamDisplayProps) {
+    const router = useRouter()
+
     const getTeamImage = (opponent: Opponent) => {
         const imageUrl = opponent?.opponent?.image_url;
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
@@ -32,10 +38,19 @@ export default function TeamDisplay({
         return opponent?.opponent?.name || 'TBD'
     }
 
+    const handleTeamClick = () => {
+        if (opponent?.opponent?.id) {
+            router.push(`/teams/${opponent.opponent.id}`)
+        }
+    }
+
     return (
         <div className="flex flex-col items-center space-y-3">
             <div className="relative">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl border-2 border-gray-600/30 shadow-lg transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/30">
+                <div 
+                    className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl border-2 border-gray-600/30 shadow-lg transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/30 cursor-pointer"
+                    onClick={handleTeamClick}
+                >
                     <Image
                         src={getTeamImage(opponent)}
                         alt={getTeamName(opponent)}

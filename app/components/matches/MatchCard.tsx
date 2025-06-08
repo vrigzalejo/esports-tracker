@@ -13,6 +13,7 @@ interface MatchCardProps {
 
 interface Opponent {
     opponent: {
+        id: number
         name: string
         image_url: string
     }

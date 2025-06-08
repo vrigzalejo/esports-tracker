@@ -2,6 +2,7 @@ import TeamDisplay from './TeamDisplay'
 
 interface Opponent {
     opponent: {
+        id: number
         name: string
         image_url: string
     }
