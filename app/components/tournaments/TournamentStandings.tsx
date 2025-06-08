@@ -146,11 +146,13 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                     {standing.rank || index + 1}
                                 </div>
                                 {standing.team.image_url && (
-                                    <img 
-                                        src={standing.team.image_url} 
-                                        alt={standing.team.name}
-                                        className="w-6 h-6 rounded object-cover"
-                                    />
+                                    <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                        <img 
+                                            src={standing.team.image_url} 
+                                            alt={standing.team.name}
+                                            className="w-full h-full object-contain p-0.5"
+                                        />
+                                    </div>
                                 )}
                                 <div className="min-w-0 flex-1">
                                     <div className={`text-sm font-medium truncate ${

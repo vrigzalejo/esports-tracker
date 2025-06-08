@@ -680,12 +680,12 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                     <div className="relative z-10 flex items-center space-x-8">
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300" />
-                            <div className="relative w-28 h-28 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-2xl border-2 border-gray-600/30 shadow-2xl overflow-hidden">
+                            <div className="relative w-28 h-28 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-600/40 shadow-2xl overflow-hidden backdrop-blur-sm">
                                 <Image
                                     src={getTeamImage(team.image_url)}
                                     alt={team.name}
                                     fill
-                                    className="object-cover rounded-2xl"
+                                    className="object-contain p-2"
                                     priority
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement
@@ -1274,24 +1274,24 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center space-x-3">
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="relative w-6 h-6">
+                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                 <Image
                                                                     src={getTeamImage(team.image_url)}
                                                                     alt={team.name}
                                                                     fill
-                                                                    className="object-cover rounded"
+                                                                    className="object-contain p-0.5"
                                                                 />
                                                             </div>
                                                             <span className="text-xs font-medium">{team.acronym || team.name}</span>
                                                         </div>
                                                         <span className="text-gray-400 text-xs">vs</span>
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="relative w-6 h-6">
+                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                 <Image
                                                                     src={getTeamImage(opponent?.opponent.image_url || '')}
                                                                     alt={opponent?.opponent.name || 'TBD'}
                                                                     fill
-                                                                    className="object-cover rounded"
+                                                                    className="object-contain p-0.5"
                                                                 />
                                                             </div>
                                                             <span className="text-xs font-medium">{opponent?.opponent.name || 'TBD'}</span>

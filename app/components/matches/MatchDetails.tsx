@@ -51,11 +51,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Team 1 */}
                     <div className={`flex items-center justify-end space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
                         {scoreInfo[0]?.image && (
-                            <img 
-                                src={scoreInfo[0].image} 
-                                alt={scoreInfo[0].name}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-gray-500"
-                            />
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                                <img 
+                                    src={scoreInfo[0].image} 
+                                    alt={scoreInfo[0].name}
+                                    className="w-full h-full object-contain p-1"
+                                />
+                            </div>
                         )}
                         <div className="text-right">
                             <div className="text-lg font-bold">{scoreInfo[0]?.name}</div>
@@ -89,11 +91,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             <div className="text-sm text-gray-400">{scoreInfo[1]?.acronym}</div>
                         </div>
                         {scoreInfo[1]?.image && (
-                            <img 
-                                src={scoreInfo[1].image} 
-                                alt={scoreInfo[1].name}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-gray-500"
-                            />
+                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                                <img 
+                                    src={scoreInfo[1].image} 
+                                    alt={scoreInfo[1].name}
+                                    className="w-full h-full object-contain p-1"
+                                />
+                            </div>
                         )}
                     </div>
                 </div>
