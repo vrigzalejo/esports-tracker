@@ -666,7 +666,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                 {/* Back button */}
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors"
+                    className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors cursor-pointer"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Back</span>

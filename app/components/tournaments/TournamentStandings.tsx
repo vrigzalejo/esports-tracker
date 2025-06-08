@@ -128,7 +128,7 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                     return (
                         <div
                             key={standing.team.id}
-                            className={`grid gap-2 items-center py-2 rounded transition-colors ${
+                            className={`grid gap-2 items-center py-2 rounded transition-colors cursor-pointer ${
                                 hasWinLossData ? 'grid-cols-4' : 'grid-cols-2'
                             } ${
                                 isRelevantTeam 

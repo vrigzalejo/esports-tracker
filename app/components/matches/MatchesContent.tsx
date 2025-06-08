@@ -366,7 +366,7 @@ export default function MatchesContent() {
                                     setCustomDateRange({ start: '', end: '' })
                                     resetPage()
                                 }}
-                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200"
+                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200 cursor-pointer"
                             >
                                 Clear
                             </button>
@@ -497,7 +497,7 @@ export default function MatchesContent() {
                                 {searchTerm && (
                                     <button
                                         onClick={() => setSearchTerm('')}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer"
                                     >
                                         Clear search
                                     </button>
@@ -509,7 +509,7 @@ export default function MatchesContent() {
                                             setCustomDateRange({ start: '', end: '' })
                                             resetPage()
                                         }}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer"
                                     >
                                         Clear date filter
                                     </button>

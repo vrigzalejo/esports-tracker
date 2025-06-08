@@ -26,7 +26,7 @@ export default function Navigation() {
                             <Link
                                 key={item.id}
                                 href={item.path}
-                                className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${isActive
+                                className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${isActive
                                         ? 'border-blue-500 text-blue-400'
                                         : 'border-transparent text-gray-300 hover:text-white hover:border-gray-300'
                                     }`}
