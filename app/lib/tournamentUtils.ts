@@ -97,8 +97,10 @@ export const parseLeagueInformation = (tournament: Tournament): string => {
     const league = tournament.league?.name || ''
     const serie = tournament.serie?.full_name || tournament.serie?.name || ''
 
-    const leagueInfo = league && serie ? `${league} - ${serie}` : league || serie
-    return parseLeagueInfo(leagueInfo)
+    if (league && serie) {
+        return `${league} - ${parseLeagueInfo(serie)}`
+    }
+    return league || parseLeagueInfo(serie)
 }
 
 // Get tournament type information

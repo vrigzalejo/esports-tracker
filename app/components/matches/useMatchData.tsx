@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Match } from '@/types/esports'
+import { parseLeagueInfo } from '@/lib/textUtils'
 
 interface MatchResults {
     team1Score: number
@@ -178,7 +179,10 @@ export function useMatchData(match: Match) {
         const league = match.league?.name || ''
         const serie = match.serie?.full_name || match.serie?.name || ''
 
-        return league && serie ? `${league} - ${serie}` : league || serie;
+        if (league && serie) {
+            return `${league} - ${parseLeagueInfo(serie)}`
+        }
+        return league || parseLeagueInfo(serie)
     }
 
     // Get region information

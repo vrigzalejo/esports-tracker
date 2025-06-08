@@ -136,7 +136,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Match Information */}
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-blue-400 font-medium">{parseLeagueInfo(match.league?.name || '')}</span>
+                            <span className="text-blue-400 font-medium">{match.league?.name || ''}</span>
                             {match.league?.name && match.serie?.full_name && (
                                 <span className="text-gray-500">•</span>
                             )}
@@ -147,11 +147,19 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-400">
-                                {parseLeagueInfo(match.name)} • {match.videogame?.name}
+                                {match.name}
+                                • {match.videogame?.name}
+                                {match.number_of_games && (
+                                    <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
+                                        BO{match.number_of_games}
+                                    </span>
+                                )}
                             </div>
+                            
                             <div className="text-xs text-gray-300">
                                 {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
                             </div>
+                            
                         </div>
                     </div>
                 </div>

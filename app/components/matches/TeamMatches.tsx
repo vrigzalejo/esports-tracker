@@ -100,8 +100,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
             parts.push(match.tournament.name);
         }
 
-        const rawInfo = parts.length > 0 ? parts.join(' • ') : null;
-        return rawInfo ? parseLeagueInfo(rawInfo) : null;
+        return parts.length > 0 ? parts.join(' • ') : null;
     };
 
     if (loading) {
@@ -173,7 +172,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                             </div>
                                         )}
                                         <div className="text-gray-300 text-xs">
-                                            {!competitionInfo && parseLeagueInfo(`${match.league.name} • ${match.tournament.name}`)}
+                                            {!competitionInfo && `${match.league.name} • ${parseLeagueInfo(match.tournament.name)}`}
                                         </div>
                                     </div>
                                 </div>

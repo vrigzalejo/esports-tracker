@@ -1,6 +1,51 @@
 // Helper function to capitalize first letter of words
 export function capitalizeWords(text: string): string {
-    return text.replace(/\b\w/g, (char) => char.toUpperCase());
+    if (!text) return text;
+    
+    // Words that should always be capitalized regardless of position
+    const alwaysCapitalize = new Set([
+        'season', 'stage', 'masters', 'championship', 'tournament', 'league', 
+        'series', 'playoffs', 'finals', 'qualifier', 'qualifiers', 'group',
+        'bracket', 'round', 'match', 'game', 'cup', 'open', 'pro', 'elite',
+        'premier', 'major', 'minor', 'regional', 'national', 'international',
+        'world', 'global', 'europe', 'america', 'asia', 'north', 'south',
+        'east', 'west', 'central', 'latin', 'valorant', 'changers', 'ace'
+    ]);
+    
+    // Words that should remain lowercase unless at the beginning
+    const keepLowercase = new Set([
+        'and', 'or', 'but', 'nor', 'for', 'yet', 'so', 'a', 'an', 'the',
+        'in', 'on', 'at', 'by', 'to', 'of', 'vs', 'v'
+    ]);
+    
+    return text.split(' ').map((word, index) => {
+        if (!word) return word;
+        
+        const lowerWord = word.toLowerCase();
+        
+        // Always capitalize first word
+        if (index === 0) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+        
+        // Always capitalize certain words
+        if (alwaysCapitalize.has(lowerWord)) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+        
+        // Keep certain words lowercase unless they're the first word
+        if (keepLowercase.has(lowerWord)) {
+            return lowerWord;
+        }
+        
+        // Handle numbers and mixed alphanumeric (like "2025", "3rd", etc.)
+        if (/^\d/.test(word) || /\d/.test(word)) {
+            return word;
+        }
+        
+        // Default: capitalize first letter
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
 }
 
 // Helper function to parse and format dates consistently
@@ -158,4 +203,38 @@ export function parseLeagueInfo(leagueInfo: string): string {
     
     // Join with a cleaner separator and capitalize
     return capitalizeWords(cleanedParts.join(' • '));
+}
+
+// Helper function to clean match names by removing team names
+export function cleanMatchName(matchName: string | undefined | null): string {
+    if (!matchName || matchName.trim() === '') return '';
+    
+    // Split by colon to separate match type from teams
+    const parts = matchName.split(':');
+    if (parts.length < 2) {
+        // If no colon, check if it's just a "Team vs Team" pattern
+        const vsPattern = /^[^:]+\s+vs\s+[^:]+$/i;
+        if (vsPattern.test(matchName.trim())) {
+            return ''; // Return empty string for "Team vs Team" patterns
+        }
+        return matchName;
+    }
+    
+    // Take only the first part (match type) and clean it up
+    const matchType = parts[0].trim();
+    
+    // Check if the match type is just team names (contains "vs" or "v")
+    const teamVsPattern = /^[^:]*\b(vs?|versus)\b[^:]*$/i;
+    if (teamVsPattern.test(matchType)) {
+        return ''; // Return empty string if match type is just team names
+    }
+    
+    // Capitalize each word in the match type
+    const capitalizedMatchType = matchType
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    
+    return capitalizedMatchType;
 } 
