@@ -63,6 +63,10 @@ interface Match {
         name: string
         slug: string
     }
+    videogame_version?: {
+        name: string
+        current?: boolean
+    }
     opponents: Array<{
         opponent: {
             id: number
@@ -153,6 +157,94 @@ interface Tournament {
 
 interface TeamDetailsContentProps {
     teamId: string
+}
+
+// Prize pool formatting utility
+const formatPrizePool = (prizePool: string | undefined | null): string => {
+    if (!prizePool || prizePool.trim() === '') return 'TBD';
+    
+    // Handle common "TBD" or "To be determined" cases
+    const lowerPrizePool = prizePool.toLowerCase().trim();
+    if (lowerPrizePool === 'tbd' || lowerPrizePool === 'to be determined' || lowerPrizePool === 'n/a') {
+        return 'TBD';
+    }
+    
+    // Detect currency from the original string
+    let currencySymbol = '$'; // Default to USD
+    
+    // Check for currency symbols
+    if (/€/.test(prizePool)) currencySymbol = '€';
+    else if (/£/.test(prizePool)) currencySymbol = '£';
+    else if (/¥/.test(prizePool)) currencySymbol = '¥';
+    else if (/₹/.test(prizePool)) currencySymbol = '₹';
+    else if (/₽/.test(prizePool)) currencySymbol = '₽';
+    
+    // Check for currency names/codes
+    else if (/indonesian rupiah|idr/gi.test(prizePool)) currencySymbol = 'IDR';
+    else if (/euro|eur/gi.test(prizePool)) currencySymbol = '€';
+    else if (/british pound|gbp/gi.test(prizePool)) currencySymbol = '£';
+    else if (/japanese yen|jpy/gi.test(prizePool)) currencySymbol = '¥';
+    else if (/indian rupee|inr/gi.test(prizePool)) currencySymbol = '₹';
+    else if (/russian ruble|rub/gi.test(prizePool)) currencySymbol = '₽';
+    else if (/chinese yuan|cny/gi.test(prizePool)) currencySymbol = '¥';
+    else if (/korean won|krw/gi.test(prizePool)) currencySymbol = '₩';
+    else if (/thai baht|thb/gi.test(prizePool)) currencySymbol = '฿';
+    
+    // Extract numeric value
+    let numericValue = prizePool;
+    
+    // Remove all currency-related text but keep K/M suffixes
+    numericValue = numericValue.replace(/[$€£¥₹₽₩฿]/g, '');
+    numericValue = numericValue.replace(/united states dollar|us dollar|indonesian rupiah|euro|british pound|japanese yen|indian rupee|russian ruble|chinese yuan|korean won|thai baht|singapore dollar|malaysian ringgit|philippine peso|vietnamese dong|brazilian real|mexican peso|canadian dollar|australian dollar|new zealand dollar|south african rand|turkish lira|polish zloty|czech koruna|hungarian forint|norwegian krone|swedish krona|danish krone|swiss franc/gi, '');
+    numericValue = numericValue.replace(/\b(usd|eur|gbp|jpy|inr|rub|cny|krw|thb|sgd|myr|php|vnd|brl|mxn|cad|aud|nzd|zar|try|pln|czk|huf|nok|sek|dkk|chf|idr)\b/gi, '');
+    numericValue = numericValue.replace(/[,\s]+/g, '');
+    
+    // Check for K/M suffixes
+    const hasK = /k$/i.test(numericValue.trim());
+    const hasM = /m$/i.test(numericValue.trim());
+    
+    // Extract numbers
+    const cleanValue = numericValue.replace(/[^0-9.]/g, '');
+    let value = parseFloat(cleanValue);
+    
+    if (isNaN(value) || value <= 0) return 'TBD';
+    
+    // Apply multipliers
+    if (hasK && !hasM) {
+        value = value * 1000;
+    } else if (hasM) {
+        value = value * 1000000;
+    }
+    
+    // Format with original currency
+    if (value >= 1000000) {
+        return `${currencySymbol}${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+        return `${currencySymbol}${(value / 1000).toFixed(1)}K`;
+    } else {
+        return `${currencySymbol}${value.toLocaleString()}`;
+    }
+}
+
+// Match name formatting utility
+const formatMatchName = (matchName: string | undefined | null): string => {
+    if (!matchName || matchName.trim() === '') return '';
+    
+    // Split by colon to separate match type from teams
+    const parts = matchName.split(':');
+    if (parts.length < 2) return matchName;
+    
+    const matchType = parts[0].trim();
+    const teamsInfo = parts.slice(1).join(':').trim();
+    
+    // Capitalize each word in the match type
+    const capitalizedMatchType = matchType
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    
+    return `${capitalizedMatchType}: ${teamsInfo}`;
 }
 
 export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) {
@@ -571,7 +663,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                 )}
                                                                 {tournament.prizepool && (
                                                                     <span className="text-green-400 text-sm font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
-                                                                        {tournament.prizepool}
+                                                                        {formatPrizePool(tournament.prizepool)}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -783,7 +875,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                         )}
                                                         {tournament.prizepool && (
                                                             <div className="text-xs text-green-400 font-medium">
-                                                                {tournament.prizepool}
+                                                                {formatPrizePool(tournament.prizepool)}
                                                             </div>
                                                         )}
                                                     </div>
@@ -884,20 +976,22 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             )}
                         </div>
 
-                        {/* Recent Match Statistics */}
-                        {matches.length > 0 && (
-                            <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
-                                <div className="flex items-center space-x-3 mb-6">
-                                    <div className="p-2 bg-yellow-500/20 rounded-xl">
-                                        <Trophy className="w-5 h-5 text-yellow-400" />
-                                    </div>
-                                    <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
-                                        Recent Match Statistics
-                                    </h2>
+
+
+                        {/* Recent Matches */}
+                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
+                            <div className="flex items-center space-x-3 mb-6">
+                                <div className="p-2 bg-blue-500/20 rounded-xl">
+                                    <Calendar className="w-5 h-5 text-blue-400" />
                                 </div>
-                                
-                                {/* Match Statistics */}
-                                <div className="grid grid-cols-3 gap-3 text-center">
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                                    Recent Matches
+                                </h2>
+                            </div>
+                            
+                            {/* Match Statistics */}
+                            {matches.length > 0 && (
+                                <div className="grid grid-cols-3 gap-3 text-center mb-6">
                                     <div className="bg-gradient-to-br from-gray-600/30 to-gray-700/40 rounded-xl p-3 border border-gray-600/20 shadow-lg hover:shadow-xl transition-all duration-200">
                                         <div className="text-lg font-bold text-white mb-1">{matches.length}</div>
                                         <div className="text-xs text-gray-300 font-medium">Total Matches</div>
@@ -921,19 +1015,8 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                         <div className="text-xs text-red-200 font-medium">Losses</div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Recent Matches */}
-                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2 bg-blue-500/20 rounded-xl">
-                                    <Calendar className="w-5 h-5 text-blue-400" />
-                                </div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
-                                    Recent Matches
-                                </h2>
-                            </div>
+                            )}
+                            
                             {matches.length > 0 ? (
                                 <div className="space-y-4 max-h-96 overflow-y-auto">
                                     {matches.map((match) => {
@@ -965,6 +1048,14 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     {/* Match Info */}
                                                     <div className="flex-1">
                                                         <div className="flex flex-col space-y-1">
+                                                            {/* Match Name */}
+                                                            {match.name && (
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Gamepad2 className="w-3 h-3 text-purple-400" />
+                                                                    <span className="text-sm font-bold text-purple-300">{formatMatchName(match.name)}</span>
+                                                                </div>
+                                                            )}
+                                                            
                                                             {/* League Name and Tier */}
                                                             {match.league && (
                                                                 <div className="flex items-center space-x-2">
@@ -998,6 +1089,17 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     <span className="text-xs font-bold text-white">{match.tournament.name}</span>
                                                                 </div>
                                                             )}
+                                                            
+                                                            {/* Videogame and Version */}
+                                                            <div className="flex items-center space-x-2">
+                                                                <Gamepad2 className="w-3 h-3 text-green-400" />
+                                                                <span className="text-xs text-green-300">
+                                                                    {match.videogame.name}
+                                                                    {match.videogame_version?.name && (
+                                                                        <span className="text-green-400 ml-1">• {match.videogame_version.name}</span>
+                                                                    )}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     
@@ -1042,22 +1144,47 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     </div>
                                                 </div>
 
-                                                {/* Match Date/Time */}
-                                                <div className="flex items-center justify-between text-xs text-gray-400">
-                                                    <div 
-                                                        className="flex items-center space-x-1 cursor-default"
-                                                        title={formatDateTime(match.begin_at).full}
-                                                    >
-                                                        <Calendar className="w-3 h-3" />
-                                                        <span>{formatDateTime(match.begin_at).date}</span>
+                                                {/* Match Date/Time Information */}
+                                                <div className="space-y-2">
+                                                    {/* Start Date/Time */}
+                                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                                        <div 
+                                                            className="flex items-center space-x-1 cursor-default"
+                                                            title={formatDateTime(match.begin_at).full}
+                                                        >
+                                                            <Calendar className="w-3 h-3" />
+                                                            <span className="text-gray-300">Start:</span>
+                                                            <span>{formatDateTime(match.begin_at).date}</span>
+                                                        </div>
+                                                        <div 
+                                                            className="flex items-center space-x-1 cursor-default"
+                                                            title={formatDateTime(match.begin_at).full}
+                                                        >
+                                                            <Clock className="w-3 h-3" />
+                                                            <span>{formatDateTime(match.begin_at).time}</span>
+                                                        </div>
                                                     </div>
-                                                    <div 
-                                                        className="flex items-center space-x-1 cursor-default"
-                                                        title={formatDateTime(match.begin_at).full}
-                                                    >
-                                                        <Clock className="w-3 h-3" />
-                                                        <span>{formatDateTime(match.begin_at).time}</span>
-                                                    </div>
+                                                    
+                                                    {/* End Date/Time */}
+                                                    {match.end_at && (
+                                                        <div className="flex items-center justify-between text-xs text-gray-400">
+                                                            <div 
+                                                                className="flex items-center space-x-1 cursor-default"
+                                                                title={formatDateTime(match.end_at).full}
+                                                            >
+                                                                <Calendar className="w-3 h-3" />
+                                                                <span className="text-gray-300">End:</span>
+                                                                <span>{formatDateTime(match.end_at).date}</span>
+                                                            </div>
+                                                            <div 
+                                                                className="flex items-center space-x-1 cursor-default"
+                                                                title={formatDateTime(match.end_at).full}
+                                                            >
+                                                                <Clock className="w-3 h-3" />
+                                                                <span>{formatDateTime(match.end_at).time}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )
