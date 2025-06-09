@@ -2,7 +2,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
-import { formatTournamentDate } from '@/lib/utils'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
 
 interface TournamentCardProps {
@@ -11,6 +10,27 @@ interface TournamentCardProps {
 
 export default function TournamentCard({ tournament }: TournamentCardProps) {
     const [showAllTeams, setShowAllTeams] = useState(false)
+
+    // Get user's timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    // Format date in user's current timezone
+    const formatDateInUserTimezone = (dateString: string) => {
+        if (!dateString) return 'TBD'
+
+        const date = new Date(dateString)
+        const options: Intl.DateTimeFormatOptions = {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: userTimezone,
+            timeZoneName: 'short'
+        }
+
+        return date.toLocaleDateString('en-US', options)
+    }
 
     const getLeagueImage = () => {
         const imageUrl = tournament.league.image_url;
@@ -163,10 +183,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                                 <Calendar className="w-4 h-4 text-purple-400" />
                                 <div className="text-center">
                                     <div className="text-gray-200 font-medium">
-                                        {formatTournamentDate(tournament.begin_at, country || undefined, region || undefined)}
+                                        {formatDateInUserTimezone(tournament.begin_at)}
                                     </div>
                                     <div className="text-gray-400 text-xs">
-                                        to {formatTournamentDate(tournament.end_at, country || undefined, region || undefined)}
+                                        to {formatDateInUserTimezone(tournament.end_at)}
                                     </div>
                                 </div>
                             </div>

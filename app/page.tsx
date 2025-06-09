@@ -189,20 +189,70 @@ export default function HomePage() {
           <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
             <div className="space-y-4 pr-2">
               {matchesLoading ? (
-                [...Array(50)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-gray-700/50 animate-pulse">
-                                          <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-gray-700 rounded-full" />
-                        <div className="flex flex-col space-y-1">
-                          <div className="h-4 w-48 bg-gray-700 rounded" />
+                [...Array(12)].map((_, i) => (
+                  <div key={i} className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 rounded-lg px-3 transition-all duration-200 animate-pulse">
+                    <div className="flex items-center space-x-3">
+                      {/* Status indicator */}
+                      <div className="relative">
+                        <div className={`w-2 h-2 rounded-full ${
+                          i % 3 === 0 ? 'bg-red-500/50' :
+                          i % 3 === 1 ? 'bg-blue-500/50' : 'bg-yellow-500/50'
+                        }`} />
+                      </div>
+                      
+                      <div className="flex flex-col">
+                        {/* Match name skeleton */}
+                        {i % 2 === 0 && (
+                          <div className="mb-1">
+                            <div className="h-4 w-32 bg-purple-300/20 rounded" />
+                          </div>
+                        )}
+                        
+                        {/* Team Images and Names */}
+                        <div className="flex items-center space-x-2 mb-1">
                           <div className="flex items-center space-x-2">
-                            <div className="h-3 w-24 bg-gray-700 rounded" />
-                            <div className="h-3 w-1 bg-gray-700 rounded" />
-                            <div className="h-3 w-20 bg-gray-700 rounded" />
+                            <div className="w-5 h-5 bg-gray-700/50 rounded-full" />
+                            <div className="h-3 w-16 bg-gray-300/30 rounded" />
+                            <span className="text-xs text-gray-500 mx-1">vs</span>
+                            <div className="w-5 h-5 bg-gray-700/50 rounded-full" />
+                            <div className="h-3 w-14 bg-gray-300/30 rounded" />
                           </div>
                         </div>
+                        
+                        {/* League, Serie, Tournament Info */}
+                        <div className="flex items-center space-x-2 mb-1">
+                          <div className="h-3 w-20 bg-blue-400/20 rounded" />
+                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
+                          <div className="h-3 w-24 bg-green-400/20 rounded" />
+                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
+                          <div className="h-3 w-18 bg-yellow-400/20 rounded" />
+                        </div>
+                        
+                        {/* Game and date info */}
+                        <div className="flex items-center space-x-2">
+                          <div className="h-3 w-16 bg-gray-500/30 rounded" />
+                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
+                          <div className="h-3 w-20 bg-gray-500/30 rounded" />
+                        </div>
                       </div>
-                    <div className="h-4 w-16 bg-gray-700 rounded" />
+                    </div>
+                    
+                    {/* Status badge */}
+                    <div className="flex items-center space-x-2">
+                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${
+                        i % 3 === 0 ? 'bg-red-500/20 border-red-500/30' :
+                        i % 3 === 1 ? 'bg-blue-500/20 border-blue-500/30' : 'bg-yellow-500/20 border-yellow-500/30'
+                      }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          i % 3 === 0 ? 'bg-red-500/50' :
+                          i % 3 === 1 ? 'bg-blue-500/50' : 'bg-yellow-500/50'
+                        }`} />
+                        <div className={`h-3 w-8 rounded ${
+                          i % 3 === 0 ? 'bg-red-400/30' :
+                          i % 3 === 1 ? 'bg-blue-400/30' : 'bg-yellow-400/30'
+                        }`} />
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : (

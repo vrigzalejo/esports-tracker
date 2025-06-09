@@ -70,10 +70,11 @@ export function useMatchData(match: Match) {
         }
     }, [match])
 
-    // Format date and time with timezone
+    // Format date and time in user's current timezone
     const formatDateTime = (dateString: string) => {
         if (!dateString) return { date: 'TBD', time: 'TBD' }
 
+        // Always use user's current timezone
         const date = new Date(dateString)
         const dateOptions: Intl.DateTimeFormatOptions = {
             month: 'short',

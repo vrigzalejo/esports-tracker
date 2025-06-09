@@ -11,6 +11,11 @@ export function capitalizeWords(text: string): string {
         'world', 'global', 'europe', 'america', 'asia', 'north', 'south',
         'east', 'west', 'central', 'latin', 'valorant', 'changers', 'ace'
     ]);
+
+    // Region acronyms that should be fully capitalized
+    const regionAcronyms = new Set([
+        'emea', 'apac', 'mena', 'latam', 'na', 'eu', 'kr', 'cn', 'jp', 'sea'
+    ]);
     
     // Words that should remain lowercase unless at the beginning
     const keepLowercase = new Set([
@@ -22,6 +27,11 @@ export function capitalizeWords(text: string): string {
         if (!word) return word;
         
         const lowerWord = word.toLowerCase();
+        
+        // Handle region acronyms - always fully capitalize
+        if (regionAcronyms.has(lowerWord)) {
+            return lowerWord.toUpperCase();
+        }
         
         // Always capitalize first word
         if (index === 0) {
