@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import type { TournamentMatch } from '@/types/esports';
 import { formatMatchDateRange } from '@/lib/textUtils';
 
@@ -172,10 +173,15 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                 <div className="flex items-center space-x-2">
                                                     {opponent?.image_url && (
                                                         <div className="relative w-5 h-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded border border-gray-600/40 shadow-md overflow-hidden backdrop-blur-sm">
-                                                            <img 
+                                                            <Image 
                                                                 src={opponent.image_url} 
                                                                 alt={opponent.name}
-                                                                className="w-full h-full object-contain p-0.5"
+                                                                fill
+                                                                className="object-contain p-0.5"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement
+                                                                    target.src = '/images/placeholder-team.svg'
+                                                                }}
                                                             />
                                                         </div>
                                                     )}

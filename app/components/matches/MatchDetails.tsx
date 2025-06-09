@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
 import TeamMatches from './TeamMatches';
@@ -64,10 +65,15 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[0]?.id)}
                                 className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
-                                <img 
+                                <Image 
                                     src={scoreInfo[0].image} 
                                     alt={scoreInfo[0].name}
-                                    className="w-full h-full object-contain p-1"
+                                    fill
+                                    className="object-contain p-1"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.src = '/images/placeholder-team.svg'
+                                    }}
                                 />
                                 {/* Hover overlay */}
                                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
@@ -115,10 +121,15 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[1]?.id)}
                                 className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
-                                <img 
+                                <Image 
                                     src={scoreInfo[1].image} 
                                     alt={scoreInfo[1].name}
-                                    className="w-full h-full object-contain p-1"
+                                    fill
+                                    className="object-contain p-1"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        target.src = '/images/placeholder-team.svg'
+                                    }}
                                 />
                                 {/* Hover overlay */}
                                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
