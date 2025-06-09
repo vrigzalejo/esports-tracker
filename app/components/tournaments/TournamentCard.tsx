@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
-import { formatDate } from '@/lib/utils'
+import { formatTournamentDate } from '@/lib/utils'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
 
 interface TournamentCardProps {
@@ -115,144 +115,170 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
     const tournamentType = parseTournamentType(tournament)
 
     return (
-        <div className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1">
-            {/* Subtle background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="group relative bg-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-purple-400/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:bg-white/[0.04]">
+            {/* Clean background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             <div className="relative z-10">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="relative w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl ring-1 ring-gray-600/20 group-hover:ring-purple-500/30 transition-all duration-300">
-                            <Image
-                                src={getLeagueImage()}
-                                alt={tournament.league.name}
-                                fill
-                                className="rounded-xl object-cover"
-                                priority={false}
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = '/images/placeholder-tournament.svg';
-                                }}
-                            />
+                <div className="flex flex-col">
+                    {/* Tournament Image - Top */}
+                    <div className="flex justify-center mb-3">
+                        <div className="relative w-28 h-28">
+                            <div className="absolute inset-0 bg-white/5 rounded-2xl backdrop-blur-sm shadow-2xl" />
+                            <div className="relative w-full h-full bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-3 border border-white/20 backdrop-blur-md">
+                                <div className="relative w-full h-full rounded-xl overflow-hidden bg-white/5">
+                                    <Image
+                                        src={getLeagueImage()}
+                                        alt={tournament.league.name}
+                                        fill
+                                        className="object-contain object-center filter drop-shadow-lg"
+                                        priority={false}
+                                        sizes="84px"
+                                        quality={100}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/images/placeholder-tournament.svg';
+                                        }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-white font-semibold text-lg leading-tight group-hover:text-purple-100 transition-colors duration-200 mb-2">
+                    </div>
+                    
+                    {/* Content - Bottom */}
+                    <div className="text-center">
+                        <div className="mb-3">
+                            <h3 className="text-white font-bold text-lg leading-tight group-hover:text-purple-100 transition-colors duration-300 mb-1">
                                 {tournament.league.name}
                                 {tournament.serie?.name && ` • ${tournament.serie.name}`}
                                 {tournament.serie?.year && ` ${tournament.serie.year}`}
                                 {` • ${tournament.name}`}
                             </h3>
-                            <p className="text-gray-400 text-sm mb-3">{tournament.videogame.name}</p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                {(() => {
-                                    const statusInfo = getTournamentStatus(tournament);
-                                    return (
-                                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1`}>
-                                            <Clock className="w-3 h-3" />
-                                            {statusInfo.status.toUpperCase()}
-                                        </span>
-                                    );
-                                })()}
-                                {tournamentType && (
-                                    <span className="px-2.5 py-1 bg-blue-500/15 text-blue-400 border border-blue-500/25 rounded-lg text-xs font-medium">
-                                        {tournamentType}
-                                    </span>
-                                )}
-                                {tournament.tier && (
-                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${getTierBadge(tournament.tier)}`}>
-                                        Tier {tournament.tier.toUpperCase()}
-                                    </span>
-                                )}
-                                {region && (
-                                    <span className="px-2.5 py-1 bg-gray-600/15 text-gray-300 border border-gray-600/25 rounded-lg text-xs font-medium">
-                                        {region}
-                                    </span>
-                                )}
+                            <p className="text-gray-300 text-sm font-medium">{tournament.videogame.name}</p>
+                        </div>
+
+                        {/* Date & Time - Clean Display */}
+                        <div className="mb-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                            <div className="flex items-center justify-center gap-2 text-sm">
+                                <Calendar className="w-4 h-4 text-purple-400" />
+                                <div className="text-center">
+                                    <div className="text-gray-200 font-medium">
+                                        {formatTournamentDate(tournament.begin_at, country || undefined, region || undefined)}
+                                    </div>
+                                    <div className="text-gray-400 text-xs">
+                                        to {formatTournamentDate(tournament.end_at, country || undefined, region || undefined)}
+                                    </div>
+                                </div>
                             </div>
+                            {country && (
+                                <div className="flex items-center justify-center gap-2 text-xs mt-1">
+                                    <MapPin className="w-3 h-3 text-gray-400" />
+                                    <span className="text-gray-400">{country}</span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Prize Pool - Compact */}
+                        {tournament.prizepool && (
+                            <div className="mb-3">
+                                <p className="text-green-400 font-bold text-2xl group-hover:text-green-300 transition-colors duration-300">{formatPrizePool(tournament.prizepool)}</p>
+                                <p className="text-gray-400 text-xs font-medium">Prize Pool</p>
+                            </div>
+                        )}
+                        
+                        {/* Badges - Compact */}
+                        <div className="flex items-center justify-center gap-2 flex-wrap">
+                            {(() => {
+                                const statusInfo = getTournamentStatus(tournament);
+                                return (
+                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1 backdrop-blur-sm`}>
+                                        <Clock className="w-3 h-3" />
+                                        {statusInfo.status.toUpperCase()}
+                                    </span>
+                                );
+                            })()}
+                            {tournamentType && (
+                                <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-lg text-xs font-semibold backdrop-blur-sm">
+                                    {tournamentType}
+                                </span>
+                            )}
+                            {tournament.tier && (
+                                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border backdrop-blur-sm ${getTierBadge(tournament.tier)}`}>
+                                    Tier {tournament.tier.toUpperCase()}
+                                </span>
+                            )}
+                            {region && (
+                                <span className="px-2.5 py-1 bg-gray-500/20 text-gray-200 border border-gray-400/30 rounded-lg text-xs font-semibold backdrop-blur-sm">
+                                    {region}
+                                </span>
+                            )}
                         </div>
                     </div>
-                    {tournament.prizepool && (
-                        <div className="text-right flex-shrink-0 ml-4">
-                            <p className="text-green-400 font-bold text-xl group-hover:text-green-300 transition-colors duration-200">{formatPrizePool(tournament.prizepool)}</p>
-                            <p className="text-gray-500 text-xs mt-1">Prize Pool</p>
-                        </div>
-                    )}
                 </div>
 
-                <div className="space-y-3">
-                    {/* Date */}
-                    <div className="flex items-center text-sm">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-                        <span className="text-gray-300">
-                            {formatDate(tournament.begin_at)} - {formatDate(tournament.end_at)}
-                        </span>
-                    </div>
-
-                    {/* Location Information */}
-                    {country && (
-                        <div className="flex items-center text-sm">
-                            <MapPin className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-                            <span className="text-gray-300">{country}</span>
+                {/* Participating Teams - Only show if teams exist */}
+                {tournament.teams && tournament.teams.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                            <div className="flex items-center">
+                                <Users className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                                <span className="text-gray-400 font-medium">
+                                    Teams ({tournament.teams.length})
+                                </span>
+                            </div>
+                            {tournament.teams.length > 6 && (
+                                <button
+                                    onClick={() => setShowAllTeams(!showAllTeams)}
+                                    className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                >
+                                    {showAllTeams ? (
+                                        <>
+                                            <span>Show less</span>
+                                            <ChevronUp className="w-3 h-3 ml-1" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Show all</span>
+                                            <ChevronDown className="w-3 h-3 ml-1" />
+                                        </>
+                                    )}
+                                </button>
+                            )}
                         </div>
-                    )}
-
-                    {/* Participating Teams */}
-                    {tournament.teams && tournament.teams.length > 0 && (
-                        <div className="mt-4 pt-3 border-t border-gray-700">
-                            <div className="flex items-center justify-between text-sm mb-2">
-                                <div className="flex items-center">
-                                    <Users className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-                                    <span className="text-gray-400 font-medium">
-                                        Teams ({tournament.teams.length})
+                        <div className={`grid grid-cols-2 gap-2 ${showAllTeams ? 'max-h-32' : 'max-h-20'} overflow-y-auto transition-all duration-300`}>
+                            {(showAllTeams ? tournament.teams : tournament.teams.slice(0, 6)).map((team) => (
+                                <div key={team.id} className="flex items-center space-x-2 text-xs">
+                                    {team.image_url ? (
+                                        <div className="relative w-4 h-4 bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex-shrink-0 overflow-hidden shadow-sm ring-1 ring-gray-600/20">
+                                            <Image
+                                                src={team.image_url}
+                                                alt={team.name}
+                                                fill
+                                                className="rounded-md object-cover object-center"
+                                                sizes="16px"
+                                                quality={85}
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex items-center justify-center"><span class="text-gray-400 text-xs font-medium">' + team.name.charAt(0).toUpperCase() + '</span></div>';
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-4 h-4 bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex-shrink-0 flex items-center justify-center shadow-sm ring-1 ring-gray-600/20">
+                                            <span className="text-gray-400 text-xs font-medium">{team.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                    )}
+                                    <span className="text-gray-300 truncate">
+                                        {team.name}
                                     </span>
                                 </div>
-                                {tournament.teams.length > 8 && (
-                                    <button
-                                        onClick={() => setShowAllTeams(!showAllTeams)}
-                                        className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                    >
-                                        {showAllTeams ? (
-                                            <>
-                                                <span>Show less</span>
-                                                <ChevronUp className="w-3 h-3 ml-1" />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span>Show all</span>
-                                                <ChevronDown className="w-3 h-3 ml-1" />
-                                            </>
-                                        )}
-                                    </button>
-                                )}
-                            </div>
-                            <div className={`grid grid-cols-2 gap-2 ${showAllTeams ? 'max-h-48' : 'max-h-24'} overflow-y-auto transition-all duration-300`}>
-                                {(showAllTeams ? tournament.teams : tournament.teams.slice(0, 8)).map((team) => (
-                                    <div key={team.id} className="flex items-center space-x-2 text-xs">
-                                        {team.image_url ? (
-                                            <div className="relative w-4 h-4 bg-gray-700 rounded-sm flex-shrink-0">
-                                                <Image
-                                                    src={team.image_url}
-                                                    alt={team.name}
-                                                    fill
-                                                    className="rounded-sm object-cover"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.style.display = 'none';
-                                                    }}
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="w-4 h-4 bg-gray-600 rounded-sm flex-shrink-0" />
-                                        )}
-                                        <span className="text-gray-300 truncate">
-                                            {team.name}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            ))}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     )
