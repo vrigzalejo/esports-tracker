@@ -48,7 +48,7 @@ export default function TeamDisplay({
         <div className="flex flex-col items-center space-y-3">
             <div className="relative">
                 <div 
-                    className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-600/40 shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/40 cursor-pointer backdrop-blur-sm overflow-hidden"
+                    className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-600/40 shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/40 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer backdrop-blur-sm overflow-hidden"
                     onClick={handleTeamClick}
                 >
                     <div className="absolute inset-0.5 bg-gradient-to-br from-gray-700/20 to-gray-800/20 rounded-2xl" />
@@ -64,6 +64,9 @@ export default function TeamDisplay({
                         }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-2xl pointer-events-none" />
+                    
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                 </div>
                 {isWinner && (
                     <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-yellow-600 backdrop-blur-sm rounded-full p-1.5 shadow-lg z-20 border border-yellow-300/30">
@@ -72,7 +75,10 @@ export default function TeamDisplay({
                 )}
             </div>
             <div className="flex flex-col items-center space-y-1">
-                <span className={`font-bold text-center text-xs sm:text-sm ${isWinner ? 'text-yellow-400' : 'text-white'}`}>
+                <span 
+                    onClick={handleTeamClick}
+                    className={`font-bold text-center text-xs sm:text-sm cursor-pointer hover:text-cyan-300 transition-colors duration-200 ${isWinner ? 'text-yellow-400' : 'text-white'}`}
+                >
                     {getTeamName(opponent)}
                 </span>
                 {showScore && score !== undefined && (

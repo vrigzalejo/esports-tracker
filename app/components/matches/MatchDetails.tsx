@@ -62,18 +62,20 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         {scoreInfo[0]?.image && (
                             <div 
                                 onClick={() => handleTeamClick(scoreInfo[0]?.id)}
-                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-purple-500/50 transition-all duration-200"
+                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <img 
                                     src={scoreInfo[0].image} 
                                     alt={scoreInfo[0].name}
                                     className="w-full h-full object-contain p-1"
                                 />
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
                         <div 
                             onClick={() => handleTeamClick(scoreInfo[0]?.id)}
-                            className="text-right cursor-pointer hover:text-purple-300 transition-colors duration-200"
+                            className="text-right cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                         >
                             <div className="text-lg font-bold">{scoreInfo[0]?.name}</div>
                             <div className="text-sm text-gray-400">{scoreInfo[0]?.acronym}</div>
@@ -103,7 +105,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         <div 
                             onClick={() => handleTeamClick(scoreInfo[1]?.id)}
-                            className="text-left cursor-pointer hover:text-purple-300 transition-colors duration-200"
+                            className="text-left cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                         >
                             <div className="text-lg font-bold">{scoreInfo[1]?.name}</div>
                             <div className="text-sm text-gray-400">{scoreInfo[1]?.acronym}</div>
@@ -111,13 +113,15 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         {scoreInfo[1]?.image && (
                             <div 
                                 onClick={() => handleTeamClick(scoreInfo[1]?.id)}
-                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-purple-500/50 transition-all duration-200"
+                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <img 
                                     src={scoreInfo[1].image} 
                                     alt={scoreInfo[1].name}
                                     className="w-full h-full object-contain p-1"
                                 />
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
                     </div>
