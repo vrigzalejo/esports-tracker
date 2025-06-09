@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { TournamentStanding } from '@/types/esports';
 
 interface TournamentStandingsProps {
@@ -165,10 +166,15 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                 </div>
                                 {standing.team.image_url && (
                                     <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
-                                        <img 
+                                        <Image 
                                             src={standing.team.image_url} 
                                             alt={standing.team.name}
-                                            className="w-full h-full object-contain p-0.5"
+                                            fill
+                                            className="object-contain p-0.5"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement
+                                                target.src = '/images/placeholder-team.svg'
+                                            }}
                                         />
                                     </div>
                                 )}

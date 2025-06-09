@@ -707,8 +707,8 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 >
                                                                     {team1?.name || 'TBD'}
                                                                 </div>
-                                                                {(team1 as any)?.acronym && (
-                                                                    <div className="text-xs text-slate-400 mt-1">{(team1 as any).acronym}</div>
+                                                                {(team1 as { acronym?: string })?.acronym && (
+                                                                    <div className="text-xs text-slate-400 mt-1">{(team1 as { acronym?: string }).acronym}</div>
                                                                 )}
                                                             </div>
                                                             {result && (
@@ -752,8 +752,8 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 >
                                                                     {team2?.name || 'TBD'}
                                                                 </div>
-                                                                {(team2 as any)?.acronym && (
-                                                                    <div className="text-xs text-slate-400 mt-1">{(team2 as any).acronym}</div>
+                                                                {(team2 as { acronym?: string })?.acronym && (
+                                                                    <div className="text-xs text-slate-400 mt-1">{(team2 as { acronym?: string }).acronym}</div>
                                                                 )}
                                                             </div>
                                                             {result && (
