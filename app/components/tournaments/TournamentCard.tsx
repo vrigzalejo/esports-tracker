@@ -236,35 +236,36 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                     </div>
                 </div>
 
-                {/* Participating Teams - Only show if teams exist */}
-                {tournament.teams && tournament.teams.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                        <div className="flex items-center justify-between text-sm mb-2">
-                            <div className="flex items-center">
-                                <Users className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-                                <span className="text-gray-400 font-medium">
-                                    Teams ({tournament.teams.length})
-                                </span>
-                            </div>
-                            {tournament.teams.length > 6 && (
-                                <button
-                                    onClick={() => setShowAllTeams(!showAllTeams)}
-                                    className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                >
-                                    {showAllTeams ? (
-                                        <>
-                                            <span>Show less</span>
-                                            <ChevronUp className="w-3 h-3 ml-1" />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Show all</span>
-                                            <ChevronDown className="w-3 h-3 ml-1" />
-                                        </>
-                                    )}
-                                </button>
-                            )}
+                {/* Participating Teams */}
+                <div className="mt-3 pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                        <div className="flex items-center">
+                            <Users className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                            <span className="text-gray-400 font-medium">
+                                Teams {tournament.teams && tournament.teams.length > 0 ? `(${tournament.teams.length})` : ''}
+                            </span>
                         </div>
+                        {tournament.teams && tournament.teams.length > 6 && (
+                            <button
+                                onClick={() => setShowAllTeams(!showAllTeams)}
+                                className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                                {showAllTeams ? (
+                                    <>
+                                        <span>Show less</span>
+                                        <ChevronUp className="w-3 h-3 ml-1" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Show all</span>
+                                        <ChevronDown className="w-3 h-3 ml-1" />
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                    
+                    {tournament.teams && tournament.teams.length > 0 ? (
                         <div className={`grid grid-cols-2 gap-2 ${showAllTeams ? 'max-h-32' : 'max-h-20'} overflow-y-auto transition-all duration-300`}>
                             {(showAllTeams ? tournament.teams : tournament.teams.slice(0, 6)).map((team) => (
                                 <div key={team.id} className="flex items-center space-x-2 text-xs">
@@ -297,8 +298,12 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                                 </div>
                             ))}
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <div className="text-center py-2">
+                            <span className="text-gray-500 text-xs italic">No teams announced yet</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )
