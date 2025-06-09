@@ -7,41 +7,51 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 ### Core Functionality
 - **Live Match Tracking**: Real-time match status with live indicators and countdown timers
 - **Enhanced Match Details**: Comprehensive match information with score cards, team rosters, and recent performance
-- **Tournament Management**: Complete tournament listings with standings, matches, and prize pools
-- **Team Analytics**: Team profiles with ratings, statistics, and recent match history
+- **Tournament Management**: Complete tournament listings with detailed tournament pages, standings, matches, and prize pools
+- **Team Analytics**: Team profiles with ratings, statistics, recent match history, and championship tracking
 - **Advanced Search & Filtering**: Filter by game, team, tournament, or match status with real-time results
 - **Responsive Design**: Mobile-first approach with smooth animations and modern UI
 
 ### Enhanced UI/UX Features
-- **Clean Team Images**: Glassmorphism design with gradient backgrounds, backdrop blur, and proper logo containment
-- **Smart Text Formatting**: Intelligent capitalization for match names, tournament titles, and league information
-- **Interactive Elements**: Consistent cursor pointer styling across all clickable elements
-- **Match Name Cleaning**: Automatic removal of team names from match titles for cleaner display
+- **Glassmorphism Design**: Modern glass-morphism effects with backdrop blur and gradient backgrounds
+- **Clean Team Images**: Proper logo containment with gradient overlays and hover animations
+- **Smart Text Formatting**: Intelligent capitalization for match names, tournament titles, and league information with region acronym handling
+- **Interactive Navigation**: Seamless navigation between tournaments, teams, and matches with consistent cursor styling
+- **Match Name Cleaning**: Automatic removal of redundant team names from match titles for cleaner display
 - **Games Format Display**: BO3, BO5 format indicators alongside match information
-- **Status Indicators**: Live, completed, and upcoming match badges with animations
+- **Status Indicators**: Live, completed, and upcoming match badges with animations and color coding
+
+### Tournament Details System
+- **Comprehensive Tournament Pages**: Dedicated pages for each tournament with complete information
+- **Tournament Navigation**: Click-to-navigate from tournament cards, images, and names throughout the app
+- **Real-time Match Display**: Tournament matches with enhanced visual design and team navigation
+- **Dynamic Standings**: Calculated standings based on actual match results with win/loss tracking
+- **Tournament Winner Display**: Special highlighting for tournament champions with roster information
+- **Teams & Rosters**: Complete team rosters with player details, flags, roles, and ages
+- **Tournament Info Sidebar**: Dates, times, game information, and location details with timezone support
 
 ### Match Details System
 - **Interactive Score Cards**: Beautiful score displays with team logos and winner highlighting
-- **Team Rosters**: View complete team lineups for tournament matches with player details
+- **Enhanced Match Cards**: Glass-morphism design with hover effects, glow animations, and improved typography
+- **Team Navigation**: Click team logos and names to navigate to team detail pages
 - **Recent Team Matches**: Track team performance with W/L indicators and detailed match results
 - **Tournament Context**: See tournament standings and related matches
 - **Escape Key Support**: Quick modal navigation with keyboard shortcuts
 - **Match Header**: Comprehensive match information with league, serie, and tournament details
 
-### Tournament Features
-- **Smart Standings**: Conditional W/L columns that adapt to available data
-- **Team-Focused Views**: Highlight relevant teams in tournament standings
-- **Match Filtering**: Show only matches involving specific teams
-- **Performance Tracking**: Win rates, rankings, and head-to-head records
-- **Championship Tracking**: Display team achievements and tournament wins
-- **Prize Pool Formatting**: Intelligent currency detection and formatting
-
 ### Team Management
 - **Detailed Team Profiles**: Comprehensive team information with recent roster and match history
-- **Championship History**: Track team achievements across tournaments
-- **Player Information**: Complete player profiles with nationality, age, and role information
+- **Championship History**: Track team achievements across tournaments with navigation to tournament details
+- **Recent Championships Section**: Clean display of team wins with dates, times, and prize pools
+- **Player Information**: Complete player profiles with nationality flags, age, role, and birthday information
 - **Match Statistics**: Win/loss records and recent performance metrics
-- **Tournament Participation**: View all tournaments a team has participated in
+- **Tournament Participation**: View all tournaments a team has participated in with detailed roster information
+
+### Timezone & Date Handling
+- **User Timezone Conversion**: All dates and times displayed in user's current timezone
+- **Comprehensive Date Display**: Start and end dates with times and timezone abbreviations
+- **Tournament Scheduling**: Complete tournament timeline with proper timezone handling
+- **Match Timing**: Accurate match scheduling with timezone-aware displays
 
 ### Technical Highlights
 - **Next.js 15**: Latest features including Turbopack and improved performance
@@ -51,7 +61,8 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 - **Component Architecture**: Modular, reusable components with proper error handling
 - **Custom Hooks**: Optimized data fetching and state management
 - **API Integration**: Comprehensive PandaScore API wrapper with caching
-- **Text Utilities**: Advanced text processing for consistent formatting
+- **Text Utilities**: Advanced text processing for consistent formatting with region acronym support
+- **Timezone Utilities**: Robust timezone handling and date formatting
 - **EOF Compliance**: Proper file endings for better Git compatibility
 
 ## 🛠️ Installation
@@ -78,7 +89,7 @@ npm run dev
 Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_PANDASCORE_TOKEN=your_api_token_here
+PANDASCORE_TOKEN=your_api_token_here
 ```
 
 ### PandaScore API Setup
@@ -94,7 +105,8 @@ app/
 ├── api/                    # API routes
 │   ├── matches/           # Match endpoints
 │   ├── tournaments/       # Tournament endpoints
-│   │   └── [id]/         # Tournament-specific data
+│   │   └── [tournamentId]/ # Tournament-specific data
+│   │       ├── route.ts   # Tournament details
 │   │       ├── standings/ # Tournament standings
 │   │       ├── matches/   # Tournament matches
 │   │       └── rosters/   # Team rosters
@@ -104,42 +116,51 @@ app/
 │           ├── tournaments/ # Team tournament participation
 │           ├── leagues/   # Team league information
 │           └── series/    # Team series data
-├── components/            # Reusable components
-│   ├── layout/           # Layout components (Header, Footer, Navigation)
-│   │   ├── Header.tsx    # Main header with search functionality
+├── tournaments/          # Tournament pages
+│   └── [tournamentId]/  # Dynamic tournament detail pages
+│       └── page.tsx     # Tournament detail page
+├── teams/               # Team pages
+│   └── [teamId]/       # Dynamic team detail pages
+│       └── page.tsx    # Team detail page
+├── components/          # Reusable components
+│   ├── layout/         # Layout components (Header, Footer, Navigation)
+│   │   ├── Header.tsx  # Main header with search functionality
 │   │   ├── Navigation.tsx # Navigation bar with active states
-│   │   └── Footer.tsx    # Footer with links and branding
-│   ├── matches/          # Match-related components
-│   │   ├── MatchCard.tsx # Enhanced match display cards
-│   │   ├── MatchDetails.tsx # Detailed match view with clean team images
+│   │   └── Footer.tsx  # Footer with links and branding
+│   ├── matches/        # Match-related components
+│   │   ├── MatchCard.tsx # Enhanced match display cards with glass-morphism
+│   │   ├── MatchDetails.tsx # Detailed match view with team navigation
 │   │   ├── MatchHeader.tsx # Match header with stream links
 │   │   ├── MatchInfo.tsx # Match information display
 │   │   ├── TeamMatches.tsx # Team match history
 │   │   ├── TeamRoster.tsx # Team roster display
 │   │   └── MatchesContent.tsx # Main matches page content
-│   ├── tournaments/      # Tournament components
-│   │   ├── TournamentStandings.tsx # Smart standings with clean team images
-│   │   ├── TournamentMatches.tsx # Tournament match lists with clean images
-│   │   ├── TournamentCard.tsx # Tournament display cards
+│   ├── tournaments/    # Tournament components
+│   │   ├── TournamentDetailsContent.tsx # Comprehensive tournament details page
+│   │   ├── TournamentStandings.tsx # Smart standings with calculated results
+│   │   ├── TournamentMatches.tsx # Tournament match lists with navigation
+│   │   ├── TournamentCard.tsx # Tournament display cards with navigation
 │   │   └── TournamentsContent.tsx # Main tournaments page content
-│   ├── teams/           # Team components
-│   │   ├── TeamDetailsContent.tsx # Comprehensive team details
+│   ├── teams/         # Team components
+│   │   ├── TeamDetailsContent.tsx # Comprehensive team details with championships
 │   │   ├── TeamsContent.tsx # Main teams page content
-│   │   └── TeamDisplay.tsx # Enhanced team display with clean images
-│   ├── ui/              # UI components
+│   │   └── TeamDisplay.tsx # Enhanced team display with navigation
+│   ├── ui/            # UI components
 │   │   ├── StatCard.tsx # Statistics display cards
 │   │   └── AlphaBanner.tsx # Alpha version banner
-│   └── debug/           # Debug components
+│   └── debug/         # Debug components
 │       └── CacheStatus.tsx # Cache status indicator
-├── hooks/               # Custom React hooks
-│   └── useEsportsData.tsx # Data fetching hooks
-├── lib/                 # Utilities and API
-│   ├── textUtils.ts     # Text formatting and capitalization utilities
+├── hooks/             # Custom React hooks
+│   ├── useEsportsData.tsx # Data fetching hooks
+│   └── useMatchData.tsx # Match-specific data hooks with timezone handling
+├── lib/               # Utilities and API
+│   ├── textUtils.ts   # Text formatting, capitalization, and region acronym utilities
 │   ├── tournamentUtils.ts # Tournament-specific utilities
-│   └── pandaScore.ts    # PandaScore API wrapper
-├── types/               # TypeScript definitions
-│   └── esports.ts       # Esports data type definitions
-└── globals.css         # Global styles with custom animations
+│   ├── timezoneUtils.ts # Timezone handling and date formatting
+│   └── pandaScore.ts  # PandaScore API wrapper
+├── types/             # TypeScript definitions
+│   └── esports.ts     # Esports data type definitions
+└── globals.css       # Global styles with custom animations
 ```
 
 ## 🎮 Supported Games
@@ -164,9 +185,10 @@ The application supports all games available through PandaScore:
 
 #### Tournament Endpoints
 - `GET /api/tournaments` - Tournament listings with search and filtering
-- `GET /api/tournaments/[id]/standings` - Tournament standings
-- `GET /api/tournaments/[id]/matches` - Tournament matches
-- `GET /api/tournaments/[id]/rosters` - Team rosters for tournament
+- `GET /api/tournaments/[tournamentId]` - Individual tournament details
+- `GET /api/tournaments/[tournamentId]/standings` - Tournament standings
+- `GET /api/tournaments/[tournamentId]/matches` - Tournament matches
+- `GET /api/tournaments/[tournamentId]/rosters` - Team rosters for tournament
 
 #### Team Endpoints
 - `GET /api/teams` - Team profiles and statistics with search
@@ -195,7 +217,8 @@ const teamMatches = await getTeamMatches('team-id')
 ## 🎨 UI/UX Features
 
 ### Design System
-- **Modern Glassmorphism**: Backdrop blur effects and translucent elements
+- **Modern Glassmorphism**: Backdrop blur effects and translucent elements throughout
+- **Enhanced Match Cards**: Glass-morphism design with hover animations, glow effects, and improved typography
 - **Clean Team Images**: Gradient backgrounds with proper logo containment and padding
 - **Gradient Accents**: Beautiful color transitions and hover effects
 - **Responsive Grid Layouts**: Adaptive layouts for all screen sizes
@@ -203,17 +226,37 @@ const teamMatches = await getTeamMatches('team-id')
 - **Error Handling**: Graceful fallbacks and user-friendly error messages
 
 ### Interactive Elements
+- **Comprehensive Navigation**: Click-to-navigate from tournament cards, team logos, league images, and names
 - **Consistent Cursor Styling**: Pointer cursors on all clickable elements
-- **Hover Animations**: Smooth transitions and micro-interactions
+- **Hover Animations**: Smooth transitions and micro-interactions with scale and glow effects
 - **Modal System**: Escape key support and backdrop click handling
 - **Status Indicators**: Live match indicators and status badges with animations
 - **Score Displays**: Winner highlighting and team comparison cards
 
 ### Text Formatting
 - **Smart Capitalization**: Intelligent text formatting for match names and tournament titles
+- **Region Acronym Handling**: Proper capitalization of region acronyms (EMEA, APAC, etc.)
 - **Match Name Cleaning**: Automatic removal of team information from match titles
 - **League Information Parsing**: Proper formatting of league, serie, and tournament names
 - **Prize Pool Formatting**: Currency detection and proper formatting
+
+### Tournament Features
+- **Tournament Detail Pages**: Comprehensive tournament information with matches, standings, and team rosters
+- **Dynamic Standings**: Real-time calculation of team standings based on match results
+- **Tournament Winner Display**: Special highlighting for champions with roster information
+- **Teams & Rosters Section**: Complete team information with player details and flags
+- **Tournament Navigation**: Seamless navigation between related tournaments, teams, and matches
+
+### Team Features
+- **Team Detail Pages**: Comprehensive team profiles with tournament history and achievements
+- **Championship Tracking**: Recent championships section with tournament navigation
+- **Player Information**: Detailed player profiles with nationality flags, roles, and ages
+- **Tournament Participation**: Complete tournament history with roster information
+
+### Timezone & Date Features
+- **User Timezone Display**: All dates and times shown in user's current timezone
+- **Comprehensive Date Information**: Start and end dates with times and timezone abbreviations
+- **Tournament Scheduling**: Complete timeline information with proper timezone handling
 
 ### Accessibility
 - **Keyboard Navigation**: Full keyboard support for modals and interactions
@@ -250,6 +293,7 @@ CMD ["npm", "start"]
 - **Image Optimization**: Next.js Image component with lazy loading and proper error handling
 - **Bundle Analysis**: Optimized bundle sizes and tree shaking
 - **Text Processing**: Efficient text utilities for consistent formatting
+- **Height Matching**: Dynamic height calculations for consistent layouts
 
 ## 🔧 Development Features
 
@@ -258,12 +302,14 @@ CMD ["npm", "start"]
 - **EOF Compliance**: Proper file endings for all source files
 - **Consistent Styling**: Unified approach to component styling and interactions
 - **Error Boundaries**: Proper error handling and fallback components
+- **Linter Compliance**: Clean code with proper TypeScript typing
 
 ### Developer Experience
 - **Hot Reload**: Fast development with Next.js hot reload
 - **Type Safety**: Comprehensive TypeScript definitions
 - **Component Documentation**: Well-documented component props and usage
-- **Utility Functions**: Reusable text processing and formatting utilities
+- **Utility Functions**: Reusable text processing, timezone, and formatting utilities
+- **Modular Architecture**: Clean separation of concerns with reusable components
 
 ## 🤝 Contributing
 
@@ -282,6 +328,8 @@ CMD ["npm", "start"]
 - Ensure proper EOF newlines in all files
 - Use consistent cursor pointer styling
 - Apply proper text formatting utilities
+- Implement proper timezone handling
+- Add navigation between related entities
 
 ## 💖 Support
 

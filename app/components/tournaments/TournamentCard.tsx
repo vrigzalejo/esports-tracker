@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
@@ -10,6 +11,7 @@ interface TournamentCardProps {
 
 export default function TournamentCard({ tournament }: TournamentCardProps) {
     const [showAllTeams, setShowAllTeams] = useState(false)
+    const router = useRouter()
 
     // Get user's timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -135,7 +137,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
     const tournamentType = parseTournamentType(tournament)
 
     return (
-        <div className="group relative bg-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-purple-400/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:bg-white/[0.04]">
+        <div 
+            className="group relative bg-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-purple-400/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:bg-white/[0.04]"
+            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+        >
             {/* Clean background glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             

@@ -750,7 +750,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
                                                         {tournament.league?.image_url && (
-                                                            <div className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2">
+                                                            <div 
+                                                                className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
+                                                                onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                            >
                                                                 <div className="relative w-full h-full">
                                                                     <Image
                                                                         src={tournament.league.image_url}
@@ -773,7 +776,12 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {tournament.league && (
                                                     <div className="flex items-center space-x-2">
                                                         <Trophy className="w-4 h-4 text-yellow-400" />
-                                                        <span className="text-lg font-bold text-yellow-300">{tournament.league.name}</span>
+                                                        <span 
+                                                            className="text-lg font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
+                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                        >
+                                                            {tournament.league.name}
+                                                        </span>
                                                     </div>
                                                 )}
                                                                 
@@ -781,7 +789,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {tournament.serie && (
                                                     <div className="flex items-center space-x-2">
                                                         <Calendar className="w-4 h-4 text-blue-400" />
-                                                        <span className="text-md font-semibold text-blue-300">
+                                                        <span 
+                                                            className="text-md font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
+                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                        >
                                                             {parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}
                                                         </span>
                                                     </div>
@@ -790,7 +801,12 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {/* Tournament Name and Tier */}
                                                 <div className="flex items-center space-x-2 flex-wrap">
                                                     <Award className="w-4 h-4 text-orange-400" />
-                                                    <span className="text-xl font-bold text-white">{parseLeagueInfo(tournament.name)}</span>
+                                                    <span 
+                                                        className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
+                                                        onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                    >
+                                                        {parseLeagueInfo(tournament.name)}
+                                                    </span>
                                                                     {tournament.tier && (() => {
                                                                         const tierInfo = getTierDisplay(tournament.tier)
                                                                         return (
@@ -992,7 +1008,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                     {tournaments
                                         .filter(tournament => tournament.winner_id === parseInt(teamId))
                                         .map((tournament) => (
-                                            <div key={tournament.id} className="flex items-start space-x-3 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/10 hover:bg-yellow-500/10 transition-all duration-200">
+                                            <div key={tournament.id} className="flex items-start space-x-3 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/10 hover:bg-yellow-500/10 transition-all duration-200 cursor-pointer" onClick={() => router.push(`/tournaments/${tournament.id}`)}>
                                                 {/* League Image */}
                                                 {tournament.league?.image_url && (
                                                     <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-1 ring-yellow-500/30 flex-shrink-0 p-1">
@@ -1014,7 +1030,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {/* Tournament Details */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center space-x-2 mb-1">
-                                                        <span className="text-sm font-bold text-yellow-200">{parseLeagueInfo(tournament.name)}</span>
+                                                        <span className="text-sm font-bold text-yellow-200 hover:text-yellow-100 transition-colors">{parseLeagueInfo(tournament.name)}</span>
                                                         {tournament.tier && (() => {
                                                             const tierInfo = getTierDisplay(tournament.tier)
                                                             return (
@@ -1028,26 +1044,33 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     {/* League and Serie */}
                                                     <div className="space-y-0.5">
                                                         {tournament.league && (
-                                                            <div className="text-xs text-yellow-300/80">
+                                                            <div className="text-xs text-yellow-300/80 hover:text-yellow-300 transition-colors">
                                                                 {tournament.league.name}
                                                             </div>
                                                         )}
                                                         {tournament.serie && (
-                                                            <div className="text-xs text-yellow-300/60">
+                                                            <div className="text-xs text-yellow-300/60 hover:text-yellow-300/80 transition-colors">
                                                                 {parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}
                                                             </div>
                                                         )}
                                                     </div>
                                                     
-                                                    {/* Date and Prize */}
+                                                    {/* Tournament Info */}
                                                     <div className="flex items-center justify-between mt-2">
-                                                        {tournament.begin_at && (
-                                                            <div className="text-xs text-yellow-300/70">
-                                                                {formatDateTime(tournament.begin_at).date}
-                                                            </div>
-                                                        )}
+                                                        <div className="text-xs space-y-0.5">
+                                                            {tournament.begin_at && (
+                                                                <div className="text-yellow-300/80 font-medium">
+                                                                    {formatDateTime(tournament.begin_at).date} • {formatDateTime(tournament.begin_at).time}
+                                                                </div>
+                                                            )}
+                                                            {tournament.end_at && (
+                                                                <div className="text-yellow-300/60">
+                                                                    {formatDateTime(tournament.end_at).date} • {formatDateTime(tournament.end_at).time}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                         {tournament.prizepool && (
-                                                            <div className="text-xs text-green-400 font-medium">
+                                                            <div className="text-xs text-green-400 font-bold">
                                                                 {formatPrizePool(tournament.prizepool)}
                                                             </div>
                                                         )}

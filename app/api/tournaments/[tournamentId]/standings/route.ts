@@ -3,19 +3,19 @@ import { getTournamentStandings } from '@/lib/pandaScore';
 
 export async function GET(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ tournamentId: string }> }
 ) {
     try {
-        const { id } = await params;
+        const { tournamentId } = await params;
         
-        if (!id) {
+        if (!tournamentId) {
             return NextResponse.json(
                 { error: 'Tournament ID is required' },
                 { status: 400 }
             );
         }
 
-        const standings = await getTournamentStandings(id);
+        const standings = await getTournamentStandings(tournamentId);
         return NextResponse.json(standings);
     } catch (error) {
         console.error('Error fetching tournament standings:', error);
