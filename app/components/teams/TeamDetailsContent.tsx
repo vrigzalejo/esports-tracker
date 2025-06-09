@@ -854,72 +854,95 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                         {teamRoster && teamRoster.players && teamRoster.players.length > 0 ? (
                                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                                 {teamRoster.players.map((player: any) => ( /* eslint-disable-line @typescript-eslint/no-explicit-any */
-                                                                    <div key={player.id} className="flex items-center space-x-3 p-3 bg-gradient-to-r from-gray-700/40 to-gray-700/60 rounded-lg hover:from-gray-600/50 hover:to-gray-600/70 transition-all duration-300 border border-gray-600/20 hover:border-purple-500/40">
-                                                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full overflow-hidden ring-2 ring-gray-600/50 hover:ring-purple-500/60 transition-all duration-300 shadow-lg flex-shrink-0">
-                                                                            <Image
-                                                                                src={getPlayerImage(player.image_url)}
-                                                                                alt={player.name}
-                                                                                fill
-                                                                                className="object-cover"
-                                                                                onError={(e) => {
-                                                                                    const target = e.target as HTMLImageElement
-                                                                                    target.src = '/images/placeholder-player.svg'
-                                                                                }}
-                                                                            />
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <p className="font-medium text-white">{player.name}</p>
-                                                                            <div className="flex items-center space-x-2 text-xs">
-                                                                                {player.nationality && (
-                                                                                    <div 
-                                                                                        className="flex items-center space-x-1 text-gray-400 cursor-default"
-                                                                                        title={player.nationality}
-                                                                                    >
-                                                                                        <div className="relative w-4 h-3">
-                                                                                            {getFlagPath(player.nationality) ? (
-                                                                                                <Image
-                                                                                                    src={getFlagPath(player.nationality)}
-                                                                                                    alt={`${player.nationality} flag`}
-                                                                                                    width={16}
-                                                                                                    height={12}
-                                                                                                    className="object-cover rounded-sm"
-                                                                                                    onError={(e) => {
-                                                                                                        const target = e.target as HTMLImageElement
-                                                                                                        target.style.display = 'none'
-                                                                                                        const parent = target.parentElement?.parentElement
-                                                                                                        if (parent) {
-                                                                                                            parent.innerHTML = `<span class="text-xs text-gray-400">${player.nationality}</span>`
-                                                                                                        }
-                                                                                                    }}
-                                                                                                />
-                                                                                            ) : (
-                                                                                                <span className="text-xs text-gray-400">{player.nationality}</span>
-                                                                                            )}
-                                                                                        </div>
+                                                                    <div key={player.id} className="group">
+                                                                        <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
+                                                                            {/* Player Image - Full Size */}
+                                                                            <div className="relative w-full h-64 bg-gray-700 overflow-hidden">
+                                                                                <Image
+                                                                                    src={getPlayerImage(player.image_url)}
+                                                                                    alt={player.name}
+                                                                                    fill
+                                                                                    className="object-cover object-top"
+                                                                                    onError={(e) => {
+                                                                                        const target = e.target as HTMLImageElement
+                                                                                        target.src = '/images/placeholder-player.svg'
+                                                                                    }}
+                                                                                />
+                                                                                
+                                                                                {/* Active status indicator */}
+                                                                                {!player.active && (
+                                                                                    <div className="absolute top-3 right-3">
+                                                                                        <div className="w-2.5 h-2.5 rounded-full bg-red-400" title="Inactive" />
                                                                                     </div>
                                                                                 )}
-                                                                                {player.age > 0 && (
-                                                                                    <span className="text-gray-400">{player.age}y</span>
-                                                                                )}
-                                                                                {!player.active && (
-                                                                                    <span className="px-1.5 py-0.5 bg-red-500/20 text-red-300 text-xs rounded-full">Inactive</span>
-                                                                                )}
-                                                                                {player.role && (
-                                                                                    <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-xs">
-                                                                                        {player.role}
-                                                                                    </span>
-                                                                                )}
                                                                             </div>
-                                                                            {(player.first_name || player.last_name) && (
-                                                                                <p className="text-xs text-gray-500 mt-1">
-                                                                                    {[player.first_name, player.last_name].filter(Boolean).join(' ')}
-                                                                                </p>
-                                                                            )}
-                                                                            {player.birthday && (
-                                                                                <p className="text-xs text-gray-500 mt-1">
-                                                                                    Born: {formatBirthday(player.birthday)}
-                                                                                </p>
-                                                                            )}
+                                                                            
+                                                                            {/* Player Info */}
+                                                                            <div className="p-3">
+                                                                                <div className="text-center mb-3">
+                                                                                    <h5 className="text-white font-semibold text-base mb-1">
+                                                                                        {player.name}
+                                                                                    </h5>
+                                                                                    {(player.first_name || player.last_name) && (
+                                                                                        <p className="text-xs text-gray-400 font-medium">
+                                                                                            {[player.first_name, player.last_name].filter(Boolean).join(' ')}
+                                                                                        </p>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                <div className="space-y-2">
+                                                                                    {/* Nationality */}
+                                                                                    {player.nationality && (
+                                                                                        <div className="flex items-center justify-center space-x-2 text-gray-300 text-xs">
+                                                                                            <div className="relative w-4 h-3">
+                                                                                                {getFlagPath(player.nationality) ? (
+                                                                                                    <Image
+                                                                                                        src={getFlagPath(player.nationality)}
+                                                                                                        alt={`${player.nationality} flag`}
+                                                                                                        width={16}
+                                                                                                        height={12}
+                                                                                                        className="object-cover rounded-sm"
+                                                                                                        onError={(e) => {
+                                                                                                            const target = e.target as HTMLImageElement
+                                                                                                            target.style.display = 'none'
+                                                                                                            const parent = target.parentElement?.parentElement
+                                                                                                            if (parent) {
+                                                                                                                parent.innerHTML = `<span class="text-xs text-gray-300">${player.nationality}</span>`
+                                                                                                            }
+                                                                                                        }}
+                                                                                                    />
+                                                                                                ) : (
+                                                                                                    <span className="text-xs text-gray-300">{player.nationality}</span>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <span>{player.nationality}</span>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* Player Details */}
+                                                                                    <div className="space-y-2">
+                                                                                        {player.age > 0 && (
+                                                                                            <div className="text-center text-sm text-gray-300">
+                                                                                                Age {player.age}
+                                                                                            </div>
+                                                                                        )}
+                                                                                        
+                                                                                        {player.role && (
+                                                                                            <div className="flex justify-center">
+                                                                                                <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-500/30">
+                                                                                                    {player.role}
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        
+                                                                                        {player.birthday && (
+                                                                                            <div className="text-center text-xs text-gray-400">
+                                                                                                {formatBirthday(player.birthday)}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 ))}
@@ -1047,76 +1070,97 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                 </h2>
                             </div>
                             {team.players && team.players.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {team.players.map((player) => (
-                                        <div key={player.id} className="flex items-center space-x-3 p-3 bg-gradient-to-r from-gray-700/40 to-gray-700/60 rounded-lg hover:from-gray-600/50 hover:to-gray-600/70 transition-all duration-300 border border-gray-600/20 hover:border-purple-500/40">
-                                            <div className="relative w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full overflow-hidden ring-2 ring-gray-600/50 hover:ring-purple-500/60 transition-all duration-300 shadow-lg flex-shrink-0">
-                                                <Image
-                                                    src={getPlayerImage(player.image_url)}
-                                                    alt={player.name}
-                                                    fill
-                                                    className="object-cover"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement
-                                                        target.src = '/images/placeholder-player.svg'
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center space-x-2 mb-1">
-                                                    <p className="font-medium text-white text-sm">{player.name}</p>
-                                                    {player.nationality && (
-                                                        <div 
-                                                            className="flex items-center space-x-1 cursor-default"
-                                                            title={player.nationality}
-                                                        >
-                                                            <div className="relative w-4 h-3">
-                                                                {getFlagPath(player.nationality) ? (
-                                                                    <Image
-                                                                        src={getFlagPath(player.nationality)}
-                                                                        alt={`${player.nationality} flag`}
-                                                                        width={16}
-                                                                        height={12}
-                                                                        className="object-cover rounded-sm"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement
-                                                                            target.style.display = 'none'
-                                                                            const parent = target.parentElement?.parentElement
-                                                                            if (parent) {
-                                                                                parent.innerHTML = `<span class="text-xs text-gray-400">${player.nationality}</span>`
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                ) : (
-                                                                    <span className="text-xs text-gray-400">{player.nationality}</span>
-                                                                )}
-                                                            </div>
+                                        <div key={player.id} className="group">
+                                            <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
+                                                {/* Player Image - Full Size */}
+                                                <div className="relative w-full h-48 bg-gray-700 overflow-hidden">
+                                                    <Image
+                                                        src={getPlayerImage(player.image_url)}
+                                                        alt={player.name}
+                                                        fill
+                                                        className="object-cover object-top"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement
+                                                            target.src = '/images/placeholder-player.svg'
+                                                        }}
+                                                    />
+                                                    
+                                                    {/* Active status indicator */}
+                                                    {!player.active && (
+                                                        <div className="absolute top-3 right-3">
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-red-400" title="Inactive" />
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center space-x-2 text-xs text-gray-400">
-                                                    {player.role && (
-                                                        <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
-                                                            {player.role}
-                                                        </span>
-                                                    )}
-                                                    {(player.first_name || player.last_name) && (
-                                                        <span>
-                                                            {[player.first_name, player.last_name].filter(Boolean).join(' ')}
-                                                        </span>
-                                                    )}
-                                                    {player.age > 0 && (
-                                                        <span className="text-gray-400">{player.age}y</span>
-                                                    )}
-                                                    {!player.active && (
-                                                        <span className="px-1.5 py-0.5 bg-red-500/20 text-red-300 text-xs rounded-full">Inactive</span>
-                                                    )}
-                                                </div>
-                                                {player.birthday && (
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        Born: {formatBirthday(player.birthday)}
+                                                
+                                                {/* Player Info */}
+                                                <div className="p-3">
+                                                    <div className="text-center mb-3">
+                                                        <h5 className="text-white font-semibold text-base mb-1">
+                                                            {player.name}
+                                                        </h5>
+                                                        {(player.first_name || player.last_name) && (
+                                                            <p className="text-xs text-gray-400 font-medium">
+                                                                {[player.first_name, player.last_name].filter(Boolean).join(' ')}
+                                                            </p>
+                                                        )}
                                                     </div>
-                                                )}
+
+                                                    <div className="space-y-2">
+                                                        {/* Nationality */}
+                                                        {player.nationality && (
+                                                            <div className="flex items-center justify-center space-x-2 text-gray-300 text-xs">
+                                                                <div className="relative w-4 h-3">
+                                                                    {getFlagPath(player.nationality) ? (
+                                                                        <Image
+                                                                            src={getFlagPath(player.nationality)}
+                                                                            alt={`${player.nationality} flag`}
+                                                                            width={16}
+                                                                            height={12}
+                                                                            className="object-cover rounded-sm"
+                                                                            onError={(e) => {
+                                                                                const target = e.target as HTMLImageElement
+                                                                                target.style.display = 'none'
+                                                                                const parent = target.parentElement?.parentElement
+                                                                                if (parent) {
+                                                                                    parent.innerHTML = `<span class="text-xs text-gray-300">${player.nationality}</span>`
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <span className="text-xs text-gray-300">{player.nationality}</span>
+                                                                    )}
+                                                                </div>
+                                                                <span>{player.nationality}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Player Details */}
+                                                        <div className="space-y-2">
+                                                            {player.age > 0 && (
+                                                                <div className="text-center text-sm text-gray-300">
+                                                                    Age {player.age}
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {player.role && (
+                                                                <div className="flex justify-center">
+                                                                    <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-500/30">
+                                                                        {player.role}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {player.birthday && (
+                                                                <div className="text-center text-xs text-gray-400">
+                                                                    {formatBirthday(player.birthday)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

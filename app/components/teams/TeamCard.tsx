@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Users, Trophy, User, Calendar, Clock, Globe, Star } from 'lucide-react'
 import type { Team } from '@/types/esports'
 
@@ -7,6 +8,12 @@ interface TeamCardProps {
 }
 
 export default function TeamCard({ team }: TeamCardProps) {
+    const router = useRouter()
+
+    const handleImageClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        router.push(`/teams/${team.id}`)
+    }
     const getTeamImage = () => {
         const imageUrl = team.image_url;
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
@@ -147,14 +154,18 @@ export default function TeamCard({ team }: TeamCardProps) {
     const tournamentInfo = getTournamentInfo();
 
     return (
-        <div className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1">
+        <div className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1"
+        >
             {/* Subtle background glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <div className="relative z-10">
                 {/* Team Header */}
                 <div className="flex items-center space-x-3 mb-4">
-                    <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300">
+                    <div 
+                        onClick={handleImageClick}
+                        className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300 cursor-pointer hover:ring-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105"
+                    >
                         <Image
                             src={getTeamImage()}
                             alt={team.name}
@@ -167,11 +178,17 @@ export default function TeamCard({ team }: TeamCardProps) {
                             }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
+                        
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg" />
                     </div>
-                    <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg leading-tight group-hover:text-purple-100 transition-colors duration-200">{team.name}</h3>
+                    <div 
+                        onClick={handleImageClick}
+                        className="flex-1 cursor-pointer"
+                    >
+                        <h3 className="text-white font-semibold text-lg leading-tight group-hover:text-purple-100 transition-colors duration-200 hover:text-cyan-300">{team.name}</h3>
                         {team.acronym && (
-                            <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-200">{team.acronym}</p>
+                            <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-200 hover:text-cyan-200">{team.acronym}</p>
                         )}
                     </div>
                 </div>

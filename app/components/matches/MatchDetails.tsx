@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
 import TeamMatches from './TeamMatches';
@@ -11,6 +12,13 @@ interface MatchDetailsProps {
 }
 
 export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
+    const router = useRouter();
+
+    const handleTeamClick = (teamId: number | undefined) => {
+        if (teamId) {
+            router.push(`/teams/${teamId}`);
+        }
+    };
     // Format the score display
     const getScoreCard = () => {
         if (match.status === 'not_started' || !match.results || match.results.length === 0) {
@@ -33,6 +41,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
 
         // Get team names and scores
         const scoreInfo = match.opponents.map((opponent, index) => ({
+            id: opponent.opponent?.id,
             name: opponent.opponent?.name || 'TBD',
             acronym: createAcronym(opponent.opponent?.name || 'TBD'),
             image: opponent.opponent?.image_url,
@@ -51,15 +60,23 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* Team 1 */}
                     <div className={`flex items-center justify-end space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
                         {scoreInfo[0]?.image && (
-                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                            <div 
+                                onClick={() => handleTeamClick(scoreInfo[0]?.id)}
+                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
+                            >
                                 <img 
                                     src={scoreInfo[0].image} 
                                     alt={scoreInfo[0].name}
                                     className="w-full h-full object-contain p-1"
                                 />
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
-                        <div className="text-right">
+                        <div 
+                            onClick={() => handleTeamClick(scoreInfo[0]?.id)}
+                            className="text-right cursor-pointer hover:text-cyan-300 transition-colors duration-200"
+                        >
                             <div className="text-lg font-bold">{scoreInfo[0]?.name}</div>
                             <div className="text-sm text-gray-400">{scoreInfo[0]?.acronym}</div>
                         </div>
@@ -86,17 +103,25 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         <div className={`text-4xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-white'}`}>
                             {scoreInfo[1]?.score}
                         </div>
-                        <div className="text-left">
+                        <div 
+                            onClick={() => handleTeamClick(scoreInfo[1]?.id)}
+                            className="text-left cursor-pointer hover:text-cyan-300 transition-colors duration-200"
+                        >
                             <div className="text-lg font-bold">{scoreInfo[1]?.name}</div>
                             <div className="text-sm text-gray-400">{scoreInfo[1]?.acronym}</div>
                         </div>
                         {scoreInfo[1]?.image && (
-                            <div className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                            <div 
+                                onClick={() => handleTeamClick(scoreInfo[1]?.id)}
+                                className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
+                            >
                                 <img 
                                     src={scoreInfo[1].image} 
                                     alt={scoreInfo[1].name}
                                     className="w-full h-full object-contain p-1"
                                 />
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
                     </div>

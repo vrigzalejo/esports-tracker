@@ -49,24 +49,33 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
 
     if (!teamId || !tournamentId) {
         return (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                <h3 className="text-lg font-bold text-white mb-2">{teamName}</h3>
-                <p className="text-gray-400 text-sm">Roster information not available</p>
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                <div className="flex items-center space-x-3 mb-4">
+                    <Users className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">{teamName}</h3>
+                </div>
+                <p className="text-gray-400 text-sm text-center py-8">Roster information not available</p>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                <h3 className="text-lg font-bold text-white mb-4">{teamName}</h3>
-                <div className="animate-pulse space-y-3">
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                <div className="flex items-center space-x-3 mb-6">
+                    <Users className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">{teamName} Roster</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-gray-700 rounded-full" />
-                            <div className="flex-1 space-y-2">
-                                <div className="h-4 bg-gray-700 rounded w-1/4" />
-                                <div className="h-3 bg-gray-700 rounded w-1/3" />
+                        <div key={i} className="animate-pulse">
+                            <div className="bg-gray-800/60 rounded-xl overflow-hidden">
+                                <div className="w-full h-64 bg-gray-700" />
+                                <div className="p-3 text-center space-y-2">
+                                    <div className="h-4 bg-gray-700 rounded w-2/3 mx-auto" />
+                                    <div className="h-3 bg-gray-700 rounded w-1/2 mx-auto" />
+                                    <div className="h-3 bg-gray-700 rounded w-3/4 mx-auto" />
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -77,88 +86,104 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
 
     if (error) {
         return (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-                <h3 className="text-lg font-bold text-white mb-2">{teamName}</h3>
-                <p className="text-red-400 text-sm">Error: {error}</p>
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+                <div className="flex items-center space-x-3 mb-4">
+                    <Users className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">{teamName}</h3>
+                </div>
+                <p className="text-red-400 text-sm text-center py-8">Error: {error}</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center space-x-2 mb-4">
+        <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+            <div className="flex items-center space-x-3 mb-6">
                 <Users className="w-5 h-5 text-blue-400" />
-                <h3 className="text-lg font-bold text-white">{teamName} Roster</h3>
+                <h3 className="text-lg font-semibold text-white">{teamName} Roster</h3>
             </div>
 
             {roster.length === 0 ? (
-                <p className="text-gray-400 text-sm">No roster information available</p>
+                <p className="text-gray-400 text-sm text-center py-8">No roster information available</p>
             ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {roster.map((player) => (
-                        <div key={player.id} className="flex items-center space-x-4 bg-gray-700/30 rounded-lg p-3">
-                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-800">
-                                <Image
-                                    src={player.image_url || '/images/placeholder-player.svg'}
-                                    alt={player.name}
-                                    fill
-                                    className="object-cover"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = '/images/placeholder-player.svg';
-                                    }}
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                    <h4 className="text-white font-medium">{player.name}</h4>
+                        <div key={player.id} className="group">
+                            <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
+                                {/* Player Image - Full Size */}
+                                <div className="relative w-full h-64 bg-gray-700 overflow-hidden">
+                                    <Image
+                                        src={player.image_url || '/images/placeholder-player.svg'}
+                                        alt={player.name}
+                                        fill
+                                        className="object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/images/placeholder-player.svg';
+                                        }}
+                                    />
+                                    
+                                    {/* Active status indicator */}
                                     {player.active !== undefined && (
-                                        <div className={`w-2 h-2 rounded-full ${player.active ? 'bg-green-400' : 'bg-red-400'}`}
-                                            title={player.active ? 'Active' : 'Inactive'} />
-                                    )}
-                                </div>
-
-                                <div className="flex items-center flex-wrap gap-2 text-sm">
-                                    {player.nationality && (
-                                        <div
-                                            className="flex items-center space-x-1 cursor-default"
-                                            title={player.nationality}
-                                        >
-                                            <div className="relative w-4 h-3">
-                                                {getFlagPath(player.nationality) ? (
-                                                    <Image
-                                                        src={getFlagPath(player.nationality)}
-                                                        alt={`${player.nationality} flag`}
-                                                        width={16}
-                                                        height={12}
-                                                        className="object-cover rounded-sm"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none';
-                                                            const parent = target.parentElement?.parentElement;
-                                                            if (parent) {
-                                                                parent.innerHTML = `<span class="text-xs text-gray-400">${player.nationality}</span>`;
-                                                            }
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span className="text-xs text-gray-400">{player.nationality}</span>
-                                                )}
-                                            </div>
+                                        <div className="absolute top-3 right-3">
+                                            <div 
+                                                className={`w-2.5 h-2.5 rounded-full ${player.active ? 'bg-green-400' : 'bg-red-400'}`}
+                                                title={player.active ? 'Active' : 'Inactive'} 
+                                            />
                                         </div>
                                     )}
+                                </div>
+                                
+                                {/* Player Info - Compact */}
+                                <div className="p-3 text-center">
+                                    <h4 className="text-white font-medium text-base mb-2 truncate">
+                                        {player.name}
+                                    </h4>
 
-                                    {(player.age || player.birthday) && (
-                                        <span className="text-gray-400 text-xs">
-                                            {player.age ? `${player.age}y` : ''}
-                                            {player.birthday && (
-                                                <span title={`Birthday: ${new Date(player.birthday).toLocaleDateString()}`}>
-                                                    {player.age ? ` (${new Date(player.birthday).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` :
-                                                        new Date(player.birthday).toLocaleDateString()}
-                                                </span>
-                                            )}
-                                        </span>
-                                    )}
+                                    <div className="space-y-2">
+                                        {player.nationality && (
+                                            <div className="flex items-center justify-center space-x-2 text-gray-300 text-sm">
+                                                <div className="relative w-4 h-3">
+                                                    {getFlagPath(player.nationality) ? (
+                                                        <Image
+                                                            src={getFlagPath(player.nationality)}
+                                                            alt={`${player.nationality} flag`}
+                                                            width={16}
+                                                            height={12}
+                                                            className="object-cover rounded-sm"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.style.display = 'none';
+                                                                const parent = target.parentElement?.parentElement;
+                                                                if (parent) {
+                                                                    parent.innerHTML = `<span class="text-sm text-gray-300">${player.nationality}</span>`;
+                                                                }
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span className="text-sm text-gray-300">{player.nationality}</span>
+                                                    )}
+                                                </div>
+                                                <span>{player.nationality}</span>
+                                            </div>
+                                        )}
+
+                                        {player.age && (
+                                            <div className="text-center text-sm text-gray-300">
+                                                Age {player.age}
+                                            </div>
+                                        )}
+                                        
+                                        {player.birthday && (
+                                            <div className="text-center text-xs text-gray-400">
+                                                {new Date(player.birthday).toLocaleDateString('en-US', { 
+                                                    year: 'numeric', 
+                                                    month: 'long', 
+                                                    day: 'numeric' 
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

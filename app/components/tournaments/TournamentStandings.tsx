@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import type { TournamentStanding } from '@/types/esports';
 
 interface TournamentStandingsProps {
@@ -10,6 +11,18 @@ interface TournamentStandingsProps {
 }
 
 export default function TournamentStandings({ tournamentId, tournamentName, teamIds = [] }: TournamentStandingsProps) {
+    const router = useRouter();
+
+    const handleTeamClick = (teamId: number) => {
+        router.push(`/teams/${teamId}`);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, teamId: number) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleTeamClick(teamId);
+        }
+    };
     const [standings, setStandings] = useState<TournamentStanding[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -128,12 +141,17 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                     return (
                         <div
                             key={standing.team.id}
-                            className={`grid gap-2 items-center py-2 rounded transition-colors cursor-pointer ${
+                            onClick={() => handleTeamClick(standing.team.id)}
+                            onKeyDown={(e) => handleKeyDown(e, standing.team.id)}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`View details for ${standing.team.name}`}
+                            className={`grid gap-2 items-center py-2 rounded transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${
                                 hasWinLossData ? 'grid-cols-4' : 'grid-cols-2'
                             } ${
                                 isRelevantTeam 
-                                    ? 'bg-blue-900/30 border border-blue-500/30 hover:bg-blue-800/40' 
-                                    : 'hover:bg-gray-600'
+                                    ? 'bg-blue-900/30 border border-blue-500/30 hover:bg-blue-800/40 hover:border-purple-500/50' 
+                                    : 'hover:bg-gray-600 hover:bg-purple-900/20'
                             }`}
                         >
                             <div className={`flex items-center space-x-3 ${
