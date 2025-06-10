@@ -59,18 +59,29 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
         }
     }, [tournamentId, memoizedTeamIds.length, fetchMatches]);
 
-
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'finished':
                 return 'text-green-400';
             case 'running':
-                return 'text-yellow-400';
+                return 'text-red-400 animate-pulse';
             case 'not_started':
                 return 'text-blue-400';
             default:
                 return 'text-gray-400';
+        }
+    };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'finished':
+                return 'FINISHED';
+            case 'running':
+                return 'LIVE';
+            case 'not_started':
+                return 'UPCOMING';
+            default:
+                return status.replace('_', ' ').toUpperCase();
         }
     };
 
@@ -154,11 +165,12 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                             {teamMatches.map((match) => {
                                 const opponent = match.opponents.find(opp => opp.opponent.id !== teamId)?.opponent;
                                 const result = getMatchResult(match, teamId);
+                                const isLive = match.status === 'running';
                                 
                                 return (
                                     <div
                                         key={match.id}
-                                        className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors cursor-pointer"
+                                        className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
@@ -191,8 +203,9 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className={`text-xs font-medium ${getStatusColor(match.status)}`}>
-                                                    {match.status.replace('_', ' ').toUpperCase()}
+                                                <div className={`text-xs font-medium ${getStatusColor(match.status)} flex items-center justify-end space-x-1`}>
+                                                    {isLive && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+                                                    <span>{getStatusText(match.status)}</span>
                                                 </div>
                                                 <div className="text-gray-400 text-xs">
                                                     {formatMatchDateRange(match)}

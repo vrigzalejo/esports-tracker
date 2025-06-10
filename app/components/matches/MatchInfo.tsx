@@ -1,5 +1,7 @@
 import { Globe, Trophy, Star, Users } from 'lucide-react'
 import { cleanMatchName } from '@/lib/textUtils'
+import { useRouter } from 'next/navigation'
+import type { Match } from '@/types/esports'
 
 interface MatchInfoProps {
     region: string | null
@@ -9,6 +11,7 @@ interface MatchInfoProps {
     leagueInfo: string
     matchName?: string
     gamesFormat?: string | null
+    match: Match
 }
 
 export default function MatchInfo({ 
@@ -18,10 +21,18 @@ export default function MatchInfo({
     leagueTier, 
     leagueInfo,
     matchName,
-    gamesFormat
+    gamesFormat,
+    match
 }: MatchInfoProps) {
+    const router = useRouter();
     const cleanedLeagueInfo = leagueInfo;
     const cleanedMatchName = cleanMatchName(matchName);
+    
+    const handleTournamentClick = () => {
+        if (match.tournament?.id) {
+            router.push(`/tournaments/${match.tournament.id}`);
+        }
+    };
     
     return (
         <div className="space-y-3">
@@ -56,9 +67,12 @@ export default function MatchInfo({
             {/* League Information with Match Name */}
             {(cleanedLeagueInfo || cleanedMatchName) && (
                 <div className="flex items-center justify-center text-xs sm:text-sm">
-                    <div className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full">
+                    <div 
+                        className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full cursor-pointer hover:bg-gray-800/50 transition-colors duration-200"
+                        onClick={handleTournamentClick}
+                    >
                         <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" size={16} />
-                        <span className="text-center break-words">
+                        <span className="text-center break-words hover:text-gray-300 transition-colors duration-200">
                             {cleanedLeagueInfo}
                             {cleanedLeagueInfo && cleanedMatchName && ' • '}
                             {cleanedMatchName && (
