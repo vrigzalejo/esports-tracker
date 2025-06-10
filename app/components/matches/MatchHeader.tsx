@@ -6,16 +6,27 @@ import { getStatusColor, getStatusText } from '@/lib/utils'
 interface MatchHeaderProps {
     match: Match
     videoStreams: { url: string; platform: string }[]
+    streamsEnabled?: boolean
+    streamsDisabledReason?: string | null
     onShowDetails: () => void
 }
 
-export default function MatchHeader({ match, videoStreams, onShowDetails }: MatchHeaderProps) {
+export default function MatchHeader({ 
+    match, 
+    videoStreams, 
+    streamsEnabled = true,
+    streamsDisabledReason,
+    onShowDetails 
+}: MatchHeaderProps) {
     const [showStreams, setShowStreams] = useState(false)
+    const [showTooltip, setShowTooltip] = useState(false)
     const streamsRef = useRef<HTMLDivElement>(null)
 
     const handleStreamClick = (streamUrl: string, e: React.MouseEvent) => {
         e.preventDefault()
-        window.open(streamUrl, '_blank', 'noopener,noreferrer')
+        if (streamsEnabled) {
+            window.open(streamUrl, '_blank', 'noopener,noreferrer')
+        }
     }
 
     // Handle click outside to close streams dropdown
@@ -78,16 +89,38 @@ export default function MatchHeader({ match, videoStreams, onShowDetails }: Matc
                         <button
                             onClick={(e) => {
                                 e.stopPropagation()
-                                setShowStreams(!showStreams)
+                                if (streamsEnabled) {
+                                    setShowStreams(!showStreams)
+                                }
                             }}
-                            className="flex items-center space-x-2 px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 text-xs rounded-full font-medium transition-all duration-200 cursor-pointer group/stream whitespace-nowrap"
+                            onMouseEnter={() => {
+                                if (!streamsEnabled && streamsDisabledReason) {
+                                    setShowTooltip(true)
+                                }
+                            }}
+                            onMouseLeave={() => setShowTooltip(false)}
+                            disabled={!streamsEnabled}
+                            className={`flex items-center space-x-2 px-3 py-1.5 text-xs rounded-full font-medium transition-all duration-200 whitespace-nowrap ${
+                                streamsEnabled
+                                    ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 cursor-pointer group/stream'
+                                    : 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
+                            }`}
                         >
-                            <Tv className="w-3 h-3 group-hover/stream:animate-pulse" size={12} />
+                            <Tv className={`w-3 h-3 ${streamsEnabled ? 'group-hover/stream:animate-pulse' : ''}`} size={12} />
                             <span>{videoStreams.length} Stream{videoStreams.length > 1 ? 's' : ''}</span>
                         </button>
 
+                        {/* Tooltip for disabled streams */}
+                        {showTooltip && !streamsEnabled && streamsDisabledReason && (
+                            <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-600 shadow-xl z-[9999] p-3">
+                                <div className="text-gray-300 text-xs text-center">
+                                    {streamsDisabledReason}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Video Streams Dropdown */}
-                        {showStreams && (
+                        {showStreams && streamsEnabled && (
                             <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
                                 <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
                                     <div className="flex items-center justify-between">

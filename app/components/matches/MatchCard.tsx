@@ -41,6 +41,53 @@ export default function MatchCard({ match }: MatchCardProps) {
         isMatchLive
     } = useMatchData(match)
 
+    // Determine if streams should be enabled based on match status and timing
+    const getStreamsAvailability = () => {
+        // Always enable streams for LIVE and FINISHED matches
+        if (match.status === 'running' || match.status === 'finished' || match.status === 'completed') {
+            return {
+                streams: videoStreams,
+                enabled: true,
+                reason: null
+            };
+        }
+
+        // For UPCOMING matches, only enable streams 1 hour before scheduled_at
+        if (match.status === 'not_started') {
+            const now = new Date();
+            const scheduledTime = new Date(match.scheduled_at || match.begin_at);
+            const oneHourBefore = new Date(scheduledTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+            // Enable streams if current time is within 1 hour of the scheduled time
+            if (now >= oneHourBefore) {
+                return {
+                    streams: videoStreams,
+                    enabled: true,
+                    reason: null
+                };
+            } else {
+                // Calculate time remaining until streams become available
+                const timeUntilAvailable = oneHourBefore.getTime() - now.getTime();
+                const hoursRemaining = Math.ceil(timeUntilAvailable / (1000 * 60 * 60));
+                
+                return {
+                    streams: videoStreams,
+                    enabled: false,
+                    reason: `Streams available ${hoursRemaining}h before match`
+                };
+            }
+        }
+
+        // Default case
+        return {
+            streams: videoStreams,
+            enabled: true,
+            reason: null
+        };
+    };
+
+    const streamsAvailability = getStreamsAvailability();
+
     // Handle escape key to close modal
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
@@ -69,7 +116,9 @@ export default function MatchCard({ match }: MatchCardProps) {
                     {/* Header with status, game, and buttons */}
                     <MatchHeader
                         match={match}
-                        videoStreams={videoStreams}
+                        videoStreams={streamsAvailability.streams}
+                        streamsEnabled={streamsAvailability.enabled}
+                        streamsDisabledReason={streamsAvailability.reason}
                         onShowDetails={() => setShowDetails(true)}
                     />
 
@@ -101,6 +150,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                         leagueInfo={leagueInfo}
                         matchName={match.name}
                         gamesFormat={gamesFormat}
+                        match={match}
                     />
                 </div>
             </div>

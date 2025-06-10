@@ -195,6 +195,15 @@ export interface TeamMatch {
         score: number
         team_id: number
     }>
+    streams_list?: Array<{
+        raw_url?: string
+        embed_url?: string
+        url?: string
+        platform?: string
+        language?: string
+        official?: boolean
+        live?: boolean
+    }>
     opponents: Array<{
         opponent: {
             id: number
@@ -274,6 +283,15 @@ export interface TournamentMatch {
     results: Array<{
         score: number
         team_id: number
+    }>
+    streams_list?: Array<{
+        raw_url?: string
+        embed_url?: string
+        url?: string
+        platform?: string
+        language?: string
+        official?: boolean
+        live?: boolean
     }>
     opponents: Array<{
         opponent: {

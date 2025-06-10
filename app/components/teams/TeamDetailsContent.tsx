@@ -255,6 +255,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
+    const [matchFilter, setMatchFilter] = useState<'all' | 'wins' | 'losses'>('all')
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
@@ -352,7 +353,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                 // Set tournament section to match total sidebar height
                 tournamentRef.current.style.height = `${totalHeight}px`
                 
-                // Calculate scrollable content height
+                // Calculate scrollable content height for tournaments
                 const scrollableContent = tournamentRef.current.querySelector('.tournament-scroll-content') as HTMLElement
                 const header = tournamentRef.current.querySelector('.tournament-header') as HTMLElement
                 
@@ -442,6 +443,27 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
             isWin: teamResult.score > opponentResult.score
         }
     }
+
+    // Filter matches based on selected filter
+    const getFilteredMatches = () => {
+        if (matchFilter === 'all') return matches
+        
+        return matches.filter(match => {
+            const result = getMatchResult(match, parseInt(teamId))
+            if (!result) return false
+            
+            // Only include matches that have already happened (not upcoming)
+            const isUpcoming = new Date(match.begin_at) > new Date()
+            if (isUpcoming) return false
+            
+            if (matchFilter === 'wins') return result.isWin
+            if (matchFilter === 'losses') return !result.isWin
+            
+            return false
+        })
+    }
+
+    const filteredMatches = getFilteredMatches()
 
     const getFlagPath = (countryCode: string): string => {
         return countryCode ? `/flags/3x2/${countryCode}.svg` : ''
@@ -1082,119 +1104,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             </div>
                         )}
 
-                        {/* Recent Roster */}
-                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2 bg-purple-500/20 rounded-xl">
-                                    <Users className="w-5 h-5 text-purple-400" />
-                                </div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
-                                    Recent Roster
-                                </h2>
-                            </div>
-                            {team.players && team.players.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {team.players.map((player) => (
-                                        <div key={player.id} className="group">
-                                            <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
-                                                {/* Player Image - Full Size */}
-                                                <div className="relative w-full h-48 bg-gray-700 overflow-hidden">
-                                                    <Image
-                                                        src={getPlayerImage(player.image_url)}
-                                                        alt={player.name}
-                                                        fill
-                                                        className="object-cover object-top"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement
-                                                            target.src = '/images/placeholder-player.svg'
-                                                        }}
-                                                    />
-                                                    
-                                                    {/* Active status indicator */}
-                                                    {!player.active && (
-                                                        <div className="absolute top-3 right-3">
-                                                            <div className="w-2.5 h-2.5 rounded-full bg-red-400" title="Inactive" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Player Info */}
-                                                <div className="p-3">
-                                                    <div className="text-center mb-3">
-                                                        <h5 className="text-white font-semibold text-base mb-1">
-                                                            {player.name}
-                                                        </h5>
-                                                        {(player.first_name || player.last_name) && (
-                                                            <p className="text-xs text-gray-400 font-medium">
-                                                                {[player.first_name, player.last_name].filter(Boolean).join(' ')}
-                                                            </p>
-                                                        )}
-                                                    </div>
 
-                                                    <div className="space-y-2">
-                                                        {/* Nationality */}
-                                                        {player.nationality && (
-                                                            <div className="flex items-center justify-center space-x-2 text-gray-300 text-xs">
-                                                                <div className="relative w-4 h-3">
-                                                                    {getFlagPath(player.nationality) ? (
-                                                                        <Image
-                                                                            src={getFlagPath(player.nationality)}
-                                                                            alt={`${player.nationality} flag`}
-                                                                            width={16}
-                                                                            height={12}
-                                                                            className="object-cover rounded-sm"
-                                                                            onError={(e) => {
-                                                                                const target = e.target as HTMLImageElement
-                                                                                target.style.display = 'none'
-                                                                                const parent = target.parentElement?.parentElement
-                                                                                if (parent) {
-                                                                                    parent.innerHTML = `<span class="text-xs text-gray-300">${player.nationality}</span>`
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    ) : (
-                                                                        <span className="text-xs text-gray-300">{player.nationality}</span>
-                                                                    )}
-                                                                </div>
-                                                                <span>{player.nationality}</span>
-                                                            </div>
-                                                        )}
 
-                                                        {/* Player Details */}
-                                                        <div className="space-y-2">
-                                                            {player.age > 0 && (
-                                                                <div className="text-center text-sm text-gray-300">
-                                                                    Age {player.age}
-                                                                </div>
-                                                            )}
-                                                            
-                                                            {player.role && (
-                                                                <div className="flex justify-center">
-                                                                    <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-500/30">
-                                                                        {player.role}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            
-                                                            {player.birthday && (
-                                                                <div className="text-center text-xs text-gray-400">
-                                                                    {formatBirthday(player.birthday)}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-gray-400 text-center py-4">No players information available</p>
-                            )}
-                        </div>
-
-                        {/* Recent Matches */}
-                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
+                                                {/* Recent Matches */}
+                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl h-[800px]">
                             <div className="flex items-center space-x-3 mb-6">
                                 <div className="p-2 bg-blue-500/20 rounded-xl">
                                     <Calendar className="w-5 h-5 text-blue-400" />
@@ -1207,34 +1120,69 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             {/* Match Statistics */}
                             {matches.length > 0 && (
                                 <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                                    <div className="bg-gradient-to-br from-gray-600/30 to-gray-700/40 rounded-lg p-2 border border-gray-600/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-sm font-bold text-white mb-0.5">{matches.length}</div>
-                                        <div className="text-xs text-gray-300 font-medium">Matches</div>
+                                    <div 
+                                        className={`rounded-lg p-2 border shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer ${
+                                            matchFilter === 'all' 
+                                                ? 'bg-gradient-to-br from-blue-500/30 to-blue-600/40 border-blue-500/40' 
+                                                : 'bg-gradient-to-br from-gray-600/30 to-gray-700/40 border-gray-600/20 hover:border-blue-500/30'
+                                        }`}
+                                        onClick={() => setMatchFilter('all')}
+                                    >
+                                        <div className={`text-sm font-bold mb-0.5 ${matchFilter === 'all' ? 'text-blue-300' : 'text-white'}`}>
+                                            {matches.length}
+                                        </div>
+                                        <div className={`text-xs font-medium ${matchFilter === 'all' ? 'text-blue-200' : 'text-gray-300'}`}>
+                                            Matches
+                                        </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-green-500/20 to-green-600/30 rounded-lg p-2 border border-green-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-sm font-bold text-green-400 mb-0.5">
+                                    <div 
+                                        className={`rounded-lg p-2 border shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer ${
+                                            matchFilter === 'wins' 
+                                                ? 'bg-gradient-to-br from-green-500/30 to-green-600/40 border-green-500/40' 
+                                                : 'bg-gradient-to-br from-green-500/20 to-green-600/30 border-green-500/20 hover:border-green-500/40'
+                                        }`}
+                                        onClick={() => setMatchFilter('wins')}
+                                    >
+                                        <div className={`text-sm font-bold mb-0.5 ${matchFilter === 'wins' ? 'text-green-300' : 'text-green-400'}`}>
                                             {matches.filter(match => {
                                                 const result = getMatchResult(match, parseInt(teamId))
                                                 return result?.isWin
                                             }).length}
                                         </div>
-                                        <div className="text-xs text-green-200 font-medium">Wins</div>
+                                        <div className={`text-xs font-medium ${matchFilter === 'wins' ? 'text-green-200' : 'text-green-200'}`}>
+                                            Wins
+                                        </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-red-500/20 to-red-600/30 rounded-lg p-2 border border-red-500/20 shadow-lg hover:shadow-xl transition-all duration-200">
-                                        <div className="text-sm font-bold text-red-400 mb-0.5">
+                                    <div 
+                                        className={`rounded-lg p-2 border shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer ${
+                                            matchFilter === 'losses' 
+                                                ? 'bg-gradient-to-br from-red-500/30 to-red-600/40 border-red-500/40' 
+                                                : 'bg-gradient-to-br from-red-500/20 to-red-600/30 border-red-500/20 hover:border-red-500/40'
+                                        }`}
+                                        onClick={() => setMatchFilter('losses')}
+                                    >
+                                        <div className={`text-sm font-bold mb-0.5 ${matchFilter === 'losses' ? 'text-red-300' : 'text-red-400'}`}>
                                             {matches.filter(match => {
                                                 const result = getMatchResult(match, parseInt(teamId))
-                                                return result && !result.isWin
+                                                if (!result) return false
+                                                
+                                                // Only count matches that have already happened (not upcoming)
+                                                const isUpcoming = new Date(match.begin_at) > new Date()
+                                                if (isUpcoming) return false
+                                                
+                                                return !result.isWin
                                             }).length}
                                         </div>
-                                        <div className="text-xs text-red-200 font-medium">Losses</div>
+                                        <div className={`text-xs font-medium ${matchFilter === 'losses' ? 'text-red-200' : 'text-red-200'}`}>
+                                            Losses
+                                        </div>
                                     </div>
                                 </div>
                             )}
                             
                             {matches.length > 0 ? (
-                                <div className="space-y-4 max-h-96 overflow-y-auto">
-                                    {matches.map((match) => {
+                                <div className="space-y-4 overflow-y-auto pr-2 h-[600px]">
+                                    {filteredMatches.map((match) => {
                                         const result = getMatchResult(match, parseInt(teamId))
                                         const opponent = match.opponents.find(opp => opp.opponent.id !== parseInt(teamId))
                                         
@@ -1275,7 +1223,12 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             {match.league && (
                                                                 <div className="flex items-center space-x-2">
                                                                     <Trophy className="w-3 h-3 text-yellow-400" />
-                                                                    <span className="text-sm font-bold text-yellow-300">{match.league.name}</span>
+                                                                    <span 
+                                                                        className="text-sm font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
+                                                                        onClick={() => router.push(`/tournaments/${match.tournament.id}`)}
+                                                                    >
+                                                                        {match.league.name}
+                                                                    </span>
                                                                     {match.tournament?.tier && (() => {
                                                                         const tierInfo = getTierDisplay(match.tournament.tier)
                                                                         return (
@@ -1291,7 +1244,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             {match.serie && (
                                                                 <div className="flex items-center space-x-2">
                                                                     <Calendar className="w-3 h-3 text-blue-400" />
-                                                                    <span className="text-xs font-semibold text-blue-300">
+                                                                    <span 
+                                                                        className="text-xs font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
+                                                                        onClick={() => router.push(`/tournaments/${match.tournament.id}`)}
+                                                                    >
                                                                         {parseLeagueInfo(match.serie.full_name || match.serie.name)}
                                                                     </span>
                                                                 </div>
@@ -1301,7 +1257,12 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             {match.tournament && (
                                                                 <div className="flex items-center space-x-2">
                                                                     <Award className="w-3 h-3 text-orange-400" />
-                                                                    <span className="text-xs font-bold text-white">{parseLeagueInfo(match.tournament.name)}</span>
+                                                                    <span 
+                                                                        className="text-xs font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
+                                                                        onClick={() => router.push(`/tournaments/${match.tournament.id}`)}
+                                                                    >
+                                                                        {parseLeagueInfo(match.tournament.name)}
+                                                                    </span>
                                                                 </div>
                                                             )}
                                                             
