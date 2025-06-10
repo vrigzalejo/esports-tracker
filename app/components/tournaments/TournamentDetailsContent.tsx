@@ -886,13 +886,24 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                 <div className="space-y-4 overflow-y-auto pr-2 pb-4 matches-scroll-content">
                                     {matches.length > 0 ? matches
                                         .sort((a, b) => {
-                                            // Prioritize live matches first, then by date
+                                            // Priority order: 1. LIVE, 2. UPCOMING, 3. FINISHED
                                             if (a.status === 'running' && b.status !== 'running') return -1;
                                             if (b.status === 'running' && a.status !== 'running') return 1;
                                             
+                                            // If both are not running, prioritize upcoming matches
+                                            if (a.status === 'not_started' && b.status !== 'not_started' && b.status !== 'running') return -1;
+                                            if (b.status === 'not_started' && a.status !== 'not_started' && a.status !== 'running') return 1;
+                                            
                                             const dateA = new Date(a.begin_at || a.scheduled_at).getTime();
                                             const dateB = new Date(b.begin_at || b.scheduled_at).getTime();
-                                            return dateA - dateB; // Ascending order (earliest first)
+                                            
+                                            // For finished matches, sort by date descending (most recent first)
+                                            if ((a.status === 'finished' || a.status === 'completed') && (b.status === 'finished' || b.status === 'completed')) {
+                                                return dateB - dateA; // Descending order for finished matches
+                                            }
+                                            
+                                            // For live and upcoming matches, sort by date ascending (earliest first)
+                                            return dateA - dateB;
                                         })
                                                                                 .map((match) => {
                                         const result = getMatchResult(match)
