@@ -88,6 +88,9 @@ export default function MatchCard({ match }: MatchCardProps) {
 
     const streamsAvailability = getStreamsAvailability();
 
+    // Check if both teams are TBD
+    const areBothTeamsTBD = !match.opponents?.[0]?.opponent?.name && !match.opponents?.[1]?.opponent?.name;
+
     // Handle escape key to close modal
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
@@ -107,7 +110,7 @@ export default function MatchCard({ match }: MatchCardProps) {
 
     return (
         <>
-            <div className="group bg-gray-800/50 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300 animate-slide-up shadow-lg hover:shadow-blue-500/10 relative overflow-hidden cursor-pointer">
+            <div className="group bg-gray-800/50 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300 animate-slide-up shadow-lg hover:shadow-blue-500/10 relative overflow-hidden">
                 {/* Glowing effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -120,6 +123,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                         streamsEnabled={streamsAvailability.enabled}
                         streamsDisabledReason={streamsAvailability.reason}
                         onShowDetails={() => setShowDetails(true)}
+                        detailsDisabled={areBothTeamsTBD}
                     />
 
                     {/* Teams Section */}

@@ -161,7 +161,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                     return (
                         <div
                             key={match.id}
-                            className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors cursor-pointer"
+                            className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">

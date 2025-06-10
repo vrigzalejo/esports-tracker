@@ -9,6 +9,7 @@ interface MatchHeaderProps {
     streamsEnabled?: boolean
     streamsDisabledReason?: string | null
     onShowDetails: () => void
+    detailsDisabled?: boolean
 }
 
 export default function MatchHeader({ 
@@ -16,7 +17,8 @@ export default function MatchHeader({
     videoStreams, 
     streamsEnabled = true,
     streamsDisabledReason,
-    onShowDetails 
+    onShowDetails,
+    detailsDisabled = false
 }: MatchHeaderProps) {
     const [showStreams, setShowStreams] = useState(false)
     const [showTooltip, setShowTooltip] = useState(false)
@@ -68,19 +70,30 @@ export default function MatchHeader({
                 <button
                     onClick={(e) => {
                         e.stopPropagation()
-                        onShowDetails()
+                        if (!detailsDisabled) {
+                            onShowDetails()
+                        }
                     }}
-                    className="group/roster relative overflow-hidden flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400/50 text-xs rounded-full font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer"
+                    disabled={detailsDisabled}
+                    className={`group/roster relative overflow-hidden flex items-center space-x-2 px-4 py-2 text-xs rounded-full font-medium transition-all duration-300 ${
+                        detailsDisabled
+                            ? 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
+                            : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400/50 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer'
+                    }`}
                 >
-                    {/* Animated background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover/roster:opacity-100 transition-opacity duration-300" />
+                    {/* Animated background - only show when not disabled */}
+                    {!detailsDisabled && (
+                        <>
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover/roster:opacity-100 transition-opacity duration-300" />
+                            
+                            {/* Lightning effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform -translate-x-full group-hover/roster:translate-x-full transition-transform duration-700 ease-in-out" />
+                        </>
+                    )}
 
-                    {/* Lightning effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform -translate-x-full group-hover/roster:translate-x-full transition-transform duration-700 ease-in-out" />
-
-                    <UserCheck className="w-4 h-4 group-hover/roster:animate-pulse relative z-10" size={16} />
+                    <UserCheck className={`w-4 h-4 relative z-10 ${!detailsDisabled ? 'group-hover/roster:animate-pulse' : ''}`} size={16} />
                     <span className="relative z-10 font-semibold">Details</span>
-                    <Zap className="w-3 h-3 group-hover/roster:animate-bounce relative z-10" size={12} />
+                    <Zap className={`w-3 h-3 relative z-10 ${!detailsDisabled ? 'group-hover/roster:animate-bounce' : ''}`} size={12} />
                 </button>
 
                 {/* Streams Button */}

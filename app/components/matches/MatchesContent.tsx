@@ -281,12 +281,12 @@ export default function MatchesContent() {
                                 onChange={(e) => {
                                     handleGameChange(e.target.value)
                                 }}
-                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                                 disabled={gamesLoading}
                                 aria-label="Select game"
                             >
                                 {!gamesLoading && games.map((game: Game) => (
-                                    <option key={game.id || game.slug} value={game.slug || game.id}>
+                                    <option key={game.id || game.slug} value={game.slug || game.id} className="cursor-pointer">
                                         {game.name}
                                     </option>
                                 ))}
@@ -301,14 +301,14 @@ export default function MatchesContent() {
                                 onChange={(e) => {
                                     handleDateFilterChange(e.target.value)
                                 }}
-                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                                 aria-label="Select date filter"
                             >
-                                <option value="all">Most Recent</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="custom">Custom Range</option>
+                                <option value="all" className="cursor-pointer">Most Recent</option>
+                                <option value="today" className="cursor-pointer">Today</option>
+                                <option value="week" className="cursor-pointer">This Week</option>
+                                <option value="month" className="cursor-pointer">This Month</option>
+                                <option value="custom" className="cursor-pointer">Custom Range</option>
                             </select>
                         </div>
 
@@ -319,12 +319,12 @@ export default function MatchesContent() {
                                 setItemsPerPage(Number(e.target.value))
                                 resetPage()
                             }}
-                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                             aria-label="Select items per page"
                         >
-                            <option value="10">10 per page</option>
-                            <option value="20">20 per page</option>
-                            <option value="50">50 per page</option>
+                            <option value="10" className="cursor-pointer">10 per page</option>
+                            <option value="20" className="cursor-pointer">20 per page</option>
+                            <option value="50" className="cursor-pointer">50 per page</option>
                         </select>
                     </div>
                 </div>
