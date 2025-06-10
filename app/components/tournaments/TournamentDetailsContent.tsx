@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, Users, Calendar, Trophy, Gamepad2, Clock, Star, MapPin, Crown, Medal } from 'lucide-react'
+import { ArrowLeft, Users, Calendar, Trophy, Gamepad2, Clock, Star, MapPin, Crown, Medal, Tv, Play, ExternalLink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo, cleanMatchName } from '@/lib/textUtils'
+import { getStatusColor, getStatusText } from '@/lib/utils'
 
 
 
@@ -54,6 +55,10 @@ interface Match {
         region?: string
         tier?: string
     }
+    streams_list?: Array<{
+        raw_url?: string
+        url?: string
+    }>
 }
 
 
@@ -66,6 +71,7 @@ interface TournamentDetails {
     prizepool?: string
     tier?: string
     status?: string
+    winner_id?: number | null
     league: {
         id: number
         name: string
@@ -117,6 +123,129 @@ interface TournamentDetails {
 
 interface TournamentDetailsContentProps {
     tournamentId: string
+}
+
+// Streams Dropdown Component
+interface StreamsDropdownProps {
+    streams: { url: string; platform: string }[]
+    enabled: boolean
+    disabledReason: string | null
+}
+
+function StreamsDropdownComponent({ streams, enabled, disabledReason }: StreamsDropdownProps) {
+    const [showStreams, setShowStreams] = useState(false)
+    const [showTooltip, setShowTooltip] = useState(false)
+    const streamsRef = useRef<HTMLDivElement>(null)
+
+    const handleStreamClick = (streamUrl: string, e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (enabled) {
+            window.open(streamUrl, '_blank', 'noopener,noreferrer')
+        }
+    }
+
+    // Handle click outside to close streams dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (streamsRef.current && !streamsRef.current.contains(event.target as Node)) {
+                setShowStreams(false)
+            }
+        }
+
+        if (showStreams) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [showStreams])
+
+    return (
+        <div className="relative" ref={streamsRef}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation()
+                    if (enabled) {
+                        setShowStreams(!showStreams)
+                    }
+                }}
+                onMouseEnter={() => {
+                    if (!enabled && disabledReason) {
+                        setShowTooltip(true)
+                    }
+                }}
+                onMouseLeave={() => setShowTooltip(false)}
+                disabled={!enabled}
+                className={`flex items-center space-x-2 px-3 py-1.5 text-xs rounded-full font-medium transition-all duration-200 whitespace-nowrap ${
+                    enabled
+                        ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 cursor-pointer group/stream'
+                        : 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
+                }`}
+            >
+                <Tv className={`w-3 h-3 ${enabled ? 'group-hover/stream:animate-pulse' : ''}`} size={12} />
+                <span>{streams.length} Stream{streams.length > 1 ? 's' : ''}</span>
+            </button>
+
+            {/* Tooltip for disabled streams */}
+            {showTooltip && !enabled && disabledReason && (
+                <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-600 shadow-xl z-[9999] p-3">
+                    <div className="text-gray-300 text-xs text-center">
+                        {disabledReason}
+                    </div>
+                </div>
+            )}
+
+            {/* Video Streams Dropdown */}
+            {showStreams && enabled && (
+                <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
+                    <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-white text-sm font-medium flex items-center whitespace-nowrap">
+                                <Tv className="w-4 h-4 mr-2 text-purple-400" size={16} />
+                                Available Streams
+                            </h4>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowStreams(false)
+                                }}
+                                className="text-gray-400 hover:text-gray-300 ml-3 cursor-pointer"
+                                aria-label="Close streams menu"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="overflow-y-auto">
+                        {streams.map((stream, index) => (
+                            <button
+                                key={index}
+                                onClick={(e) => handleStreamClick(stream.url, e)}
+                                className="flex items-center w-full px-4 py-3 hover:bg-gray-700/50 transition-colors duration-200 group/item cursor-pointer"
+                            >
+                                <div className="flex items-center min-w-0 flex-1">
+                                    <div className="flex items-center space-x-2 text-purple-400">
+                                        <Play className="w-4 h-4 flex-shrink-0" size={16} />
+                                        {stream.platform === 'Twitch' && (
+                                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
+                                        )}
+                                    </div>
+                                    <span className="ml-3 text-gray-300 text-sm font-medium truncate">
+                                        {stream.platform}
+                                    </span>
+                                    <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" size={16} />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
 }
 
 // Prize pool formatting utility
@@ -371,6 +500,130 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
             winnerId: team1Result.score > team2Result.score ? team1Result.team_id : team2Result.team_id
         }
     }
+
+    // Get match streams
+    const getMatchStreams = (match: Match) => {
+        const streams: { url: string; platform: string }[] = [];
+
+        if (match.streams_list && Array.isArray(match.streams_list)) {
+            streams.push(...match.streams_list.map(stream => ({
+                url: stream.raw_url || stream.url || '',
+                platform: getPlatformFromUrl(stream.raw_url || stream.url || '')
+            })));
+        }
+
+        return streams.filter(stream => !!stream.url);
+    };
+
+    const getPlatformFromUrl = (url: string) => {
+        if (!url) return 'External';
+        if (url.includes('twitch.tv')) return 'Twitch';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
+        if (url.includes('facebook.com') || url.includes('fb.gg')) return 'Facebook';
+        if (url.includes('afreecatv.com')) return 'AfreecaTV';
+        if (url.includes('huya.com')) return 'Huya';
+        if (url.includes('douyu.com')) return 'Douyu';
+        return 'External';
+    };
+
+
+
+    // Determine if streams should be enabled based on match status and timing
+    const getStreamsAvailability = (match: Match) => {
+        const streams = getMatchStreams(match);
+        
+        // Always enable streams for LIVE and FINISHED matches
+        if (match.status === 'running' || match.status === 'finished' || match.status === 'completed') {
+            return {
+                streams,
+                enabled: true,
+                reason: null
+            };
+        }
+
+        // For UPCOMING matches, only enable streams 1 hour before scheduled_at
+        if (match.status === 'not_started') {
+            const now = new Date();
+            const scheduledTime = new Date(match.scheduled_at || match.begin_at);
+            const oneHourBefore = new Date(scheduledTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+            // Enable streams if current time is within 1 hour of the scheduled time
+            if (now >= oneHourBefore) {
+                return {
+                    streams,
+                    enabled: true,
+                    reason: null
+                };
+            } else {
+                // Calculate time remaining until streams become available
+                const timeUntilAvailable = oneHourBefore.getTime() - now.getTime();
+                const hoursRemaining = Math.ceil(timeUntilAvailable / (1000 * 60 * 60));
+                
+                return {
+                    streams,
+                    enabled: false,
+                    reason: `Streams available ${hoursRemaining}h before match`
+                };
+            }
+        }
+
+        // Default case
+        return {
+            streams,
+            enabled: true,
+            reason: null
+        };
+    };
+
+    // Real-time countdown state for all matches
+    const [countdowns, setCountdowns] = useState<{ [matchId: number]: string }>({})
+
+    // Update countdowns every second
+    useEffect(() => {
+        const updateCountdowns = () => {
+            const newCountdowns: { [matchId: number]: string } = {}
+            
+            matches.forEach(match => {
+                if (match.status === 'not_started') {
+                    const now = new Date().getTime()
+                    const target = new Date(match.scheduled_at || match.begin_at).getTime()
+                    const difference = target - now
+
+                    if (difference > 0) {
+                        const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+                        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+                        const seconds = Math.floor((difference % (1000 * 60)) / 1000)
+
+                        if (days > 0) {
+                            newCountdowns[match.id] = `${days}d ${hours}h ${minutes}m`
+                        } else if (hours > 0) {
+                            // Show seconds if within 24 hours
+                            newCountdowns[match.id] = `${hours}h ${minutes}m ${seconds}s`
+                        } else if (minutes > 0) {
+                            newCountdowns[match.id] = `${minutes}m ${seconds}s`
+                        } else {
+                            newCountdowns[match.id] = `${seconds}s`
+                        }
+                    } else {
+                        newCountdowns[match.id] = 'Starting soon...'
+                    }
+                }
+            })
+            
+            setCountdowns(newCountdowns)
+        }
+
+        // Update immediately
+        updateCountdowns()
+        
+        // Update every second
+        const interval = setInterval(updateCountdowns, 1000)
+        
+        return () => clearInterval(interval)
+    }, [matches])
+
+
 
     // Calculate team statistics from matches
     const calculateTeamStats = () => {
@@ -633,14 +886,20 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                 <div className="space-y-4 overflow-y-auto pr-2 pb-4 matches-scroll-content">
                                     {matches.length > 0 ? matches
                                         .sort((a, b) => {
+                                            // Prioritize live matches first, then by date
+                                            if (a.status === 'running' && b.status !== 'running') return -1;
+                                            if (b.status === 'running' && a.status !== 'running') return 1;
+                                            
                                             const dateA = new Date(a.begin_at || a.scheduled_at).getTime();
                                             const dateB = new Date(b.begin_at || b.scheduled_at).getTime();
                                             return dateA - dateB; // Ascending order (earliest first)
                                         })
-                                        .map((match) => {
+                                                                                .map((match) => {
                                         const result = getMatchResult(match)
                                         const team1 = match.opponents[0]?.opponent
                                         const team2 = match.opponents[1]?.opponent
+                                        const streamsAvailability = getStreamsAvailability(match)
+                                        const countdown = countdowns[match.id]
                                         
                                         return (
                                             <div key={match.id} className="group relative bg-gradient-to-br from-slate-800/40 via-slate-700/30 to-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-slate-600/20 hover:border-blue-400/40 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1">
@@ -651,21 +910,28 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                     {/* Header with Status and Info */}
                                                     <div className="flex items-center justify-between mb-6">
                                                         <div className="flex items-center space-x-3">
-                                                            <span className={`px-3 py-1.5 rounded-xl text-xs font-bold backdrop-blur-sm border transition-all duration-300 ${
-                                                                match.status === 'finished' || match.status === 'completed' 
-                                                                    ? 'bg-slate-500/20 text-slate-300 border-slate-500/30 group-hover:bg-slate-400/30'
-                                                                    : match.status === 'running'
-                                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 group-hover:bg-emerald-400/30 animate-pulse'
-                                                                    : 'bg-blue-500/20 text-blue-400 border-blue-500/30 group-hover:bg-blue-400/30'
-                                                            }`}>
-                                                                {match.status === 'finished' || match.status === 'completed' ? 'FINISHED' :
-                                                                 match.status === 'running' ? 'LIVE' : 'UPCOMING'}
-                                                            </span>
+                                                            <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+                                                                {match.status === 'running' ? (
+                                                                    <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+                                                                ) : (
+                                                                    <div className={`w-2 h-2 rounded-full ml-2 ${getStatusColor(match.status)}`} />
+                                                                )}
+                                                                <span className="text-xs font-medium text-white">{getStatusText(match.status)}</span>
+                                                            </div>
                                                             {match.number_of_games && (
                                                                 <span className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-xl text-xs font-bold border border-purple-500/30 backdrop-blur-sm group-hover:bg-purple-400/30 transition-all duration-300">
                                                                     BO{match.number_of_games}
                                                                 </span>
                                                             )}
+                                                            
+                                                                                                        {/* Streams Button */}
+                                            {streamsAvailability.streams.length > 0 && (
+                                                <StreamsDropdownComponent 
+                                                    streams={streamsAvailability.streams}
+                                                    enabled={streamsAvailability.enabled}
+                                                    disabledReason={streamsAvailability.reason}
+                                                />
+                                            )}
                                                         </div>
                                                         <div className="text-xs text-slate-400 font-medium bg-slate-700/30 px-3 py-1.5 rounded-xl backdrop-blur-sm border border-slate-600/20">
                                                             <div>{formatDateTime(match.begin_at).date}</div>
@@ -678,49 +944,58 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                     </>
                                                                 )}
                                                             </div>
+                                                            {/* Countdown for upcoming matches */}
+                                                            {match.status === 'not_started' && countdown && (
+                                                                <div className="mt-2 text-center">
+                                                                    <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/20 text-xs font-medium">
+                                                                        <Clock className="w-3 h-3 mr-1.5 text-green-400" size={12} />
+                                                                        <span>{countdown}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     {/* Teams Section */}
                                                     <div className="flex items-center justify-center mb-6">
                                                         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 w-full max-w-md">
-                                                                                                                    {/* Team 1 */}
-                                                        <div className="flex flex-col items-center space-y-3">
-                                                            <div 
-                                                                className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
-                                                                onClick={() => team1?.id && router.push(`/teams/${team1.id}`)}
-                                                            >
-                                                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
-                                                                <Image
-                                                                    src={getTeamImage(team1?.image_url || '')}
-                                                                    alt={team1?.name || 'TBD'}
-                                                                    fill
-                                                                    className="object-contain p-2"
-                                                                />
-                                                            </div>
-                                                            <div className="text-center">
+                                                            {/* Team 1 */}
+                                                            <div className="flex flex-col items-center space-y-3">
                                                                 <div 
-                                                                    className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
-                                                                        result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
-                                                                    }`}
+                                                                    className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
                                                                     onClick={() => team1?.id && router.push(`/teams/${team1.id}`)}
                                                                 >
-                                                                    {team1?.name || 'TBD'}
+                                                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
+                                                                    <Image
+                                                                        src={getTeamImage(team1?.image_url || '')}
+                                                                        alt={team1?.name || 'TBD'}
+                                                                        fill
+                                                                        className="object-contain p-2"
+                                                                    />
                                                                 </div>
-                                                                {(team1 as { acronym?: string })?.acronym && (
-                                                                    <div className="text-xs text-slate-400 mt-1">{(team1 as { acronym?: string }).acronym}</div>
+                                                                <div className="text-center">
+                                                                    <div 
+                                                                        className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
+                                                                            result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
+                                                                        }`}
+                                                                        onClick={() => team1?.id && router.push(`/teams/${team1.id}`)}
+                                                                    >
+                                                                        {team1?.name || 'TBD'}
+                                                                    </div>
+                                                                    {(team1 as { acronym?: string })?.acronym && (
+                                                                        <div className="text-xs text-slate-400 mt-1">{(team1 as { acronym?: string }).acronym}</div>
+                                                                    )}
+                                                                </div>
+                                                                {result && (
+                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
+                                                                        result.winnerId === team1?.id 
+                                                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                                                                            : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                                                                    }`}>
+                                                                        {result.team1Score}
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            {result && (
-                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
-                                                                    result.winnerId === team1?.id 
-                                                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                                                                        : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
-                                                                }`}>
-                                                                    {result.team1Score}
-                                                                </div>
-                                                            )}
-                                                        </div>
 
                                                             {/* VS Divider */}
                                                             <div className="flex flex-col items-center">
@@ -729,43 +1004,43 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 </div>
                                                             </div>
 
-                                                                                                                    {/* Team 2 */}
-                                                        <div className="flex flex-col items-center space-y-3">
-                                                            <div 
-                                                                className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
-                                                                onClick={() => team2?.id && router.push(`/teams/${team2.id}`)}
-                                                            >
-                                                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
-                                                                <Image
-                                                                    src={getTeamImage(team2?.image_url || '')}
-                                                                    alt={team2?.name || 'TBD'}
-                                                                    fill
-                                                                    className="object-contain p-2"
-                                                                />
-                                                            </div>
-                                                            <div className="text-center">
+                                                            {/* Team 2 */}
+                                                            <div className="flex flex-col items-center space-y-3">
                                                                 <div 
-                                                                    className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
-                                                                        result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
-                                                                    }`}
+                                                                    className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
                                                                     onClick={() => team2?.id && router.push(`/teams/${team2.id}`)}
                                                                 >
-                                                                    {team2?.name || 'TBD'}
+                                                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
+                                                                    <Image
+                                                                        src={getTeamImage(team2?.image_url || '')}
+                                                                        alt={team2?.name || 'TBD'}
+                                                                        fill
+                                                                        className="object-contain p-2"
+                                                                    />
                                                                 </div>
-                                                                {(team2 as { acronym?: string })?.acronym && (
-                                                                    <div className="text-xs text-slate-400 mt-1">{(team2 as { acronym?: string }).acronym}</div>
+                                                                <div className="text-center">
+                                                                    <div 
+                                                                        className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
+                                                                            result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
+                                                                        }`}
+                                                                        onClick={() => team2?.id && router.push(`/teams/${team2.id}`)}
+                                                                    >
+                                                                        {team2?.name || 'TBD'}
+                                                                    </div>
+                                                                    {(team2 as { acronym?: string })?.acronym && (
+                                                                        <div className="text-xs text-slate-400 mt-1">{(team2 as { acronym?: string }).acronym}</div>
+                                                                    )}
+                                                                </div>
+                                                                {result && (
+                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
+                                                                        result.winnerId === team2?.id 
+                                                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                                                                            : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                                                                    }`}>
+                                                                        {result.team2Score}
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            {result && (
-                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
-                                                                    result.winnerId === team2?.id 
-                                                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                                                                        : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
-                                                                }`}>
-                                                                    {result.team2Score}
-                                                                </div>
-                                                            )}
-                                                        </div>
                                                         </div>
                                                     </div>
 
@@ -785,19 +1060,19 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                 </div>
                                             </div>
                                         )
-                                    }) : (
-                                        <div className="text-center py-12">
-                                            <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                                            <p className="text-gray-400">No matches found for this tournament</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                     }) : (
+                                         <div className="text-center py-12">
+                                             <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                                             <p className="text-gray-400">No matches found for this tournament</p>
+                                         </div>
+                                     )}
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
 
-                    {/* Sidebar */}
-                    <div className="space-y-6" ref={sidebarRef}>
+                     {/* Sidebar */}
+                     <div className="space-y-6" ref={sidebarRef}>
                         {/* Tournament Info */}
                         <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
                             <div className="flex items-center space-x-3 mb-6">
@@ -859,7 +1134,45 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                         {/* Tournament Winner */}
                         {(() => {
                             const statusInfo = getTournamentStatus(tournament);
-                            const winner = calculatedStandings.length > 0 ? calculatedStandings[0] : null;
+                            
+                            // Get the actual tournament winner using winner_id
+                            let winner = null;
+                            if (tournament.winner_id) {
+                                // First try to find winner in expected_roster
+                                const winnerRoster = tournament.expected_roster?.find(roster => roster.team.id === tournament.winner_id);
+                                if (winnerRoster) {
+                                    winner = {
+                                        team: winnerRoster.team,
+                                        wins: 0,
+                                        losses: 0,
+                                        matches: 0,
+                                        win_rate: 0
+                                    };
+                                } else {
+                                    // Fallback to teams array
+                                    const winnerTeam = tournament.teams?.find(team => team.id === tournament.winner_id);
+                                    if (winnerTeam) {
+                                        winner = {
+                                            team: winnerTeam,
+                                            wins: 0,
+                                            losses: 0,
+                                            matches: 0,
+                                            win_rate: 0
+                                        };
+                                    }
+                                }
+                                
+                                // If we found the winner, get their stats from calculated standings
+                                if (winner) {
+                                    const winnerStats = calculatedStandings.find(standing => standing.team.id === tournament.winner_id);
+                                    if (winnerStats) {
+                                        winner.wins = winnerStats.wins;
+                                        winner.losses = winnerStats.losses;
+                                        winner.matches = winnerStats.matches_played;
+                                        winner.win_rate = winnerStats.win_rate;
+                                    }
+                                }
+                            }
                             
                             return (statusInfo.status === 'finished' && winner) && (
                                 <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 border border-yellow-500/30 shadow-xl">

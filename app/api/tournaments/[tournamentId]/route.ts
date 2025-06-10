@@ -39,6 +39,7 @@ export async function GET(
             prizepool: tournament.prizepool || null,
             tier: tournament.tier || null,
             status: tournament.status || 'unknown',
+            winner_id: tournament.winner_id || null,
             league: tournament.league ? {
                 id: tournament.league.id || 0,
                 name: tournament.league.name || 'Unknown League',

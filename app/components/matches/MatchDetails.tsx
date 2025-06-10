@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Play, ExternalLink, Tv } from 'lucide-react';
+import { Play, ExternalLink, Tv, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import type { Match } from '@/types/esports';
 import TeamRoster from './TeamRoster';
 import TeamMatches from './TeamMatches';
@@ -15,6 +16,47 @@ interface MatchDetailsProps {
 
 export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
     const router = useRouter();
+    const [countdown, setCountdown] = useState<string>('');
+
+    // Real-time countdown for upcoming matches
+    useEffect(() => {
+        if (match.status !== 'not_started') {
+            return;
+        }
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const target = new Date(match.scheduled_at || match.begin_at).getTime();
+            const difference = target - now;
+
+            if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                if (days > 0) {
+                    setCountdown(`${days}d ${hours}h ${minutes}m`);
+                } else if (hours > 0) {
+                    setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+                } else if (minutes > 0) {
+                    setCountdown(`${minutes}m ${seconds}s`);
+                } else {
+                    setCountdown(`${seconds}s`);
+                }
+            } else {
+                setCountdown('Starting soon...');
+            }
+        };
+
+        // Update immediately
+        updateCountdown();
+        
+        // Update every second
+        const interval = setInterval(updateCountdown, 1000);
+        
+        return () => clearInterval(interval);
+    }, [match.scheduled_at, match.begin_at, match.status]);
 
     const handleTeamClick = (teamId: number | undefined) => {
         if (teamId) {
@@ -277,8 +319,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-400">
-                                {cleanMatchName(match.name)}
-                                • {match.videogame?.name}
+                                {cleanMatchName(match.name)} • {match.videogame?.name}
                                 {match.number_of_games && (
                                     <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
                                         BO{match.number_of_games}
@@ -286,8 +327,18 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 )}
                             </div>
                             
-                            <div className="text-xs text-gray-300">
-                                {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
+                            <div className="flex items-center space-x-3">
+                                <div className="text-xs text-gray-300">
+                                    {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
+                                </div>
+                                
+                                {/* Countdown for upcoming matches */}
+                                {match.status === 'not_started' && countdown && (
+                                    <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/20 text-xs font-medium">
+                                        <Clock className="w-3 h-3 mr-1.5 text-green-400" size={12} />
+                                        <span>{countdown}</span>
+                                    </div>
+                                )}
                             </div>
                             
                         </div>

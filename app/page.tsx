@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Play, Trophy, Users, TrendingUp, ExternalLink } from 'lucide-react'
+import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
@@ -32,6 +32,175 @@ function StatCard({ icon: Icon, title, value, subtitle, trend }: {
       <p className="text-gray-400 text-sm">{title}</p>
       <p className="text-gray-500 text-xs">{subtitle}</p>
     </div>
+  )
+}
+
+// Custom hook for countdown functionality
+function useCountdown(match: Match) {
+  const [countdown, setCountdown] = useState('')
+  const [isLive, setIsLive] = useState(false)
+  const [isPast, setIsPast] = useState(false)
+  const countdownInterval = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  const calculateCountdown = (matchData: Match) => {
+    const now = new Date()
+    const matchDate = new Date(matchData.scheduled_at || matchData.begin_at)
+    const diff = matchDate.getTime() - now.getTime()
+
+    // Check if match is in the past
+    if (diff < 0) {
+      if (matchData.status === 'running') {
+        setIsLive(true)
+        setIsPast(false)
+        setCountdown('LIVE')
+      } else {
+        setIsLive(false)
+        setIsPast(true)
+        setCountdown('Completed')
+      }
+      return
+    }
+
+    setIsLive(false)
+    setIsPast(false)
+
+    // Calculate time units
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+    // Format countdown string
+    if (days > 0) {
+      setCountdown(`${days}d ${hours}h ${minutes}m`)
+    } else if (hours > 0) {
+      setCountdown(`${hours}h ${minutes}m ${seconds}s`)
+    } else {
+      setCountdown(`${minutes}m ${seconds}s`)
+    }
+  }
+
+  useEffect(() => {
+    calculateCountdown(match)
+    countdownInterval.current = setInterval(() => calculateCountdown(match), 1000)
+
+    return () => {
+      if (countdownInterval.current) {
+        clearInterval(countdownInterval.current)
+      }
+    }
+  }, [match])
+
+  return { countdown, isLive, isPast }
+}
+
+// Component for individual match row with countdown
+function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof useRouter> }) {
+  const { countdown, isLive, isPast } = useCountdown(match)
+
+  return (
+    <button
+      key={match.id}
+      onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
+      className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
+    >
+      <div className="flex items-center space-x-3">
+        <div className="relative">
+          <div className={`w-2 h-2 rounded-full ${
+            match.status === 'running' ? 'bg-red-500' :
+            match.status === 'finished' ? 'bg-blue-500' : 'bg-yellow-500'
+          }`} />
+          {match.status === 'running' && (
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
+          )}
+        </div>
+        
+        <div className="flex flex-col">
+          {cleanMatchName(match.name) && (
+            <div className="mb-1">
+              <span className="text-sm font-bold text-purple-300">
+                {cleanMatchName(match.name)}
+              </span>
+            </div>
+          )}
+          
+          {/* Team Images and Names */}
+          <div className="flex items-center space-x-2 mb-1">
+            {match.opponents?.slice(0, 2).map((opponent, index) => (
+              <div key={opponent.opponent.id || index} className="flex items-center space-x-2">
+                <div className="relative w-5 h-5 bg-gray-700 rounded-full overflow-hidden">
+                  <Image
+                    src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
+                    alt={opponent.opponent.name}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = '/images/placeholder-team.svg'
+                    }}
+                  />
+                </div>
+                <span className="text-sm text-gray-300 font-medium">{opponent.opponent.name}</span>
+                {index === 0 && match.opponents.length > 1 && (
+                  <span className="text-xs text-gray-500 mx-1">vs</span>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* League, Serie, Tournament Info */}
+          <div className="flex items-center space-x-2 mb-1">
+            {match.league?.name && (
+              <span className="text-xs text-blue-400 font-medium">{match.league.name}</span>
+            )}
+            {match.league?.name && match.serie?.full_name && (
+              <span className="text-xs text-gray-600">•</span>
+            )}
+            {match.serie?.full_name && (
+              <span className="text-xs text-green-400 font-medium">{capitalizeWords(match.serie.full_name)}</span>
+            )}
+            {(match.league?.name || match.serie?.full_name) && match.tournament?.name && (
+              <span className="text-xs text-gray-600">•</span>
+            )}
+            {match.tournament?.name && (
+              <span className="text-xs text-yellow-400 font-medium">{match.tournament.name}</span>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500">{match.videogame.name}</span>
+            <span className="text-xs text-gray-600">•</span>
+            <span className="text-xs text-gray-500">
+              {formatMatchDateRange(match, { includeYear: true })}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
+        {/* Countdown Timer */}
+        {!isPast && countdown && !isLive && match.status === 'not_started' && (
+          <div className="flex items-center text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/20 mr-2">
+            <Clock className="w-3 h-3 mr-1 text-green-400" size={12} />
+            <span>{countdown}</span>
+          </div>
+        )}
+        
+        {/* Status Badge */}
+        <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+          {match.status === 'running' ? (
+            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+          ) : match.status === 'finished' ? (
+            <div className="w-2 h-2 bg-gray-500 rounded-full ml-2" />
+          ) : (
+            <div className="w-2 h-2 bg-blue-500 rounded-full ml-2" />
+          )}
+          <span className="text-xs font-medium text-white">
+            {match.status === 'running' ? 'LIVE' : 
+             match.status === 'finished' ? 'FINISHED' : 'UPCOMING'}
+          </span>
+        </div>
+      </div>
+    </button>
   )
 }
 
@@ -295,7 +464,18 @@ export default function HomePage() {
                       if (a.status === 'running' && b.status !== 'running') return -1;
                       if (b.status === 'running' && a.status !== 'running') return 1;
                       
-                      // Second priority: sort by date (most recent first)
+                      // Second priority: upcoming matches (ascending order - soonest first)
+                      if (a.status === 'not_started' && b.status === 'not_started') {
+                        const dateA = new Date(a.scheduled_at || a.begin_at).getTime();
+                        const dateB = new Date(b.scheduled_at || b.begin_at).getTime();
+                        return dateA - dateB; // Ascending order for upcoming matches
+                      }
+                      
+                      // Third priority: upcoming matches before finished matches
+                      if (a.status === 'not_started' && b.status === 'finished') return -1;
+                      if (b.status === 'not_started' && a.status === 'finished') return 1;
+                      
+                      // Fourth priority: finished matches (most recent first)
                       const dateA = new Date(a.begin_at).getTime();
                       const dateB = new Date(b.begin_at).getTime();
                       return dateB - dateA;
@@ -313,104 +493,7 @@ export default function HomePage() {
                   }
 
                   return filteredMatches.map((match: Match) => (
-                    <button
-                      key={match.id}
-                      onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
-                      className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
-                    >
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <div className={`w-2 h-2 rounded-full ${
-                          match.status === 'running' ? 'bg-red-500' :
-                          match.status === 'finished' ? 'bg-blue-500' : 'bg-yellow-500'
-                        }`} />
-                        {match.status === 'running' && (
-                          <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
-                        )}
-                      </div>
-                      
-                      <div className="flex flex-col">
-                        {cleanMatchName(match.name) && (
-                          <div className="mb-1">
-                            <span className="text-sm font-bold text-purple-300">
-                              {cleanMatchName(match.name)}
-                            </span>
-                          </div>
-                        )}
-                        
-                        {/* Team Images and Names */}
-                        <div className="flex items-center space-x-2 mb-1">
-                          {match.opponents?.slice(0, 2).map((opponent, index) => (
-                            <div key={opponent.opponent.id || index} className="flex items-center space-x-2">
-                              <div className="relative w-5 h-5 bg-gray-700 rounded-full overflow-hidden">
-                                <Image
-                                  src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
-                                  alt={opponent.opponent.name}
-                                  fill
-                                  className="object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement
-                                    target.src = '/images/placeholder-team.svg'
-                                  }}
-                                />
-                              </div>
-                              <span className="text-sm text-gray-300 font-medium">{opponent.opponent.name}</span>
-                              {index === 0 && match.opponents.length > 1 && (
-                                <span className="text-xs text-gray-500 mx-1">vs</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        
-                        {/* League, Serie, Tournament Info */}
-                        <div className="flex items-center space-x-2 mb-1">
-                          {match.league?.name && (
-                            <span className="text-xs text-blue-400 font-medium">{match.league.name}</span>
-                          )}
-                          {match.league?.name && match.serie?.full_name && (
-                            <span className="text-xs text-gray-600">•</span>
-                          )}
-                          {match.serie?.full_name && (
-                            <span className="text-xs text-green-400 font-medium">{capitalizeWords(match.serie.full_name)}</span>
-                          )}
-                          {(match.league?.name || match.serie?.full_name) && match.tournament?.name && (
-                            <span className="text-xs text-gray-600">•</span>
-                          )}
-                          {match.tournament?.name && (
-                            <span className="text-xs text-yellow-400 font-medium">{match.tournament.name}</span>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-gray-500">{match.videogame.name}</span>
-                          <span className="text-xs text-gray-600">•</span>
-                          <span className="text-xs text-gray-500">
-                            {formatMatchDateRange(match, { includeYear: true })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {match.status === 'running' && (
-                        <div className="flex items-center space-x-1 bg-red-500/20 px-2 py-1 rounded-full border border-red-500/30">
-                          <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                                                                  <span className="text-xs font-medium text-red-400">LIVE</span>
-                        </div>
-                      )}
-                      {match.status === 'finished' && (
-                        <div className="flex items-center space-x-1 bg-blue-500/20 px-2 py-1 rounded-full border border-blue-500/30">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                          <span className="text-xs font-medium text-blue-400">COMPLETED</span>
-                        </div>
-                      )}
-                      {match.status === 'not_started' && (
-                        <div className="flex items-center space-x-1 bg-yellow-500/20 px-2 py-1 rounded-full border border-yellow-500/30">
-                          <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-bounce" />
-                          <span className="text-xs font-medium text-yellow-400">UPCOMING</span>
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                    <MatchRow key={match.id} match={match} router={router} />
                   ));
                 })()
               )}
