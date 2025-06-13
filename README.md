@@ -113,6 +113,13 @@ HUGGINGFACE_API_TOKEN=your_huggingface_token_here  # Optional: For AI match anal
 
 **Note**: The AI analysis system works without any API tokens by falling back to enhanced algorithmic analysis. Hugging Face integration is optional but provides superior AI-powered predictions.
 
+📖 **For detailed AI setup instructions, see [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)**
+
+## 📚 Documentation
+
+- **[HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)** - Complete AI analysis system setup and configuration guide
+- **[CACHE_README.md](CACHE_README.md)** - Comprehensive caching system documentation and performance optimization guide
+
 ## 📁 Project Structure
 
 ```
@@ -345,6 +352,8 @@ CMD ["npm", "start"]
 - **Enhanced Algorithmic**: Sophisticated fallback with professional esports analysis
 - **Extensible**: Easy to add GPT-4, Claude 3, Gemini Pro, and other providers
 
+📖 **For complete AI system documentation, see [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)**
+
 ### AI System Reliability
 - **Intelligent Model Detection**: Accurate identification of active analysis system with appropriate UI branding
 - **Transparent Fallback**: Clear messaging when switching between AI and algorithmic analysis
@@ -356,12 +365,15 @@ CMD ["npm", "start"]
 - **Core Web Vitals**: Optimized for excellent performance scores
 - **Component Memoization**: Prevents unnecessary re-renders
 - **Efficient Data Fetching**: Smart caching and request deduplication
+- **1-Hour Caching System**: Comprehensive API response caching for improved performance
 - **AI Response Caching**: Intelligent caching of AI analysis results
 - **Code Splitting**: Automatic route-based code splitting
 - **Image Optimization**: Next.js Image component with lazy loading and proper error handling
 - **Bundle Analysis**: Optimized bundle sizes and tree shaking
 - **Text Processing**: Efficient text utilities for consistent formatting
 - **Height Matching**: Dynamic height calculations for consistent layouts
+
+📖 **For detailed caching system documentation, see [CACHE_README.md](CACHE_README.md)**
 
 ## 🔧 Development Features
 
@@ -399,6 +411,11 @@ CMD ["npm", "start"]
 - Apply proper text formatting utilities
 - Implement proper timezone handling
 - Add navigation between related entities
+
+### Documentation
+- **AI System**: See [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md) for AI configuration and troubleshooting
+- **Caching System**: See [CACHE_README.md](CACHE_README.md) for performance optimization and cache management
+- **Setup Guides**: Detailed setup instructions for all system components
 
 ## 💖 Support
 
