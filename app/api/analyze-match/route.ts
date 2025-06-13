@@ -651,4 +651,4 @@ function createDefaultKeyFactors(match: Match, isAI: boolean): KeyFactor[] {
       description: `${match.videogame.name} current competitive landscape` 
     }
   ]
-} 
+}
