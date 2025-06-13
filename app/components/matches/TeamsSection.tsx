@@ -35,7 +35,7 @@ export default function TeamsSection({
 
     return (
         <div className="flex items-center justify-center">
-            <div className="grid grid-cols-3 items-center gap-4 sm:gap-6 w-full max-w-md">
+            <div className="grid grid-cols-3 items-center gap-3 sm:gap-4 w-full max-w-sm">
                 {/* Team 1 */}
                 <div className="flex justify-center">
                     <TeamDisplay
@@ -48,10 +48,10 @@ export default function TeamsSection({
                 </div>
 
                 {/* VS - Always centered */}
-                <div className="flex flex-col items-center justify-center space-y-2">
-                    <span className="text-gray-500 font-bold text-base sm:text-lg">VS</span>
+                <div className="flex flex-col items-center justify-center space-y-1">
+                    <span className="text-gray-500 font-semibold text-sm">VS</span>
                     {isMatchFinished && matchResults?.isDraw && (
-                        <div className="flex items-center text-orange-400 text-xs font-medium px-2 py-1 bg-orange-500/20 rounded-full border border-orange-500/20">
+                        <div className="flex items-center text-orange-400 text-xs font-medium px-2 py-0.5 bg-orange-500/20 rounded border border-orange-500/20">
                             <span>DRAW</span>
                         </div>
                     )}

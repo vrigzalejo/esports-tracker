@@ -1,4 +1,4 @@
-import { UserCheck, Zap, Tv, Play, ExternalLink } from 'lucide-react'
+import { UserCheck, Tv, Play, ExternalLink } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import type { Match } from '@/types/esports'
 import { getStatusColor, getStatusText } from '@/lib/utils'
@@ -50,23 +50,26 @@ export default function MatchHeader({
 
     return (
         <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+            <div className="flex items-center gap-2 flex-wrap">
+                {/* Status Badge */}
+                <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
                     {match.status === 'running' ? (
-                        <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
                     ) : (
-                        <div className={`w-2 h-2 rounded-full ml-2 ${getStatusColor(match.status)}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor(match.status)}`} />
                     )}
-                    <span className="text-xs font-medium text-white">{getStatusText(match.status)}</span>
+                    <span className="text-xs font-medium text-gray-200">{getStatusText(match.status)}</span>
                 </div>
-                <span className="text-gray-400 text-xs sm:text-sm font-medium bg-gray-900/30 px-3 py-1 rounded-full">
+                
+                {/* Game Badge */}
+                <span className="text-gray-400 text-xs font-medium bg-gray-800/40 px-3 py-1.5 rounded-lg border border-gray-700/30">
                     {match.videogame.name}
                 </span>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-                {/* Roster Button */}
+                {/* Details Button */}
                 <button
                     onClick={(e) => {
                         e.stopPropagation()
@@ -75,25 +78,14 @@ export default function MatchHeader({
                         }
                     }}
                     disabled={detailsDisabled}
-                    className={`group/roster relative overflow-hidden flex items-center space-x-2 px-4 py-2 text-xs rounded-full font-medium transition-all duration-300 ${
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-colors duration-200 ${
                         detailsDisabled
-                            ? 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
-                            : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400/50 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer'
+                            ? 'bg-gray-700/30 text-gray-500 border border-gray-700/30 cursor-not-allowed'
+                            : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-400/40 cursor-pointer'
                     }`}
                 >
-                    {/* Animated background - only show when not disabled */}
-                    {!detailsDisabled && (
-                        <>
-                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover/roster:opacity-100 transition-opacity duration-300" />
-                            
-                            {/* Lightning effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform -translate-x-full group-hover/roster:translate-x-full transition-transform duration-700 ease-in-out" />
-                        </>
-                    )}
-
-                    <UserCheck className={`w-4 h-4 relative z-10 ${!detailsDisabled ? 'group-hover/roster:animate-pulse' : ''}`} size={16} />
-                    <span className="relative z-10 font-semibold">Details</span>
-                    <Zap className={`w-3 h-3 relative z-10 ${!detailsDisabled ? 'group-hover/roster:animate-bounce' : ''}`} size={12} />
+                    <UserCheck className="w-3 h-3" />
+                    <span className="hidden sm:inline">Details</span>
                 </button>
 
                 {/* Streams Button */}
@@ -113,14 +105,14 @@ export default function MatchHeader({
                             }}
                             onMouseLeave={() => setShowTooltip(false)}
                             disabled={!streamsEnabled}
-                            className={`flex items-center space-x-2 px-3 py-1.5 text-xs rounded-full font-medium transition-all duration-200 whitespace-nowrap ${
+                            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-colors duration-200 ${
                                 streamsEnabled
-                                    ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 cursor-pointer group/stream'
-                                    : 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
+                                    ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 hover:border-purple-400/40 cursor-pointer'
+                                    : 'bg-gray-700/30 text-gray-500 border border-gray-700/30 cursor-not-allowed'
                             }`}
                         >
-                            <Tv className={`w-3 h-3 ${streamsEnabled ? 'group-hover/stream:animate-pulse' : ''}`} size={12} />
-                            <span>{videoStreams.length} Stream{videoStreams.length > 1 ? 's' : ''}</span>
+                            <Tv className="w-3 h-3" />
+                            <span>{videoStreams.length}</span>
                         </button>
 
                         {/* Tooltip for disabled streams */}
@@ -137,16 +129,16 @@ export default function MatchHeader({
                             <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[9999] max-h-[300px] overflow-y-auto">
                                 <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-white text-sm font-medium flex items-center whitespace-nowrap">
-                                            <Tv className="w-4 h-4 mr-2 text-purple-400" size={16} />
-                                            Available Streams
+                                        <h4 className="text-white text-sm font-medium flex items-center">
+                                            <Tv className="w-4 h-4 mr-2 text-purple-400" />
+                                            Streams
                                         </h4>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation()
                                                 setShowStreams(false)
                                             }}
-                                            className="text-gray-400 hover:text-gray-300 ml-3 cursor-pointer"
+                                            className="text-gray-400 hover:text-gray-300 cursor-pointer"
                                             aria-label="Close streams menu"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,11 +152,11 @@ export default function MatchHeader({
                                         <button
                                             key={index}
                                             onClick={(e) => handleStreamClick(stream.url, e)}
-                                            className="flex items-center w-full px-4 py-3 hover:bg-gray-700/50 transition-colors duration-200 group/item cursor-pointer"
+                                            className="flex items-center w-full px-4 py-3 hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer"
                                         >
                                             <div className="flex items-center min-w-0 flex-1">
                                                 <div className="flex items-center space-x-2 text-purple-400">
-                                                    <Play className="w-4 h-4 flex-shrink-0" size={16} />
+                                                    <Play className="w-4 h-4 flex-shrink-0" />
                                                     {stream.platform === 'Twitch' && (
                                                         <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
                                                     )}
@@ -172,7 +164,7 @@ export default function MatchHeader({
                                                 <span className="ml-3 text-gray-300 text-sm font-medium truncate">
                                                     {stream.platform}
                                                 </span>
-                                                <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" size={16} />
+                                                <ExternalLink className="w-4 h-4 text-gray-500 ml-3 flex-shrink-0" />
                                             </div>
                                         </button>
                                     ))}

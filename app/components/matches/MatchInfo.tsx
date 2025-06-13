@@ -35,12 +35,12 @@ export default function MatchInfo({
     };
     
     return (
-        <div className="space-y-3">
+        <div className="space-y-2">
             {/* Region */}
             {region && (
                 <div className="flex items-center justify-center">
-                    <div className="flex items-center text-emerald-400 text-xs sm:text-sm bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                        <Globe className="w-4 h-4 mr-2" size={16} />
+                    <div className="flex items-center text-emerald-400 text-xs bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                        <Globe className="w-3 h-3 mr-2" />
                         <span>{region}</span>
                     </div>
                 </div>
@@ -48,16 +48,16 @@ export default function MatchInfo({
 
             {/* Tournament Stage and League Tier */}
             {(tournamentStage || leagueTier) && (
-                <div className="flex flex-wrap items-center justify-center gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                     {tournamentStage && (
-                        <div className={`flex items-center text-xs sm:text-sm ${stageColor} bg-gray-900/30 px-3 py-1 rounded-full`}>
-                            <Trophy className="w-4 h-4 mr-2" size={16} />
+                        <div className={`flex items-center text-xs ${stageColor} bg-gray-800/40 px-3 py-1.5 rounded-lg border border-gray-700/30`}>
+                            <Trophy className="w-3 h-3 mr-2" />
                             <span className="font-medium">{tournamentStage}</span>
                         </div>
                     )}
                     {leagueTier && (
-                        <div className="flex items-center text-yellow-400 text-xs sm:text-sm bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
-                            <Star className="w-4 h-4 mr-2" size={16} />
+                        <div className="flex items-center text-yellow-400 text-xs bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20">
+                            <Star className="w-3 h-3 mr-2" />
                             <span>{leagueTier}</span>
                         </div>
                     )}
@@ -66,12 +66,12 @@ export default function MatchInfo({
 
             {/* League Information with Match Name */}
             {(cleanedLeagueInfo || cleanedMatchName) && (
-                <div className="flex items-center justify-center text-xs sm:text-sm">
+                <div className="flex items-center justify-center text-xs">
                     <div 
-                        className="flex items-center text-gray-400 bg-gray-900/30 px-3 py-1 rounded-full max-w-full cursor-pointer hover:bg-gray-800/50 transition-colors duration-200"
+                        className="flex items-center text-gray-400 bg-gray-800/40 px-3 py-1.5 rounded-lg border border-gray-700/30 max-w-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200"
                         onClick={handleTournamentClick}
                     >
-                        <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" size={16} />
+                        <Users className="w-3 h-3 mr-2 flex-shrink-0" />
                         <span className="text-center break-words hover:text-gray-300 transition-colors duration-200">
                             {cleanedLeagueInfo}
                             {cleanedLeagueInfo && cleanedMatchName && ' • '}

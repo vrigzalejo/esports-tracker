@@ -6,6 +6,7 @@ import TeamsSection from './TeamsSection'
 import MatchDateTime from './MatchDateTime'
 import MatchInfo from './MatchInfo'
 import { useMatchData } from './useMatchData'
+import OddsAssistant from './OddsAssistant'
 
 interface MatchCardProps {
     match: Match
@@ -21,6 +22,7 @@ interface Opponent {
 
 export default function MatchCard({ match }: MatchCardProps) {
     const [showDetails, setShowDetails] = useState(false)
+    const [showOddsAssistant, setShowOddsAssistant] = useState(false)
 
     const {
         countdown,
@@ -115,7 +117,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Content Container with consistent spacing */}
-                <div className="relative z-10 space-y-5">
+                <div className="relative z-10 space-y-4">
                     {/* Header with status, game, and buttons */}
                     <MatchHeader
                         match={match}
@@ -145,6 +147,25 @@ export default function MatchCard({ match }: MatchCardProps) {
                         isMatchFinished={isMatchFinished}
                     />
 
+                    {/* AI Predictions Button */}
+                    {!areBothTeamsTBD && (match.status === 'running' || match.status === 'not_started') && (
+                        <div className="flex items-center justify-center">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowOddsAssistant(true)
+                                }}
+                                className="group/ai flex items-center space-x-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-all duration-200 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 hover:border-indigo-400/40 hover:shadow-sm cursor-pointer"
+                                title="AI Match Analysis & Predictions"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                                <span>AI Predictions</span>
+                            </button>
+                        </div>
+                    )}
+
                     {/* Match Information */}
                     <MatchInfo
                         region={region}
@@ -164,6 +185,15 @@ export default function MatchCard({ match }: MatchCardProps) {
                 <MatchDetails
                     match={match}
                     onClose={() => setShowDetails(false)}
+                />
+            )}
+
+            {/* AI Odds Assistant Modal */}
+            {showOddsAssistant && (
+                <OddsAssistant
+                    match={match}
+                    isOpen={showOddsAssistant}
+                    onClose={() => setShowOddsAssistant(false)}
                 />
             )}
         </>
