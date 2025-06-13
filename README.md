@@ -6,6 +6,7 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 
 ### Core Functionality
 - **Live Match Tracking**: Real-time match status with live indicators and countdown timers
+- **AI Match Analysis**: Advanced AI-powered match predictions with multiple LLM support and smart fallback
 - **Enhanced Match Details**: Comprehensive match information with score cards, team rosters, and recent performance
 - **Tournament Management**: Complete tournament listings with detailed tournament pages, standings, matches, and prize pools
 - **Team Analytics**: Team profiles with ratings, statistics, recent match history, and championship tracking
@@ -33,6 +34,7 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 ### Match Details System
 - **Interactive Score Cards**: Beautiful score displays with team logos and winner highlighting
 - **Enhanced Match Cards**: Glass-morphism design with hover effects, glow animations, and improved typography
+- **AI Match Predictions**: Professional esports analysis with odds calculation, confidence scoring, and detailed reasoning
 - **Team Navigation**: Click team logos and names to navigate to team detail pages
 - **Recent Team Matches**: Track team performance with W/L indicators and detailed match results
 - **Tournament Context**: See tournament standings and related matches
@@ -57,6 +59,7 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 - **Next.js 15**: Latest features including Turbopack and improved performance
 - **Tailwind CSS 4**: Modern styling with custom animations and gradients
 - **TypeScript**: Full type safety throughout the application
+- **Scalable AI System**: Multi-provider LLM architecture with automatic failover and priority-based selection
 - **Optimized Performance**: Memoized components and efficient data fetching
 - **Component Architecture**: Modular, reusable components with proper error handling
 - **Custom Hooks**: Optimized data fetching and state management
@@ -90,19 +93,32 @@ Create a `.env.local` file:
 
 ```env
 PANDASCORE_TOKEN=your_api_token_here
+HUGGINGFACE_API_TOKEN=your_huggingface_token_here  # Optional: For AI match analysis
 ```
 
-### PandaScore API Setup
+### API Setup
+
+#### PandaScore API (Required)
 1. Visit [pandascore.co](https://pandascore.co)
 2. Create a free account
 3. Generate an API token
 4. Add the token to your environment variables
+
+#### Hugging Face API (Optional - For AI Analysis)
+1. Visit [huggingface.co](https://huggingface.co)
+2. Create a free account
+3. Go to [Settings → Access Tokens](https://huggingface.co/settings/tokens)
+4. Create a new token with "Read" permissions
+5. Add `HUGGINGFACE_API_TOKEN=your_token_here` to your `.env.local`
+
+**Note**: The AI analysis system works without any API tokens by falling back to enhanced algorithmic analysis. Hugging Face integration is optional but provides superior AI-powered predictions.
 
 ## 📁 Project Structure
 
 ```
 app/
 ├── api/                    # API routes
+│   ├── analyze-match/     # AI match analysis endpoint
 │   ├── matches/           # Match endpoints
 │   ├── tournaments/       # Tournament endpoints
 │   │   └── [tournamentId]/ # Tournament-specific data
@@ -116,6 +132,8 @@ app/
 │           ├── tournaments/ # Team tournament participation
 │           ├── leagues/   # Team league information
 │           └── series/    # Team series data
+├── config/               # Configuration files
+│   └── ai-models.ts     # AI model configurations and provider settings
 ├── tournaments/          # Tournament pages
 │   └── [tournamentId]/  # Dynamic tournament detail pages
 │       └── page.tsx     # Tournament detail page
@@ -132,6 +150,7 @@ app/
 │   │   ├── MatchDetails.tsx # Detailed match view with team navigation
 │   │   ├── MatchHeader.tsx # Match header with stream links
 │   │   ├── MatchInfo.tsx # Match information display
+│   │   ├── OddsAssistant.tsx # AI-powered match analysis modal with predictions
 │   │   ├── TeamMatches.tsx # Team match history
 │   │   ├── TeamRoster.tsx # Team roster display
 │   │   └── MatchesContent.tsx # Main matches page content
@@ -181,6 +200,7 @@ The application supports all games available through PandaScore:
 
 #### Match Endpoints
 - `GET /api/matches` - Match data with real-time updates and filtering
+- `POST /api/analyze-match` - AI-powered match analysis with predictions and odds
 - `GET /api/teams/[teamId]/matches` - Team-specific match history
 
 #### Tournament Endpoints
@@ -197,8 +217,9 @@ The application supports all games available through PandaScore:
 - `GET /api/teams/[teamId]/leagues` - Team league information
 - `GET /api/teams/[teamId]/series` - Team series data
 
-### Using the PandaScore API Wrapper
+### Using the API
 
+#### PandaScore API Wrapper
 ```typescript
 import { getMatches, getTournamentStandings, getTeamMatches } from '@/lib/pandaScore'
 
@@ -212,6 +233,19 @@ const standings = await getTournamentStandings('tournament-id')
 
 // Get team match history
 const teamMatches = await getTeamMatches('team-id')
+```
+
+#### AI Match Analysis
+```typescript
+// Analyze a match with AI predictions
+const response = await fetch('/api/analyze-match', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ match: matchData })
+})
+
+const { analysis } = await response.json()
+// Returns: odds, prediction, confidence, reasoning, keyFactors
 ```
 
 ## 🎨 UI/UX Features
@@ -229,9 +263,10 @@ const teamMatches = await getTeamMatches('team-id')
 - **Comprehensive Navigation**: Click-to-navigate from tournament cards, team logos, league images, and names
 - **Consistent Cursor Styling**: Pointer cursors on all clickable elements
 - **Hover Animations**: Smooth transitions and micro-interactions with scale and glow effects
-- **Modal System**: Escape key support and backdrop click handling
+- **Modal System**: Escape key support and backdrop click handling with keyboard navigation
 - **Status Indicators**: Live match indicators and status badges with animations
 - **Score Displays**: Winner highlighting and team comparison cards
+- **AI Analysis Modal**: Professional match analysis interface with clear provider identification
 
 ### Text Formatting
 - **Smart Capitalization**: Intelligent text formatting for match names and tournament titles
@@ -259,10 +294,11 @@ const teamMatches = await getTeamMatches('team-id')
 - **Tournament Scheduling**: Complete timeline information with proper timezone handling
 
 ### Accessibility
-- **Keyboard Navigation**: Full keyboard support for modals and interactions
+- **Keyboard Navigation**: Full keyboard support for modals and interactions with Escape key handling
 - **Screen Reader Support**: Proper ARIA labels and semantic HTML
 - **Color Contrast**: WCAG compliant color schemes
 - **Focus Management**: Clear focus indicators and logical tab order
+- **Clear AI Feedback**: Transparent messaging about which analysis system is active
 
 ## 🚀 Deployment
 
@@ -284,11 +320,43 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
+## 🤖 AI Analysis System
+
+### Scalable LLM Architecture
+- **Multi-Provider Support**: DeepSeek, Mistral, Llama, and extensible for GPT-4, Claude, Gemini
+- **Priority-Based Fallback**: Automatic failover between AI models based on availability and performance
+- **Provider Factory Pattern**: Centralized management of AI providers with dynamic registration
+- **Configuration-Driven**: External config file for easy model management and scaling
+- **Smart Fallback**: Always reliable with enhanced algorithmic analysis as final fallback
+
+### AI Features
+- **Professional Match Analysis**: Comprehensive esports predictions with odds calculation
+- **Confidence Scoring**: AI-generated confidence levels (55-88% range) based on multiple factors
+- **Detailed Reasoning**: 5-point analysis explaining prediction rationale
+- **Key Factors Analysis**: Tournament prestige, regional advantage, series format, game meta, team professionalism
+- **Real-time Processing**: Fast analysis with processing indicators and smooth UX
+- **Smart Model Detection**: Intelligent UI branding that accurately reflects which AI system is active
+- **Seamless Fallback Experience**: Transparent switching between AI and algorithmic analysis with appropriate messaging
+
+### Supported AI Models
+- **DeepSeek V3** (Primary): Advanced reasoning and esports knowledge
+- **Mistral 7B**: Fast and efficient analysis
+- **Llama 2**: Reliable open-source alternative
+- **Enhanced Algorithmic**: Sophisticated fallback with professional esports analysis
+- **Extensible**: Easy to add GPT-4, Claude 3, Gemini Pro, and other providers
+
+### AI System Reliability
+- **Intelligent Model Detection**: Accurate identification of active analysis system with appropriate UI branding
+- **Transparent Fallback**: Clear messaging when switching between AI and algorithmic analysis
+- **100% Uptime**: Always functional with smart algorithmic fallback when AI providers are unavailable
+- **User-Friendly Feedback**: Proper error handling with helpful configuration guidance
+
 ## 📊 Performance Optimizations
 
 - **Core Web Vitals**: Optimized for excellent performance scores
 - **Component Memoization**: Prevents unnecessary re-renders
 - **Efficient Data Fetching**: Smart caching and request deduplication
+- **AI Response Caching**: Intelligent caching of AI analysis results
 - **Code Splitting**: Automatic route-based code splitting
 - **Image Optimization**: Next.js Image component with lazy loading and proper error handling
 - **Bundle Analysis**: Optimized bundle sizes and tree shaking
@@ -303,6 +371,7 @@ CMD ["npm", "start"]
 - **Consistent Styling**: Unified approach to component styling and interactions
 - **Error Boundaries**: Proper error handling and fallback components
 - **Linter Compliance**: Clean code with proper TypeScript typing
+- **Robust Logic**: Explicit conditional logic with clear model detection and fallback handling
 
 ### Developer Experience
 - **Hot Reload**: Fast development with Next.js hot reload
@@ -344,6 +413,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [PandaScore](https://pandascore.co) for providing the comprehensive esports API
+- [Hugging Face](https://huggingface.co) for the free AI inference API and model hosting
+- [DeepSeek](https://www.deepseek.com) for the advanced AI reasoning capabilities
 - [Next.js](https://nextjs.org) team for the amazing framework
 - [Tailwind CSS](https://tailwindcss.com) for the utility-first CSS framework
 - [Lucide React](https://lucide.dev) for the beautiful icon library

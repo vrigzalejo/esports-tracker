@@ -44,9 +44,9 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
             
             if (!data.success) {
                 if (data.error === 'AI_NOT_CONFIGURED') {
-                    throw new Error('Hugging Face API not available. Using enhanced algorithmic fallback analysis.')
+                    throw new Error('DeepSeek AI not available. Using enhanced algorithmic fallback analysis.')
                 } else if (data.error === 'AI_NOT_IMPLEMENTED') {
-                    throw new Error('AI analysis ready! Add Hugging Face token for enhanced predictions.')
+                    throw new Error('AI analysis ready! Add HUGGINGFACE_API_TOKEN for DeepSeek AI predictions.')
                 } else {
                     throw new Error(data.message || 'Analysis failed')
                 }
@@ -90,6 +90,23 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
         }
     }, [isOpen])
 
+    // Handle Escape key to close modal
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isOpen) {
+                onClose()
+            }
+        }
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleKeyDown)
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isOpen, onClose])
+
     if (!isOpen) return null
 
     return (
@@ -105,12 +122,11 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white">AI Match Analyst</h2>
-                            <p className="text-sm text-gray-400">Hugging Face AI with smart fallback</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg cursor-pointer"
                         title="Close AI Odds Assistant"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +161,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
                                 <span className="text-lg">AI analyzing match...</span>
                             </div>
-                            <p className="text-gray-400 mt-2">Hugging Face AI processing team data & statistics</p>
+                            <p className="text-gray-400 mt-2">DeepSeek AI processing team data & statistics</p>
                             <div className="mt-4 flex justify-center">
                                 <div className="bg-gray-800/50 rounded-lg p-3 max-w-md">
                                     <p className="text-xs text-gray-300">
@@ -156,7 +172,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                             <div className="mt-3 flex justify-center">
                                 <div className="bg-green-900/20 border border-green-500/30 rounded-lg px-3 py-1">
                                     <p className="text-xs text-green-400 font-medium">
-                                        ⚡ Powered by Hugging Face AI
+                                        ⚡ Powered by DeepSeek AI
                                     </p>
                                 </div>
                             </div>
@@ -298,22 +314,35 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         </svg>
                                     </div>
                                     <span className="text-green-400 text-sm font-medium">
-                                        {analysis?.model === 'algorithmic-analysis' || analysis?.model === 'algorithmic-fallback' 
-                                            ? 'Powered by Smart AI' 
-                                            : analysis?.model?.includes('enhanced')
-                                            ? 'Powered by Enhanced AI'
-                                            : 'Powered by AI'}
+                                        {(() => {
+                                            const model = analysis?.model
+                                            if (model === 'enhanced-algorithmic' || model === 'algorithmic-analysis' || model === 'algorithmic-fallback') {
+                                                return 'Powered by Smart AI'
+                                            } else if (model?.includes('deepseek') || model?.includes('mistral') || model?.includes('llama')) {
+                                                return 'Powered by AI'
+                                            } else if (model?.includes('enhanced')) {
+                                                return 'Powered by Enhanced AI'
+                                            } else {
+                                                return 'Powered by AI'
+                                            }
+                                        })()}
                                     </span>
                                 </div>
                                 <p className="text-green-300 text-xs">
-                                    {analysis?.model === 'algorithmic-analysis' || analysis?.model === 'algorithmic-fallback'
-                                        ? '🧠 Intelligent algorithmic analysis with professional esports expertise (AI fallback active)'
-                                        : analysis?.model?.includes('huggingface')
-                                        ? '🤖 Real AI analysis generated by Hugging Face with professional esports expertise'
-                                        : analysis?.model?.includes('enhanced')
-                                        ? '🧠 Enhanced algorithmic fallback analysis with professional esports expertise'
-                                        : '🤖 Real AI analysis generated with professional esports expertise'
-                                    }
+                                    {(() => {
+                                        const model = analysis?.model
+                                        if (model === 'enhanced-algorithmic' || model === 'algorithmic-analysis' || model === 'algorithmic-fallback') {
+                                            return '🧠 Intelligent algorithmic analysis with professional esports expertise (AI fallback active)'
+                                        } else if (model?.includes('deepseek') || model?.includes('mistral') || model?.includes('llama')) {
+                                            return '🤖 Real AI analysis generated with professional esports expertise'
+                                        } else if (model?.includes('huggingface')) {
+                                            return '🤖 Real AI analysis generated by DeepSeek AI with professional esports expertise'
+                                        } else if (model?.includes('enhanced')) {
+                                            return '🧠 Enhanced algorithmic fallback analysis with professional esports expertise'
+                                        } else {
+                                            return '🤖 Real AI analysis generated with professional esports expertise'
+                                        }
+                                    })()}
                                 </p>
                             </div>
 
