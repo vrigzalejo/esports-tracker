@@ -45,49 +45,44 @@ export default function TeamDisplay({
     }
 
     return (
-        <div className="flex flex-col items-center space-y-3">
+        <div className="flex flex-col items-center space-y-2">
             <div className="relative">
                 <div 
-                    className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-600/40 shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:border-blue-500/40 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer backdrop-blur-sm overflow-hidden"
+                    className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gray-800/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 cursor-pointer overflow-hidden"
                     onClick={handleTeamClick}
                 >
-                    <div className="absolute inset-0.5 bg-gradient-to-br from-gray-700/20 to-gray-800/20 rounded-2xl" />
                     <Image
                         src={getTeamImage(opponent)}
                         alt={getTeamName(opponent)}
                         fill
-                        className="object-contain rounded-2xl p-1.5 relative z-10"
+                        className="object-contain rounded-xl p-1.5"
                         priority={false}
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/images/placeholder-team.svg';
                         }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-2xl pointer-events-none" />
-                    
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                 </div>
                 {isWinner && (
-                    <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-yellow-600 backdrop-blur-sm rounded-full p-1.5 shadow-lg z-20 border border-yellow-300/30">
-                        <Crown className="w-3 h-3 text-white drop-shadow-sm" size={12} />
+                    <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 shadow-sm">
+                        <Crown className="w-2.5 h-2.5 text-white" />
                     </div>
                 )}
             </div>
             <div className="flex flex-col items-center space-y-1">
                 <span 
                     onClick={handleTeamClick}
-                    className={`font-bold text-center text-xs sm:text-sm cursor-pointer hover:text-cyan-300 transition-colors duration-200 ${isWinner ? 'text-yellow-400' : 'text-white'}`}
+                    className={`font-medium text-center text-xs cursor-pointer hover:text-gray-300 transition-colors duration-200 ${isWinner ? 'text-yellow-400' : 'text-gray-200'}`}
                 >
                     {getTeamName(opponent)}
                 </span>
                 {showScore && score !== undefined && (
-                    <span className={`text-lg sm:text-xl font-bold px-3 py-1 rounded-lg ${
+                    <span className={`text-sm font-semibold px-2 py-0.5 rounded ${
                         isLive
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                            ? 'bg-blue-500/20 text-blue-400'
                             : isWinner
-                                ? 'bg-green-500/20 text-green-400 border border-green-500/20'
-                                : 'bg-gray-700/30 text-gray-400 border border-gray-600/20'
+                                ? 'bg-green-500/20 text-green-400'
+                                : 'bg-gray-700/40 text-gray-400'
                     }`}>
                         {score}
                     </span>

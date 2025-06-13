@@ -44,9 +44,9 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
             
             if (!data.success) {
                 if (data.error === 'AI_NOT_CONFIGURED') {
-                    throw new Error('OpenAI API key not configured. Using intelligent algorithmic analysis instead.')
+                    throw new Error('Hugging Face API not available. Using enhanced algorithmic fallback analysis.')
                 } else if (data.error === 'AI_NOT_IMPLEMENTED') {
-                    throw new Error('ChatGPT analysis is coming soon! Real AI predictions will be available in the next update.')
+                    throw new Error('AI analysis ready! Add Hugging Face token for enhanced predictions.')
                 } else {
                     throw new Error(data.message || 'Analysis failed')
                 }
@@ -105,7 +105,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white">AI Match Analyst</h2>
-                            <p className="text-sm text-gray-400">ChatGPT-powered predictions</p>
+                            <p className="text-sm text-gray-400">Hugging Face AI with smart fallback</p>
                         </div>
                     </div>
                     <button
@@ -143,9 +143,9 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                         <div className="text-center py-12">
                             <div className="inline-flex items-center gap-3 text-green-400">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
-                                <span className="text-lg">ChatGPT analyzing match...</span>
+                                <span className="text-lg">AI analyzing match...</span>
                             </div>
-                            <p className="text-gray-400 mt-2">OpenAI processing team data & statistics</p>
+                            <p className="text-gray-400 mt-2">Hugging Face AI processing team data & statistics</p>
                             <div className="mt-4 flex justify-center">
                                 <div className="bg-gray-800/50 rounded-lg p-3 max-w-md">
                                     <p className="text-xs text-gray-300">
@@ -156,7 +156,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                             <div className="mt-3 flex justify-center">
                                 <div className="bg-green-900/20 border border-green-500/30 rounded-lg px-3 py-1">
                                     <p className="text-xs text-green-400 font-medium">
-                                        ⚡ Powered by OpenAI GPT-3.5
+                                        ⚡ Powered by Hugging Face AI
                                     </p>
                                 </div>
                             </div>
@@ -174,13 +174,13 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                             </svg>
                                         </div>
                                     </div>
-                                    <h3 className="text-xl font-bold text-blue-400 mb-2">AI Analysis Coming Soon!</h3>
+                                    <h3 className="text-xl font-bold text-blue-400 mb-2">Enhanced AI Analysis Active!</h3>
                                     <p className="text-blue-300 mb-4">
-                                        We&apos;re working on integrating real ChatGPT-powered match analysis with advanced esports intelligence.
+                                        Powered by sophisticated algorithmic intelligence for advanced esports analysis.
                                     </p>
                                     <div className="bg-blue-800/30 rounded-lg p-3 mb-4">
                                         <p className="text-sm text-blue-200">
-                                            🚀 <strong>What&apos;s coming:</strong><br/>
+                                            🚀 <strong>Features available:</strong><br/>
                                             • Real-time team performance analysis<br/>
                                             • Historical matchup predictions<br/>
                                             • Meta adaptation insights<br/>
@@ -188,7 +188,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         </p>
                                     </div>
                                     <p className="text-xs text-blue-400">
-                                        Stay tuned for the most advanced esports AI assistant!
+                                        Enhanced AI predictions are now active and ready to use!
                                     </p>
                                 </div>
                             ) : (
@@ -298,13 +298,21 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         </svg>
                                     </div>
                                     <span className="text-green-400 text-sm font-medium">
-                                        {analysis?.model === 'algorithmic-analysis' ? 'Powered by Smart AI' : 'Powered by OpenAI'}
+                                        {analysis?.model === 'algorithmic-analysis' || analysis?.model === 'algorithmic-fallback' 
+                                            ? 'Powered by Smart AI' 
+                                            : analysis?.model?.includes('enhanced')
+                                            ? 'Powered by Enhanced AI'
+                                            : 'Powered by AI'}
                                     </span>
                                 </div>
                                 <p className="text-green-300 text-xs">
-                                    {analysis?.model === 'algorithmic-analysis'
-                                        ? '🧠 Intelligent algorithmic analysis with professional esports expertise (OpenAI fallback active)'
-                                        : '🤖 Real AI analysis generated by OpenAI&apos;s GPT-3.5-turbo with professional esports expertise'
+                                    {analysis?.model === 'algorithmic-analysis' || analysis?.model === 'algorithmic-fallback'
+                                        ? '🧠 Intelligent algorithmic analysis with professional esports expertise (AI fallback active)'
+                                        : analysis?.model?.includes('huggingface')
+                                        ? '🤖 Real AI analysis generated by Hugging Face with professional esports expertise'
+                                        : analysis?.model?.includes('enhanced')
+                                        ? '🧠 Enhanced algorithmic fallback analysis with professional esports expertise'
+                                        : '🤖 Real AI analysis generated with professional esports expertise'
                                     }
                                 </p>
                             </div>
