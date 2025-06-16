@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import PlayerCard from './PlayerCard'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
-import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePlayers } from '@/hooks/useEsportsData'
 
 export default function PlayersContent() {
@@ -84,73 +84,62 @@ export default function PlayersContent() {
                         Players
                     </h1>
 
-                    <div className="flex items-center space-x-4 flex-wrap gap-2">
-                        {/* Search */}
-                        <div className="flex-1 max-w-md relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                                type="text"
-                                placeholder="Search players..."
-                                value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                            />
-                        </div>
-
-                        {/* Items per page */}
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value))
-                                resetPage()
-                            }}
-                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                            aria-label="Select items per page"
-                        >
-                            <option value="10" className="cursor-pointer">10 per page</option>
-                            <option value="20" className="cursor-pointer">20 per page</option>
-                            <option value="50" className="cursor-pointer">50 per page</option>
-                            <option value="100" className="cursor-pointer">100 per page</option>
-                        </select>
-                    </div>
+                    {/* Items per page */}
+                    <select
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                            setItemsPerPage(Number(e.target.value))
+                            resetPage()
+                        }}
+                        className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                        aria-label="Select items per page"
+                    >
+                        <option value="10" className="cursor-pointer">10 per page</option>
+                        <option value="20" className="cursor-pointer">20 per page</option>
+                        <option value="50" className="cursor-pointer">50 per page</option>
+                        <option value="100" className="cursor-pointer">100 per page</option>
+                    </select>
                 </div>
 
                 {/* Loading State */}
                 {playersLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[...Array(itemsPerPage)].map((_, i) => (
-                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
-                                {/* Subtle background glow effect */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0" />
-                                
-                                <div className="relative z-10">
-                                    <div className="flex flex-col items-center mb-4">
-                                        <div className="relative w-32 h-32 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl ring-2 ring-gray-600/30 mb-3">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-xl" />
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="h-5 w-24 bg-gray-700 rounded mb-1" />
-                                            <div className="h-4 w-16 bg-gray-700 rounded" />
-                                        </div>
+                            <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700/50 animate-pulse">
+                                <div className="flex flex-col items-center">
+                                    {/* Player Image */}
+                                    <div className="w-24 h-24 bg-gray-700 rounded-xl mb-4" />
+                                    
+                                    {/* Player Name */}
+                                    <div className="text-center mb-4">
+                                        <div className="h-5 w-24 bg-gray-700 rounded mb-1" />
+                                        <div className="h-4 w-16 bg-gray-700 rounded" />
                                     </div>
 
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-center text-sm">
-                                            <div className="w-4 h-3 bg-gray-700 rounded mr-2 flex-shrink-0" />
+                                    {/* Player Info */}
+                                    <div className="w-full space-y-3">
+                                        {/* Nationality & Age */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <div className="w-4 h-3 bg-gray-700 rounded mr-2" />
+                                                <div className="h-4 w-8 bg-gray-700 rounded" />
+                                            </div>
                                             <div className="h-4 w-12 bg-gray-700 rounded" />
                                         </div>
-                                        <div className="flex items-center justify-center text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                            <div className="h-4 w-16 bg-gray-700 rounded" />
+                                        
+                                        {/* Team */}
+                                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                            <div className="flex items-center justify-center">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                <div className="h-4 w-20 bg-gray-700 rounded" />
+                                            </div>
                                         </div>
-                                        <div className="flex items-center justify-center text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                            <div className="h-4 w-20 bg-gray-700 rounded" />
-                                        </div>
-                                        <div className="mt-4 pt-3 border-t border-gray-700 group-hover:border-gray-600 transition-colors duration-300">
-                                            <div className="flex items-center justify-center text-sm">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                <div className="h-4 w-24 bg-gray-700 rounded" />
+                                        
+                                        {/* Game */}
+                                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                            <div className="flex items-center justify-center">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                <div className="h-4 w-16 bg-gray-700 rounded" />
                                             </div>
                                         </div>
                                     </div>
@@ -210,7 +199,7 @@ export default function PlayersContent() {
                         {/* Results info */}
                         <div className="text-center text-gray-400 mt-4">
                             <div>
-                                Showing {startIndex}-{endIndex} of {players.length} players
+                                Showing {startIndex}-{currentPage * itemsPerPage} of {players.length} players
                             </div>
                         </div>
                     </>

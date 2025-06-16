@@ -232,11 +232,19 @@ export const getPlayers = async (filters?: { per_page?: number; page?: number; s
         params['search[name]'] = filters.search;
     }
     
+    // Include current team data with image_url
+    params['include'] = 'current_team';
+    
     return request('/players', params);
 }
 
 export const getPlayer = async (playerId: string | number) => {
-    return request(`/players/${playerId}`);
+    const params: Record<string, string> = {};
+    
+    // Include current team data with image_url
+    params['include'] = 'current_team';
+    
+    return request(`/players/${playerId}`, params);
 }
 
 export const getPlayerMatches = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
