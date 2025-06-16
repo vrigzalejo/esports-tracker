@@ -14,6 +14,11 @@ export default function TeamCard({ team }: TeamCardProps) {
         e.stopPropagation()
         router.push(`/teams/${team.id}`)
     }
+
+    const handlePlayerClick = (e: React.MouseEvent, playerId: string | number) => {
+        e.stopPropagation()
+        router.push(`/players/${playerId}`)
+    }
     const getTeamImage = () => {
         const imageUrl = team.image_url;
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
@@ -284,7 +289,11 @@ export default function TeamCard({ team }: TeamCardProps) {
                             </div>
                             <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {players.map((player, index) => (
-                                    <div key={player.id || index} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 transition-colors duration-200">
+                                    <div 
+                                        key={player.id || index} 
+                                        onClick={(e) => handlePlayerClick(e, player.id)}
+                                        className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 hover:bg-gray-700/70 transition-colors duration-200 cursor-pointer"
+                                    >
                                         {/* Player Image */}
                                         <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0">
                                             <Image

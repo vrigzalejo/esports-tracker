@@ -151,69 +151,107 @@ export default function TeamsContent() {
                 {teamsLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...Array(itemsPerPage)].map((_, i) => (
-                            <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700/50 animate-pulse">
-                                <div className="flex items-center space-x-3 mb-4">
-                                    <div className="w-12 h-12 bg-gray-700 rounded-lg" />
-                                    <div className="flex-1">
-                                        <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
-                                        <div className="h-4 bg-gray-700 rounded w-1/2" />
+                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
+                                {/* Subtle background glow effect */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-50" />
+                                
+                                <div className="relative z-10">
+                                    {/* Team Header */}
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30" />
+                                        <div className="flex-1">
+                                            <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
+                                            <div className="h-4 bg-gray-700 rounded w-1/2" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-4">
-                                    <div className="space-y-3">
-                                        <div className="flex items-center">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
-                                            <div className="flex-1">
-                                                <div className="h-4 bg-gray-700 rounded w-full mb-1" />
-                                                <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
-                                                <div className="h-3 bg-gray-700 rounded w-3/4" />
+                                    <div className="space-y-4">
+                                        {/* Current Videogame */}
+                                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                            <div className="flex items-center justify-center">
+                                                <div className="w-4 h-4 bg-gray-600 rounded mr-2" />
+                                                <div className="h-4 bg-gray-600 rounded w-24" />
                                             </div>
                                         </div>
-                                        
-                                        <div className="grid grid-cols-1 gap-2">
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-3 h-3 bg-gray-700 rounded" />
-                                                <div className="h-3 bg-gray-700 rounded w-2/3" />
-                                                <div className="h-4 w-12 bg-gray-700 rounded-full" />
+
+                                        {/* Tournament Information */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center">
+                                                <div className="w-4 h-4 bg-gray-600 rounded mr-2 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <div className="h-4 bg-gray-700 rounded w-full mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
+                                                    <div className="h-3 bg-gray-700 rounded w-3/4" />
+                                                </div>
                                             </div>
                                             
-                                            <div className="flex items-center space-x-4">
-                                                <div className="flex items-center space-x-1">
-                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
-                                                    <div className="h-3 bg-gray-700 rounded w-8" />
+                                            {/* Tournament Details */}
+                                            <div className="grid grid-cols-1 gap-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                    <div className="h-3 bg-gray-700 rounded w-2/3" />
+                                                    <div className="h-4 w-16 bg-gray-600 rounded-full" />
                                                 </div>
                                                 
-                                                <div className="flex items-center space-x-1">
-                                                    <div className="w-3 h-3 bg-gray-700 rounded" />
-                                                    <div className="h-3 bg-gray-700 rounded w-12" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-3 border-t border-gray-700">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
-                                                <div className="h-4 bg-gray-700 rounded w-16" />
-                                            </div>
-                                            <div className="h-3 bg-gray-700 rounded w-12" />
-                                        </div>
-                                        <div className="space-y-3">
-                                            {[...Array(3)].map((_, j) => (
-                                                <div key={j} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-700/30">
-                                                    <div className="w-8 h-8 bg-gray-700 rounded-full" />
-                                                    <div className="flex-1">
-                                                        <div className="h-4 bg-gray-700 rounded w-24 mb-1" />
-                                                        <div className="flex gap-2">
-                                                            <div className="h-3 bg-gray-700 rounded w-6" />
-                                                            <div className="h-3 bg-gray-700 rounded w-12" />
-                                                            <div className="h-3 bg-gray-700 rounded w-8" />
-                                                        </div>
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-8" />
+                                                        <div className="h-3 bg-gray-600 rounded w-4" />
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-1">
+                                                        <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                        <div className="h-3 bg-gray-700 rounded w-12" />
                                                     </div>
                                                 </div>
-                                            ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Players Section */}
+                                        <div className="pt-3 border-t border-gray-700">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center">
+                                                    <div className="w-4 h-4 bg-gray-600 rounded mr-2" />
+                                                    <div className="h-4 bg-gray-700 rounded w-16" />
+                                                </div>
+                                                <div className="h-3 bg-gray-700 rounded w-12" />
+                                            </div>
+                                            <div className="space-y-3 max-h-64">
+                                                {[...Array(3)].map((_, j) => (
+                                                    <div key={j} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50">
+                                                        {/* Player Image */}
+                                                        <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0" />
+                                                        
+                                                        {/* Player Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <div className="h-4 bg-gray-700 rounded w-24" />
+                                                            </div>
+                                                            
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                {/* Nationality */}
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-4 h-3 bg-gray-600 rounded-sm" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-6" />
+                                                                </div>
+                                                                
+                                                                {/* Age */}
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-12" />
+                                                                </div>
+                                                                
+                                                                {/* Role */}
+                                                                <div className="flex items-center space-x-1">
+                                                                    <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                                    <div className="h-3 bg-gray-700 rounded w-8" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

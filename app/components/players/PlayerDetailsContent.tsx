@@ -41,7 +41,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                 setPlayer(playerData)
 
                 // Fetch player matches
-                const matchesResponse = await fetch(`/api/players/${playerId}/matches?per_page=10`)
+                const matchesResponse = await fetch(`/api/players/${playerId}/matches`)
                 if (matchesResponse.ok) {
                     const matchesData = await matchesResponse.json()
                     setMatches(matchesData || [])
