@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Play, Trophy, Users } from 'lucide-react'
+import { Home, Play, Trophy, Users, User } from 'lucide-react'
 
 export default function Navigation() {
     const pathname = usePathname()
@@ -12,6 +12,7 @@ export default function Navigation() {
         { id: 'matches', label: 'Matches', icon: Play, path: '/matches' },
         { id: 'tournaments', label: 'Tournaments', icon: Trophy, path: '/tournaments' },
         { id: 'teams', label: 'Teams', icon: Users, path: '/teams' },
+        { id: 'players', label: 'Players', icon: User, path: '/players' },
     ]
 
     return (
