@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import type { Roster, Player } from '@/types/roster';
+import type { RosterResponse, Player } from '@/types/roster';
 import { Users } from 'lucide-react';
 // Import country flags - you'll need to install: npm install country-flag-icons
 // import '/node_modules/country-flag-icons/3x2/US.svg' - this is how you'd import specific flags
@@ -9,6 +9,7 @@ interface TeamRosterProps {
     teamId?: number;
     teamName: string;
     tournamentId?: number;
+    playerId?: number; // Optional player ID for filtering Player type responses
 }
 
 // Helper function to get flag component from country name
@@ -16,7 +17,7 @@ const getFlagPath = (countryCode: string): string => {
     return countryCode ? `/flags/3x2/${countryCode}.svg` : '';
 };
 
-export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRosterProps) {
+export default function TeamRoster({ teamId, teamName, tournamentId, playerId }: TeamRosterProps) {
     const [roster, setRoster] = useState<Player[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,9 +35,49 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
                     throw new Error('Failed to fetch roster');
                 }
 
-                const data = await response.json();
-                const teamRoster = data.rosters.find((r: Roster) => r.id === teamId);
-                setRoster(teamRoster?.players || []);
+                const data: RosterResponse = await response.json();
+                
+                // Handle different response types
+                if (data.type === 'Team') {
+                    // Find the team roster by teamId
+                    const teamRoster = data.rosters.find((r) => r.id === teamId);
+                    setRoster(teamRoster?.players || []);
+                } else if (data.type === 'Player') {
+                    // For Player type, the rosters array contains individual players
+                    if (playerId) {
+                        // Filter by specific player ID if explicitly provided
+                        const filteredPlayers = data.rosters.filter((p) => p.id === playerId);
+                        setRoster(filteredPlayers);
+                    } else if (teamId) {
+                        // When type is "Player", teamId might actually be a playerId
+                        // First try to find a player with this ID
+                        const playerById = data.rosters.find((p) => p.id === teamId);
+                        
+                        if (playerById) {
+                            // teamId was actually a playerId
+                            setRoster([playerById]);
+                        } else {
+                            // teamId is actually a team ID, try to filter by current team
+                            const playersForTeam = data.rosters.filter((p) => 
+                                p.current_team?.id === teamId
+                            );
+                            
+                            if (playersForTeam.length > 0) {
+                                // Found players for this team
+                                setRoster(playersForTeam);
+                            } else {
+                                // No matches found, show all players
+                                setRoster(data.rosters);
+                            }
+                        }
+                    } else {
+                        // No IDs provided, show all players
+                        setRoster(data.rosters);
+                    }
+                } else {
+                    // Fallback for unknown response types
+                    setRoster([]);
+                }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch roster');
             } finally {
@@ -45,7 +86,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
         };
 
         fetchRoster();
-    }, [teamId, tournamentId]);
+    }, [teamId, tournamentId, playerId]);
 
     if (!teamId || !tournamentId) {
         return (
@@ -181,6 +222,20 @@ export default function TeamRoster({ teamId, teamName, tournamentId }: TeamRoste
                                                     month: 'long', 
                                                     day: 'numeric' 
                                                 })}
+                                            </div>
+                                        )}
+
+                                        {/* Show current team if available (for Player type responses) */}
+                                        {player.current_team && (
+                                            <div className="text-center text-xs text-blue-400">
+                                                {player.current_team.name}
+                                            </div>
+                                        )}
+
+                                        {/* Show current videogame if available */}
+                                        {player.current_videogame && (
+                                            <div className="text-center text-xs text-purple-400">
+                                                {player.current_videogame.name}
                                             </div>
                                         )}
                                     </div>
