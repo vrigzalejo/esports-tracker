@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams, getPlayers, getMatchDetails } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getPlayers, getMatchDetails, getUpcomingTournaments, getRunningTournaments, getPastTournaments } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
 import type { Player } from '@/types/roster'
 
@@ -334,4 +334,95 @@ function prepareApiFilters(filters?: FilterOptions): ApiFilters {
   }
 
   return apiFilters
+}
+
+// New hooks for specific tournament statuses
+export function useUpcomingTournaments(filters?: {
+  page?: number,
+  per_page?: number
+}) {
+  const [data, setData] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const result = await getUpcomingTournaments(filters)
+        setData(result || [])
+      } catch (err) {
+        console.error('Error fetching upcoming tournaments:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters?.page, filters?.per_page])
+
+  return { data, loading, error }
+}
+
+export function useRunningTournaments(filters?: {
+  page?: number,
+  per_page?: number
+}) {
+  const [data, setData] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const result = await getRunningTournaments(filters)
+        setData(result || [])
+      } catch (err) {
+        console.error('Error fetching running tournaments:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters?.page, filters?.per_page])
+
+  return { data, loading, error }
+}
+
+export function usePastTournaments(filters?: {
+  page?: number,
+  per_page?: number
+}) {
+  const [data, setData] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const result = await getPastTournaments(filters)
+        setData(result || [])
+      } catch (err) {
+        console.error('Error fetching past tournaments:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters?.page, filters?.per_page])
+
+  return { data, loading, error }
 }

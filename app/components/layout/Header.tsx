@@ -1,14 +1,32 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Gamepad2, Search } from 'lucide-react'
 import Link from 'next/link'
 
 interface HeaderProps {
     searchTerm: string
-    onSearchChange: (value: string) => void
+    onSearch: (value: string) => void
 }
 
-export default function Header({ searchTerm, onSearchChange }: HeaderProps) {
+export default function Header({ searchTerm, onSearch }: HeaderProps) {
+    const [inputValue, setInputValue] = useState(searchTerm)
+
+    // Sync input value with searchTerm prop when it changes
+    useEffect(() => {
+        setInputValue(searchTerm)
+    }, [searchTerm])
+
+    const handleSearch = () => {
+        onSearch(inputValue)
+    }
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch()
+        }
+    }
+
     return (
         <header className="bg-gray-800 border-b border-gray-700">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,17 +39,22 @@ export default function Header({ searchTerm, onSearchChange }: HeaderProps) {
                     </Link>
 
                     <div className="flex-1 max-w-lg mx-8">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search className="h-5 w-5 text-gray-400" />
-                            </div>
+                        <div className="relative flex">
                             <input
                                 type="text"
-                                value={searchTerm}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className="block w-full px-4 py-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="Search matches, tournaments, teams, players..."
                             />
+                            <button
+                                onClick={handleSearch}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                                aria-label="Search"
+                            >
+                                <Search className="h-5 w-5" />
+                            </button>
                         </div>
                     </div>
 

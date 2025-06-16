@@ -708,7 +708,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
                 <Navigation />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Back button skeleton */}
@@ -767,7 +767,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     if (error || !tournament) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
                 <Navigation />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <button
@@ -790,7 +790,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
             <Navigation />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Back button */}

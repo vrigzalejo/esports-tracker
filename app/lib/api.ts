@@ -199,3 +199,46 @@ export const getGames = async () => {
 export const getMatchDetails = async (matchId: string | number) => {
     return request(`/api/matches/${matchId}`);
 }
+
+// New tournament endpoints for different statuses
+export const getUpcomingTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/upcoming', params);
+}
+
+export const getRunningTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/running', params);
+}
+
+export const getPastTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/past', params);
+}

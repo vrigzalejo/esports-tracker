@@ -275,7 +275,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+                <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
                 <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="animate-pulse">
@@ -321,7 +321,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (error || !player) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+                <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
                 <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="text-center py-12">
@@ -335,7 +335,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+            <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
             <Navigation />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Back button */}
