@@ -256,14 +256,28 @@ export const getPlayer = async (playerId: string | number) => {
 
 export const getPlayerMatches = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
     const params: Record<string, string> = {};
-    
+
     if (filters?.per_page) {
         params['per_page'] = filters.per_page.toString();
     }
-    
+
     if (filters?.page) {
         params['page'] = filters.page.toString();
     }
-    
+
     return request(`/players/${playerId}/matches`, params);
+}
+
+export const getPlayerTournaments = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    return request(`/players/${playerId}/tournaments`, params);
 }
