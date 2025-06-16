@@ -12,6 +12,7 @@ export interface TeamFilters {
     game?: string;
     page?: number;
     per_page?: number;
+    search?: string;
 }
 
 export interface TournamentFilters {

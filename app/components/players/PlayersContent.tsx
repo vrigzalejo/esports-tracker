@@ -69,9 +69,50 @@ export default function PlayersContent() {
     const hasMorePages = players.length === itemsPerPage
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages = []
+        const maxVisiblePages = 5
+
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i)
+            }
+        } else {
+            const start = Math.max(1, currentPage - 2)
+            const end = Math.min(totalPages, start + maxVisiblePages - 1)
+
+            if (end - start < maxVisiblePages - 1) {
+                const newStart = Math.max(1, end - maxVisiblePages + 1)
+                for (let i = newStart; i <= totalPages; i++) {
+                    pages.push(i)
+                }
+            } else {
+                for (let i = start; i <= end; i++) {
+                    pages.push(i)
+                }
+            }
+
+            // Add ellipsis if needed
+            if (start > 1) {
+                if (start > 2) {
+                    pages.unshift('...')
+                }
+                pages.unshift(1)
+            }
+            if (end < totalPages) {
+                if (end < totalPages - 1) {
+                    pages.push('...')
+                }
+                pages.push(totalPages)
+            }
+        }
+
+        return pages
+    }
+
     // Calculate display indices for results info
     const startIndex = (currentPage - 1) * itemsPerPage + 1
-    const endIndex = Math.min(currentPage * itemsPerPage, players.length)
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
@@ -179,11 +220,22 @@ export default function PlayersContent() {
                                     <ChevronLeft className="w-5 h-5" />
                                 </button>
 
-                                <button
-                                    className="px-3 py-2 rounded-lg bg-blue-600 text-white cursor-pointer"
-                                >
-                                    {currentPage}
-                                </button>
+                                {getPageNumbers().map((pageNum, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => typeof pageNum === 'number' ? handlePageChange(pageNum) : undefined}
+                                        disabled={pageNum === '...'}
+                                        className={`px-3 py-2 rounded-lg transition-colors ${
+                                            pageNum === currentPage
+                                                ? 'bg-blue-600 text-white cursor-pointer'
+                                                : pageNum === '...'
+                                                ? 'text-gray-400 cursor-default'
+                                                : 'bg-gray-800 text-white hover:bg-gray-700 cursor-pointer'
+                                        }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                ))}
 
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
@@ -199,7 +251,7 @@ export default function PlayersContent() {
                         {/* Results info */}
                         <div className="text-center text-gray-400 mt-4">
                             <div>
-                                Showing {startIndex}-{currentPage * itemsPerPage} of {players.length} players
+                                Showing {startIndex}-{Math.min(currentPage * itemsPerPage, startIndex + players.length - 1)} players
                             </div>
                         </div>
                     </>

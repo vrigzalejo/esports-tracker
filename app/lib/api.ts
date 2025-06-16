@@ -77,12 +77,9 @@ export interface MatchFilters {
 }
 
 export interface TeamFilters {
-    game?: string;
     page?: number;
     per_page?: number;
-    since?: string;
-    until?: string;
-    region?: string;
+    search?: string;
 }
 
 export interface TournamentFilters {
@@ -162,10 +159,6 @@ export const getTournaments = async (filters?: TournamentFilters) => {
 export const getTeams = async (filters?: TeamFilters) => {
     const params: Record<string, string> = {};
 
-    if (filters?.game && filters.game !== 'all') {
-        params['game'] = filters.game;
-    }
-
     if (filters?.page) {
         params['page'] = filters.page.toString();
     }
@@ -174,16 +167,8 @@ export const getTeams = async (filters?: TeamFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
-    if (filters?.since) {
-        params['since'] = filters.since;
-    }
-
-    if (filters?.until) {
-        params['until'] = filters.until;
-    }
-
-    if (filters?.region && filters.region !== 'all') {
-        params['region'] = filters.region;
+    if (filters?.search) {
+        params['search'] = filters.search;
     }
 
     return request('/api/teams', params);

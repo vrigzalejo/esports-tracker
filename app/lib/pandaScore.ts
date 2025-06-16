@@ -189,6 +189,13 @@ export const getTeams = async (filters?: TeamFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
+    if (filters?.search) {
+        params['search[name]'] = filters.search;
+    }
+
+    // Include current videogame data
+    params['include'] = 'current_videogame';
+
     return request('/teams', params);
 }
 

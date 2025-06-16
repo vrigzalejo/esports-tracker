@@ -132,20 +132,9 @@ export function useTournaments(filters?: {
 }
 
 export function useTeams(filters?: {
-  game?: string
   page?: number,
   per_page?: number,
-  region?: string,
-  // Date filtering options
-  range?: {
-    since?: string | Date,
-    until?: string | Date
-  },
-  since?: string | Date,
-  until?: string | Date,
-  past?: boolean,
-  running?: boolean,
-  upcoming?: boolean
+  search?: string
 }) {
   const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
@@ -157,16 +146,13 @@ export function useTeams(filters?: {
         setLoading(true)
         setError(null)
 
-        const apiFilters = prepareApiFilters(filters)
-        const result = await getTeams(apiFilters)
+        const result = await getTeams(filters)
         
         // Handle different response formats
-        // When game filtering is applied, API returns { data: [], pagination: {} }
-        // Otherwise, it returns the array directly
         if (result && typeof result === 'object' && 'data' in result) {
           setData(result.data)
         } else {
-          setData(result)
+          setData(result || [])
         }
       } catch (err) {
         console.error('Error fetching teams:', err)
@@ -178,17 +164,9 @@ export function useTeams(filters?: {
 
     fetchData()
   }, [
-    filters?.game, 
     filters?.page,
     filters?.per_page,
-    filters?.region,
-    filters?.range?.since,
-    filters?.range?.until,
-    filters?.since,
-    filters?.until,
-    filters?.past,
-    filters?.running,
-    filters?.upcoming
+    filters?.search
   ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }

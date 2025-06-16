@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Users, Trophy, User, Calendar, Clock, Globe, Star } from 'lucide-react'
+import { Users, Trophy, User, Calendar, Clock, Globe, Star, Gamepad2 } from 'lucide-react'
 import type { Team } from '@/types/esports'
 
 interface TeamCardProps {
@@ -194,6 +194,18 @@ export default function TeamCard({ team }: TeamCardProps) {
                 </div>
 
                 <div className="space-y-4">
+                    {/* Current Videogame */}
+                    {team.current_videogame && (
+                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                            <div className="flex items-center justify-center text-sm">
+                                <Gamepad2 className="w-4 h-4 mr-2 flex-shrink-0 text-purple-400" />
+                                <span className="text-gray-300 group-hover:text-gray-200 transition-colors duration-200">
+                                    {team.current_videogame.name}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Tournament Information */}
                     {tournamentInfo && (
                         <div className="space-y-3">
