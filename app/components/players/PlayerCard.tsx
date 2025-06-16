@@ -49,7 +49,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                 <div className="flex flex-col items-center mb-4">
                     <div 
                         onClick={handleImageClick}
-                        className="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300 mb-3 overflow-hidden cursor-pointer hover:ring-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105"
+                        className="relative w-32 h-32 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300 mb-3 overflow-hidden cursor-pointer hover:ring-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105"
                     >
                         <Image 
                             src={player.image_url || '/images/placeholder-player.svg'} 
@@ -61,16 +61,16 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                 target.src = '/images/placeholder-player.svg'
                             }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-full" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-xl" />
                         
                         {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />
+                        <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                         
                         {/* Active status indicator */}
                         {player.active !== undefined && (
-                            <div className="absolute top-1 right-1">
+                            <div className="absolute top-2 right-2">
                                 <div 
-                                    className={`w-3 h-3 rounded-full ring-1 ring-gray-800 ${player.active ? 'bg-green-400' : 'bg-red-400'}`}
+                                    className={`w-4 h-4 rounded-full ring-2 ring-gray-800 ${player.active ? 'bg-green-400' : 'bg-red-400'}`}
                                     title={player.active ? 'Active' : 'Inactive'} 
                                 />
                             </div>
@@ -147,13 +147,6 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                 <Gamepad2 className="w-4 h-4 mr-2 flex-shrink-0" />
                                 <span className="truncate">{player.current_videogame.name}</span>
                             </div>
-                        </div>
-                    )}
-
-                    {/* Role */}
-                    {player.role && (
-                        <div className="flex items-center justify-center text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-200">
-                            <span className="px-2 py-1 bg-gray-700/50 rounded-full">{player.role}</span>
                         </div>
                     )}
                 </div>

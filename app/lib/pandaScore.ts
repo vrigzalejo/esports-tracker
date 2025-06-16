@@ -217,7 +217,7 @@ export const getMatchDetails = async (matchId: string | number) => {
 }
 
 // Player endpoints
-export const getPlayers = async (filters?: { per_page?: number; page?: number; search?: string }) => {
+export const getPlayers = async (filters?: { per_page?: number; page?: number; search?: string; game?: string }) => {
     const params: Record<string, string> = {};
     
     if (filters?.per_page) {

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams, getMatchDetails } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getPlayers, getMatchDetails } from '@/lib/api'
 import type { Match, Tournament, Team } from '@/types/esports'
+import type { Player } from '@/types/roster'
 
 export function useMatches(filters?: {
   game?: string
@@ -226,6 +227,47 @@ export function useMatchDetails(matchId: string | number | null) {
 
     fetchData()
   }, [matchId])
+
+  return { data, loading, error }
+}
+
+export function usePlayers(filters?: {
+  page?: number,
+  per_page?: number,
+  search?: string
+}) {
+  const [data, setData] = useState<Player[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const result = await getPlayers(filters)
+        
+        // Handle different response formats
+        if (result && typeof result === 'object' && 'data' in result) {
+          setData(result.data)
+        } else {
+          setData(result || [])
+        }
+      } catch (err) {
+        console.error('Error fetching players:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [
+    filters?.page,
+    filters?.per_page,
+    filters?.search
+  ]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error }
 }

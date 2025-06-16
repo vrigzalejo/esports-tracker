@@ -5,67 +5,44 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import PlayerCard from './PlayerCard'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
-import { Search, Filter, Users, ChevronLeft, ChevronRight } from 'lucide-react'
-import type { Player } from '@/types/roster'
+import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { usePlayers } from '@/hooks/useEsportsData'
 
 export default function PlayersContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [players, setPlayers] = useState<Player[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    
+    // Initialize state from URL parameters
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [totalPages, setTotalPages] = useState(1)
-    const [itemsPerPage] = useState(20)
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
 
-    // Update URL params when filters change
-    const updateUrlParams = () => {
-        const params = new URLSearchParams()
-        if (searchTerm) params.set('search', searchTerm)
-        if (currentPage > 1) params.set('page', currentPage.toString())
-        
-        const newUrl = params.toString() ? `/players?${params.toString()}` : '/players'
-        router.replace(newUrl)
-    }
+    // Function to update URL parameters
+    const updateUrlParams = (updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(searchParams.toString())
 
-    // Fetch players data
-    useEffect(() => {
-        const fetchPlayers = async () => {
-            setLoading(true)
-            setError(null)
-            
-            try {
-                const params = new URLSearchParams()
-                params.set('per_page', itemsPerPage.toString())
-                if (currentPage > 1) params.set('page', currentPage.toString())
-                if (searchTerm) params.set('search', searchTerm)
-
-                const response = await fetch(`/api/players?${params.toString()}`)
-                if (!response.ok) {
-                    throw new Error('Failed to fetch players')
-                }
-
-                const data = await response.json()
-                setPlayers(data || [])
-                
-                // Calculate total pages (assuming consistent page sizes)
-                const hasMorePages = data.length === itemsPerPage
-                setTotalPages(hasMorePages ? currentPage + 1 : currentPage)
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch players')
-            } finally {
-                setLoading(false)
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null) {
+                params.delete(key)
+            } else {
+                params.set(key, value)
             }
-        }
+        })
 
-        fetchPlayers()
-    }, [currentPage, searchTerm, itemsPerPage])
+        // Update the URL without reloading the page
+        router.push(`/players?${params.toString()}`)
+    }
 
     // Update URL when filters change
     useEffect(() => {
-        updateUrlParams()
-    }, [searchTerm, currentPage])
+        const updates: Record<string, string | null> = {
+            search: searchTerm || null,
+            page: currentPage.toString(),
+            per_page: itemsPerPage.toString()
+        }
+
+        updateUrlParams(updates)
+    }, [searchTerm, currentPage, itemsPerPage, searchParams, router])
 
     const handleSearch = (value: string) => {
         setSearchTerm(value)
@@ -73,10 +50,24 @@ export default function PlayersContent() {
     }
 
     const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) {
+        if (page >= 1) {
             setCurrentPage(page)
         }
     }
+
+    // Reset to first page when filters change
+    const resetPage = () => setCurrentPage(1)
+
+    // Fetch players data using the hook
+    const { data: players, loading: playersLoading } = usePlayers({
+        page: currentPage,
+        per_page: itemsPerPage,
+        search: searchTerm
+    })
+
+    // Pagination logic - assuming we have consistent page sizes
+    const hasMorePages = players.length === itemsPerPage
+    const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
     // Calculate display indices for results info
     const startIndex = (currentPage - 1) * itemsPerPage + 1
@@ -106,16 +97,26 @@ export default function PlayersContent() {
                             />
                         </div>
 
-                        {/* Filter button */}
-                        <button className="flex items-center space-x-2 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-300 hover:text-white hover:border-gray-500 transition-all duration-200 cursor-pointer">
-                            <Filter className="w-4 h-4" />
-                            <span>Filters</span>
-                        </button>
+                        {/* Items per page */}
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                setItemsPerPage(Number(e.target.value))
+                                resetPage()
+                            }}
+                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                            aria-label="Select items per page"
+                        >
+                            <option value="10" className="cursor-pointer">10 per page</option>
+                            <option value="20" className="cursor-pointer">20 per page</option>
+                            <option value="50" className="cursor-pointer">50 per page</option>
+                            <option value="100" className="cursor-pointer">100 per page</option>
+                        </select>
                     </div>
                 </div>
 
                 {/* Loading State */}
-                {loading && (
+                {playersLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[...Array(itemsPerPage)].map((_, i) => (
                             <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
@@ -124,8 +125,8 @@ export default function PlayersContent() {
                                 
                                 <div className="relative z-10">
                                     <div className="flex flex-col items-center mb-4">
-                                        <div className="relative w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full ring-2 ring-gray-600/30 mb-3">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-full" />
+                                        <div className="relative w-32 h-32 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl ring-2 ring-gray-600/30 mb-3">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-xl" />
                                         </div>
                                         <div className="text-center">
                                             <div className="h-5 w-24 bg-gray-700 rounded mb-1" />
@@ -146,7 +147,7 @@ export default function PlayersContent() {
                                             <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
                                             <div className="h-4 w-20 bg-gray-700 rounded" />
                                         </div>
-                                        <div className="mt-4 pt-3 border-t border-gray-700">
+                                        <div className="mt-4 pt-3 border-t border-gray-700 group-hover:border-gray-600 transition-colors duration-300">
                                             <div className="flex items-center justify-center text-sm">
                                                 <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
                                                 <div className="h-4 w-24 bg-gray-700 rounded" />
@@ -159,16 +160,8 @@ export default function PlayersContent() {
                     </div>
                 )}
 
-                {/* Error State */}
-                {error && (
-                    <div className="text-center py-12">
-                        <div className="text-red-400 text-lg mb-2">Error loading players</div>
-                        <div className="text-gray-400">{error}</div>
-                    </div>
-                )}
-
                 {/* Players Grid */}
-                {!loading && !error && (
+                {!playersLoading && (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {players.map((player) => (
