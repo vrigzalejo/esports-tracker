@@ -215,3 +215,40 @@ export const getTournamentMatches = async (tournamentId: string | number) => {
 export const getMatchDetails = async (matchId: string | number) => {
     return request(`/matches/${matchId}`);
 }
+
+// Player endpoints
+export const getPlayers = async (filters?: { per_page?: number; page?: number; search?: string }) => {
+    const params: Record<string, string> = {};
+    
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+    
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+    
+    if (filters?.search) {
+        params['search[name]'] = filters.search;
+    }
+    
+    return request('/players', params);
+}
+
+export const getPlayer = async (playerId: string | number) => {
+    return request(`/players/${playerId}`);
+}
+
+export const getPlayerMatches = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
+    const params: Record<string, string> = {};
+    
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+    
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+    
+    return request(`/players/${playerId}/matches`, params);
+}
