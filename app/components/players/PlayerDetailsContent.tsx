@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
@@ -127,6 +127,8 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const router = useRouter()
+    const sidebarRef = useRef<HTMLDivElement>(null)
+    const tournamentRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const fetchPlayerData = async () => {
@@ -157,6 +159,52 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
 
         fetchPlayerData()
     }, [playerId])
+
+    // Height matching effect
+    useEffect(() => {
+        const matchHeights = () => {
+            if (sidebarRef.current && tournamentRef.current) {
+                // Calculate total height of all sidebar sections including gaps
+                const sidebarSections = sidebarRef.current.children
+                let totalHeight = 0
+                
+                for (let i = 0; i < sidebarSections.length; i++) {
+                    const section = sidebarSections[i] as HTMLElement
+                    totalHeight += section.offsetHeight
+                    
+                    // Add gap between sections (24px gap from space-y-6)
+                    if (i < sidebarSections.length - 1) {
+                        totalHeight += 24
+                    }
+                }
+                
+                // Set tournament section to match total sidebar height
+                tournamentRef.current.style.height = `${totalHeight}px`
+                
+                // Calculate scrollable content height for tournaments
+                const scrollableContent = tournamentRef.current.querySelector('.tournament-scroll-content') as HTMLElement
+                const header = tournamentRef.current.querySelector('.tournament-header') as HTMLElement
+                
+                if (scrollableContent && header) {
+                    const headerHeight = header.offsetHeight
+                    const padding = 48 // 24px top + 24px bottom padding
+                    const availableHeight = totalHeight - headerHeight - padding
+                    scrollableContent.style.height = `${availableHeight}px`
+                }
+            }
+        }
+
+        // Match heights after content loads
+        const timer = setTimeout(matchHeights, 200)
+        
+        // Add resize listener
+        window.addEventListener('resize', matchHeights)
+        
+        return () => {
+            clearTimeout(timer)
+            window.removeEventListener('resize', matchHeights)
+        }
+    }, [tournaments, player])
 
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
@@ -312,10 +360,10 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                 {/* Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="lg:col-span-2 flex">
                         {/* Tournaments */}
-                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl flex flex-col w-full">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl flex flex-col w-full" ref={tournamentRef}>
+                            <div className="flex items-center justify-between mb-6 tournament-header">
                                 <div className="flex items-center space-x-3">
                                     <div className="p-2 bg-orange-500/20 rounded-xl">
                                         <Trophy className="w-5 h-5 text-orange-400" />
@@ -332,7 +380,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                 </div>
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <div className="space-y-6 overflow-y-auto pr-2">
+                                <div className="space-y-6 overflow-y-auto pr-2 tournament-scroll-content">
                                     {tournaments.length > 0 ? (
                                         tournaments.map((tournament) => {
                                             const isChampion = tournament.winner_id === parseInt(playerId)
@@ -476,7 +524,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                     </div>
 
                     {/* Sidebar */}
-                    <div className="space-y-6">
+                    <div className="space-y-6" ref={sidebarRef}>
                         {/* Player Info */}
                         <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300">
                             <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
