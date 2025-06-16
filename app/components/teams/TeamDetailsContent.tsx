@@ -893,7 +893,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                                 {teamRoster.players.map((player: any) => ( /* eslint-disable-line @typescript-eslint/no-explicit-any */
                                                                     <div key={player.id} className="group">
-                                                                        <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
+                                                                        <div 
+                                                                            className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-purple-500/50 overflow-hidden cursor-pointer"
+                                                                            onClick={() => router.push(`/players/${player.id}`)}
+                                                                        >
                                                                             {/* Player Image - Full Size */}
                                                                             <div className="relative w-full h-64 bg-gray-700 overflow-hidden">
                                                                                 <Image
