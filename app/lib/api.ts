@@ -4,12 +4,24 @@
 
 import { cacheManager } from './cache'
 
+// Request deduplication - store ongoing requests to prevent duplicates
+const ongoingRequests = new Map<string, Promise<unknown>>()
+
 const request = async (endpoint: string, params?: Record<string, string>) => {
+    // Create a unique key for this request
+    const requestKey = `${endpoint}?${new URLSearchParams(params || {}).toString()}`
+    
     // Check cache first
     const cachedData = cacheManager.get(endpoint, params)
     if (cachedData) {
         console.log(`🎯 Cache HIT for ${endpoint}`, params)
         return cachedData
+    }
+    
+    // Check if this exact request is already in progress
+    if (ongoingRequests.has(requestKey)) {
+        console.log(`🔄 Request DEDUPLICATION for ${endpoint}`, params)
+        return ongoingRequests.get(requestKey)
     }
     
     console.log(`🌐 Cache MISS for ${endpoint}, fetching...`, params)
@@ -24,46 +36,57 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
         });
     }
 
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    // Create the request promise and store it for deduplication
+    const requestPromise = (async () => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-        const response = await fetch(url.toString(), {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            signal: controller.signal
-        });
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                signal: controller.signal
+            });
 
-        clearTimeout(timeoutId);
+            clearTimeout(timeoutId);
 
-        if (!response.ok) {
-            let errorBody = null;
-            try {
-                errorBody = await response.json();
-            } catch {
-                // Ignore JSON parse error
+            if (!response.ok) {
+                let errorBody = null;
+                try {
+                    errorBody = await response.json();
+                } catch {
+                    // Ignore JSON parse error
+                }
+
+                throw new Error(
+                    `API request failed: ${response.status} ${response.statusText}\n` +
+                    `URL: ${url.toString()}\n` +
+                    `Error details: ${JSON.stringify(errorBody, null, 2)}`
+                );
             }
 
-            throw new Error(
-                `API request failed: ${response.status} ${response.statusText}\n` +
-                `URL: ${url.toString()}\n` +
-                `Error details: ${JSON.stringify(errorBody, null, 2)}`
-            );
+            const data = await response.json();
+            
+            // Cache the response
+            cacheManager.set(endpoint, data, params)
+            console.log(`💾 Cached response for ${endpoint}`, params)
+            
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        } finally {
+            // Remove from ongoing requests when done (success or failure)
+            ongoingRequests.delete(requestKey)
         }
+    })()
 
-        const data = await response.json();
-        
-        // Cache the response
-        cacheManager.set(endpoint, data, params)
-        console.log(`💾 Cached response for ${endpoint}`, params)
-        
-        return data;
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
+    // Store the promise for deduplication
+    ongoingRequests.set(requestKey, requestPromise)
+    
+    return requestPromise
 };
 
 export interface MatchFilters {

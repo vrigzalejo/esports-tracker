@@ -19,7 +19,7 @@ export default function TournamentsContent() {
     // Initialize state from URL parameters
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatus>(
-        (searchParams.get('status') as TournamentStatus) || 'upcoming'
+        (searchParams.get('status') as TournamentStatus) || 'running'
     )
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
@@ -77,21 +77,27 @@ export default function TournamentsContent() {
         }
     }
 
-    // Fetch tournaments based on selected status
-    const { data: upcomingTournaments, loading: upcomingLoading } = useUpcomingTournaments({
-        page: selectedStatus === 'upcoming' ? currentPage : 1,
-        per_page: itemsPerPage
-    })
+    // Fetch tournaments based on selected status - only call the API for the current status
+    const { data: upcomingTournaments, loading: upcomingLoading } = useUpcomingTournaments(
+        selectedStatus === 'upcoming' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
-    const { data: runningTournaments, loading: runningLoading } = useRunningTournaments({
-        page: selectedStatus === 'running' ? currentPage : 1,
-        per_page: itemsPerPage
-    })
+    const { data: runningTournaments, loading: runningLoading } = useRunningTournaments(
+        selectedStatus === 'running' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
-    const { data: pastTournaments, loading: pastLoading } = usePastTournaments({
-        page: selectedStatus === 'past' ? currentPage : 1,
-        per_page: itemsPerPage
-    })
+    const { data: pastTournaments, loading: pastLoading } = usePastTournaments(
+        selectedStatus === 'past' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
     // Get current tournaments and loading state based on selected status
     const getCurrentTournaments = () => {
@@ -201,13 +207,18 @@ export default function TournamentsContent() {
             })
         }
 
-        // Sort by begin_at date in descending order (most recent first)
+        // Sort by begin_at date - ascending for upcoming, descending for running/past
         return filtered.sort((a: Tournament, b: Tournament) => {
             const dateA = new Date(a.begin_at || 0).getTime()
             const dateB = new Date(b.begin_at || 0).getTime()
-            return dateB - dateA // Descending order (newest first)
+            
+            if (selectedStatus === 'upcoming') {
+                return dateA - dateB // Ascending order (earliest first) for upcoming
+            } else {
+                return dateB - dateA // Descending order (newest first) for running/past
+            }
         })
-    }, [tournaments, searchTerm, dateFilter, customDateRange])
+    }, [tournaments, searchTerm, dateFilter, customDateRange, selectedStatus])
 
     const currentTournaments = filteredTournaments
 
@@ -366,6 +377,7 @@ export default function TournamentsContent() {
                             <option value="10" className="cursor-pointer">10 per page</option>
                             <option value="20" className="cursor-pointer">20 per page</option>
                             <option value="50" className="cursor-pointer">50 per page</option>
+                            <option value="100" className="cursor-pointer">100 per page</option>
                         </select>
                     </div>
                 </div>

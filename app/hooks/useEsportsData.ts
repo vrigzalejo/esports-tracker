@@ -342,26 +342,49 @@ export function useUpcomingTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Don't fetch if no filters provided (inactive status)
+    if (!filters) {
+      setData([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    let isCancelled = false
+
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
         const result = await getUpcomingTournaments(filters)
-        setData(result || [])
+        
+        // Only update state if the request hasn't been cancelled
+        if (!isCancelled) {
+          setData(result || [])
+        }
       } catch (err) {
-        console.error('Error fetching upcoming tournaments:', err)
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        if (!isCancelled) {
+          console.error('Error fetching upcoming tournaments:', err)
+          setError(err instanceof Error ? err.message : 'An error occurred')
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     fetchData()
+
+    // Cleanup function to cancel the request if component unmounts or dependencies change
+    return () => {
+      isCancelled = true
+    }
   }, [filters?.page, filters?.per_page])
 
   return { data, loading, error }
@@ -372,26 +395,49 @@ export function useRunningTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Don't fetch if no filters provided (inactive status)
+    if (!filters) {
+      setData([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    let isCancelled = false
+
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
         const result = await getRunningTournaments(filters)
-        setData(result || [])
+        
+        // Only update state if the request hasn't been cancelled
+        if (!isCancelled) {
+          setData(result || [])
+        }
       } catch (err) {
-        console.error('Error fetching running tournaments:', err)
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        if (!isCancelled) {
+          console.error('Error fetching running tournaments:', err)
+          setError(err instanceof Error ? err.message : 'An error occurred')
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     fetchData()
+
+    // Cleanup function to cancel the request if component unmounts or dependencies change
+    return () => {
+      isCancelled = true
+    }
   }, [filters?.page, filters?.per_page])
 
   return { data, loading, error }
@@ -402,26 +448,49 @@ export function usePastTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Don't fetch if no filters provided (inactive status)
+    if (!filters) {
+      setData([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    let isCancelled = false
+
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
         const result = await getPastTournaments(filters)
-        setData(result || [])
+        
+        // Only update state if the request hasn't been cancelled
+        if (!isCancelled) {
+          setData(result || [])
+        }
       } catch (err) {
-        console.error('Error fetching past tournaments:', err)
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        if (!isCancelled) {
+          console.error('Error fetching past tournaments:', err)
+          setError(err instanceof Error ? err.message : 'An error occurred')
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     fetchData()
+
+    // Cleanup function to cancel the request if component unmounts or dependencies change
+    return () => {
+      isCancelled = true
+    }
   }, [filters?.page, filters?.per_page])
 
   return { data, loading, error }
