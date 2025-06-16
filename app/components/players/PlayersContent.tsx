@@ -146,10 +146,14 @@ export default function PlayersContent() {
                 {playersLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[...Array(itemsPerPage)].map((_, i) => (
-                            <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700/50 animate-pulse">
-                                <div className="flex flex-col items-center">
-                                    {/* Player Image */}
-                                    <div className="w-24 h-24 bg-gray-700 rounded-xl mb-4" />
+                            <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 animate-pulse">
+                                {/* Subtle background glow effect */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                
+                                <div className="relative z-10">
+                                    <div className="flex flex-col items-center">
+                                                                            {/* Player Image - Full Size */}
+                                        <div className="w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl mb-4 ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300" />
                                     
                                     {/* Player Name */}
                                     <div className="text-center mb-4">
@@ -186,6 +190,7 @@ export default function PlayersContent() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         ))}
                     </div>
                 )}
