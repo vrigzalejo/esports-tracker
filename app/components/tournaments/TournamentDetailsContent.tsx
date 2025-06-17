@@ -1277,7 +1277,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                     </div>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                         {winnerRoster.players.map((player) => (
-                                                            <div key={player.id} className="flex items-center space-x-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                                                            <div key={player.id} className="flex items-center space-x-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20 cursor-pointer hover:bg-yellow-500/20 transition-colors" onClick={() => router.push(`/players/${player.id}`)}>
                                                                 <div className="relative w-6 h-6 bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-full border border-yellow-500/30 overflow-hidden">
                                                                     {player.image_url ? (
                                                                         <Image
@@ -1297,7 +1297,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                     )}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
-                                                                    <div className="text-sm text-yellow-200 font-medium truncate">{player.name}</div>
+                                                                    <div className="text-sm text-yellow-200 font-medium truncate hover:text-yellow-100 transition-colors">{player.name}</div>
                                                                     <div className="flex items-center space-x-2 text-xs">
                                                                         {player.role && (
                                                                             <span className="bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500/30">
@@ -1432,7 +1432,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                             {roster.players && roster.players.length > 0 && (
                                                 <div className="space-y-2">
                                                     {roster.players.map((player) => (
-                                                        <div key={player.id} className="flex items-center space-x-3 p-2 bg-gray-600/20 rounded-lg hover:bg-gray-600/30 transition-colors">
+                                                        <div key={player.id} className="flex items-center space-x-3 p-2 bg-gray-600/20 rounded-lg hover:bg-gray-600/30 transition-colors cursor-pointer" onClick={() => router.push(`/players/${player.id}`)}>
                                                             <div className="relative w-6 h-6 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full border border-gray-600/40 overflow-hidden">
                                                                 {player.image_url ? (
                                                                     <Image
@@ -1452,7 +1452,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 )}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="text-sm text-white font-medium truncate">{player.name}</div>
+                                                                <div className="text-sm text-white font-medium truncate hover:text-blue-300 transition-colors">{player.name}</div>
                                                                 <div className="flex items-center space-x-2 text-xs text-gray-400">
                                                                     {player.role && (
                                                                         <span className="bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30">
