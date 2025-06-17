@@ -1,4 +1,6 @@
 // Local Storage utility for dropdown values
+import { logger } from './logger'
+
 const STORAGE_PREFIX = 'esports-tracker-'
 
 export interface DropdownValues {
@@ -27,7 +29,7 @@ export const getStoredDropdownValues = (): DropdownValues => {
     const stored = localStorage.getItem(`${STORAGE_PREFIX}dropdown-values`)
     return stored ? JSON.parse(stored) : {}
   } catch (error) {
-    console.warn('Failed to parse stored dropdown values:', error)
+    logger.warn('Failed to parse stored dropdown values:', error)
     return {}
   }
 }
@@ -41,7 +43,7 @@ export const saveDropdownValues = (values: Partial<DropdownValues>) => {
     const updated = { ...existing, ...values }
     localStorage.setItem(`${STORAGE_PREFIX}dropdown-values`, JSON.stringify(updated))
   } catch (error) {
-    console.warn('Failed to save dropdown values:', error)
+    logger.warn('Failed to save dropdown values:', error)
   }
 }
 
@@ -63,6 +65,6 @@ export const clearStoredDropdownValues = () => {
   try {
     localStorage.removeItem(`${STORAGE_PREFIX}dropdown-values`)
   } catch (error) {
-    console.warn('Failed to clear stored dropdown values:', error)
+    logger.warn('Failed to clear stored dropdown values:', error)
   }
 } 

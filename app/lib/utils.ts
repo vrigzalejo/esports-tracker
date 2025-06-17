@@ -120,6 +120,8 @@ export const formatTournamentDate = (dateString: string, country?: string, regio
     }
 }
 
+import { serverLogger } from './logger'
+
 /**
  * Logs API requests with query strings while hiding sensitive tokens
  */
@@ -127,7 +129,7 @@ export function logApiRequest(endpoint: string, url: string, method: string = 'G
   // Hide token in URL for logging
   const sanitizedUrl = url.replace(/([?&]token=)[^&]+/, '$1***HIDDEN***')
   
-  console.log(`🌐 [API] ${method} ${endpoint}`, {
+  serverLogger.log(`🌐 [API] ${method} ${endpoint}`, {
     url: sanitizedUrl,
     params: params ? Object.fromEntries(
       Object.entries(params).map(([key, value]) => 
@@ -143,7 +145,7 @@ export function logApiRequest(endpoint: string, url: string, method: string = 'G
  */
 export function logApiResponse(endpoint: string, status: number, statusText: string, duration: number, dataInfo?: { count?: number; hasData?: boolean }) {
   const emoji = status >= 200 && status < 300 ? '✅' : '❌'
-  console.log(`${emoji} [API] ${endpoint} response`, {
+  serverLogger.log(`${emoji} [API] ${endpoint} response`, {
     status,
     statusText,
     duration: `${duration}ms`,
@@ -155,7 +157,7 @@ export function logApiResponse(endpoint: string, status: number, statusText: str
  * Logs API errors with context
  */
 export function logApiError(endpoint: string, error: unknown, context?: Record<string, unknown>) {
-  console.error(`💥 [API] ${endpoint} error:`, {
+  serverLogger.error(`💥 [API] ${endpoint} error:`, {
     error: error instanceof Error ? error.message : error,
     ...context,
     timestamp: new Date().toISOString()

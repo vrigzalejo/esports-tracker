@@ -5,6 +5,7 @@
  */
 
 import { NextRequest } from 'next/server'
+import { serverLogger } from './logger'
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
@@ -15,6 +16,79 @@ const RATE_LIMIT_CONFIG = {
 
 // In-memory rate limit store (use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+
+/**
+ * Validate Origin header to prevent unauthorized API access
+ */
+export function validateOriginHeader(request: NextRequest): { valid: boolean; error?: string } {
+  const origin = request.headers.get('origin')
+  const referer = request.headers.get('referer')
+  
+  // Allow requests with no origin for non-browser clients (like Postman, curl, etc.)
+  // But only in development mode
+  if (!origin && !referer) {
+    if (process.env.NODE_ENV === 'development') {
+      serverLogger.log('🔒 [Security] No origin header - allowing in development mode')
+      return { valid: true }
+    }
+    
+    return {
+      valid: false,
+      error: 'Origin header is required'
+    }
+  }
+  
+  // Get allowed origins from environment or use defaults
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:3000',
+    'https://esports-tracker-three.vercel.app',
+    'https://*.vercel.app' // Allow all Vercel preview deployments
+  ]
+  
+  // Check origin against allowed list
+  if (origin) {
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        // Handle wildcard domains
+        const pattern = allowedOrigin.replace('*', '.*')
+        const regex = new RegExp(`^${pattern}$`)
+        return regex.test(origin)
+      }
+      return origin === allowedOrigin
+    })
+    
+    if (!isAllowed) {
+      return {
+        valid: false,
+        error: `Origin '${origin}' is not allowed`
+      }
+    }
+  }
+  
+  // If we have referer but no origin, validate referer
+  if (!origin && referer) {
+    const refererUrl = new URL(referer)
+    const refererOrigin = `${refererUrl.protocol}//${refererUrl.host}`
+    
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        const pattern = allowedOrigin.replace('*', '.*')
+        const regex = new RegExp(`^${pattern}$`)
+        return regex.test(refererOrigin)
+      }
+      return refererOrigin === allowedOrigin
+    })
+    
+    if (!isAllowed) {
+      return {
+        valid: false,
+        error: `Referer origin '${refererOrigin}' is not allowed`
+      }
+    }
+  }
+  
+  return { valid: true }
+}
 
 /**
  * Simple rate limiting implementation
@@ -159,17 +233,91 @@ export function detectSuspiciousActivity(request: NextRequest): { suspicious: bo
 }
 
 /**
+ * Comprehensive security check that combines all validations
+ */
+export function performSecurityCheck(request: NextRequest): { 
+  allowed: boolean; 
+  error?: string; 
+  details?: Record<string, unknown> 
+} {
+  // 1. Validate origin header
+  const originCheck = validateOriginHeader(request)
+  if (!originCheck.valid) {
+    logSecurityEvent('ORIGIN_VALIDATION_FAILED', {
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer'),
+      userAgent: request.headers.get('user-agent'),
+      url: request.url,
+      error: originCheck.error
+    })
+    return {
+      allowed: false,
+      error: originCheck.error,
+      details: { check: 'origin_validation' }
+    }
+  }
+  
+  // 2. Check rate limiting
+  const rateLimitCheck = checkRateLimit(request)
+  if (!rateLimitCheck.allowed) {
+    logSecurityEvent('RATE_LIMIT_EXCEEDED', {
+      ip: getClientIP(request),
+      url: request.url,
+      error: rateLimitCheck.error
+    })
+    return {
+      allowed: false,
+      error: rateLimitCheck.error,
+      details: { check: 'rate_limit' }
+    }
+  }
+  
+  // 3. Validate API key if provided
+  const apiKeyCheck = validateApiKey(request)
+  if (!apiKeyCheck.valid) {
+    logSecurityEvent('API_KEY_VALIDATION_FAILED', {
+      ip: getClientIP(request),
+      url: request.url,
+      error: apiKeyCheck.error
+    })
+    return {
+      allowed: false,
+      error: apiKeyCheck.error,
+      details: { check: 'api_key_validation' }
+    }
+  }
+  
+  // 4. Check for suspicious activity
+  const suspiciousCheck = detectSuspiciousActivity(request)
+  if (suspiciousCheck.suspicious) {
+    logSecurityEvent('SUSPICIOUS_ACTIVITY_DETECTED', {
+      ip: getClientIP(request),
+      userAgent: request.headers.get('user-agent'),
+      url: request.url,
+      reason: suspiciousCheck.reason
+    })
+    // Log but don't block for suspicious activity (adjust as needed)
+  }
+  
+  return { allowed: true }
+}
+
+/**
  * Log security events for monitoring
  */
 export function logSecurityEvent(event: string, details: Record<string, unknown>): void {
-  const timestamp = new Date().toISOString()
-  console.warn(`🔒 [SECURITY] ${event}`, {
-    timestamp,
-    ...details
-  })
+  // Only log security events in development mode
+  if (process.env.NODE_ENV === 'development') {
+    const timestamp = new Date().toISOString()
+    serverLogger.warn(`🔒 [SECURITY] ${event}`, {
+      timestamp,
+      ...details
+    })
+  }
   
   // In production, you might want to send this to a logging service
-  // or security monitoring system
+  // or security monitoring system instead of console logging
+  // Example: sendToLoggingService(event, details)
 }
 
 /**
