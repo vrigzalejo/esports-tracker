@@ -252,7 +252,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                         </div>
                         {tournament.teams && tournament.teams.length > 6 && (
                             <button
-                                onClick={() => setShowAllTeams(!showAllTeams)}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowAllTeams(!showAllTeams)
+                                }}
                                 className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
                                 {showAllTeams ? (

@@ -13,6 +13,7 @@ interface MatchCardProps {
 }
 
 interface Opponent {
+    type?: 'Player' | 'Team'
     opponent: {
         id: number
         name: string

@@ -58,9 +58,10 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
         return () => clearInterval(interval);
     }, [match.scheduled_at, match.begin_at, match.status]);
 
-    const handleTeamClick = (teamId: number | undefined) => {
+    const handleTeamClick = (teamId: number | undefined, opponentType?: 'Player' | 'Team') => {
         if (teamId) {
-            router.push(`/teams/${teamId}`);
+            const basePath = opponentType === 'Player' ? '/players' : '/teams';
+            router.push(`${basePath}/${teamId}`);
         }
     };
 
@@ -143,7 +144,8 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
             acronym: createAcronym(opponent.opponent?.name || 'TBD'),
             image: opponent.opponent?.image_url,
             score: match.results[index]?.score ?? 0,
-            isWinner: match.winner_id === opponent.opponent?.id
+            isWinner: match.winner_id === opponent.opponent?.id,
+            type: opponent.type
         }));
 
         // Ensure we have at least 2 teams
@@ -158,7 +160,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     <div className={`flex items-center justify-end space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
                         {scoreInfo[0]?.image && (
                             <div 
-                                onClick={() => handleTeamClick(scoreInfo[0]?.id)}
+                                onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                                 className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <Image 
@@ -168,7 +170,11 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     className="object-contain p-1"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement
-                                        target.src = '/images/placeholder-team.svg'
+                                        if (scoreInfo[0]?.type === 'Player') {
+                                            target.src = '/images/placeholder-player.svg'
+                                        } else {
+                                            target.src = '/images/placeholder-team.svg'
+                                        }
                                     }}
                                 />
                                 {/* Hover overlay */}
@@ -176,7 +182,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             </div>
                         )}
                         <div 
-                            onClick={() => handleTeamClick(scoreInfo[0]?.id)}
+                            onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                             className="text-right cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                         >
                             <div className="text-lg font-bold">{scoreInfo[0]?.name}</div>
@@ -206,7 +212,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             {scoreInfo[1]?.score}
                         </div>
                         <div 
-                            onClick={() => handleTeamClick(scoreInfo[1]?.id)}
+                            onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
                             className="text-left cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                         >
                             <div className="text-lg font-bold">{scoreInfo[1]?.name}</div>
@@ -214,7 +220,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         {scoreInfo[1]?.image && (
                             <div 
-                                onClick={() => handleTeamClick(scoreInfo[1]?.id)}
+                                onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
                                 className="relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <Image 
@@ -224,7 +230,11 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     className="object-contain p-1"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement
-                                        target.src = '/images/placeholder-team.svg'
+                                        if (scoreInfo[1]?.type === 'Player') {
+                                            target.src = '/images/placeholder-player.svg'
+                                        } else {
+                                            target.src = '/images/placeholder-team.svg'
+                                        }
                                     }}
                                 />
                                 {/* Hover overlay */}
@@ -359,6 +369,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     teamId={opponent.opponent?.id}
                                     teamName={opponent.opponent?.name || 'TBD'}
                                     tournamentId={match.tournament?.id}
+                                    playerId={opponent.type === 'Player' ? opponent.opponent?.id : undefined}
                                 />
                             ))}
                         </div>

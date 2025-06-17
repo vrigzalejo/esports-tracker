@@ -260,7 +260,7 @@ export default function MatchesContent() {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={(term) => {
+            <Header searchTerm={searchTerm} onSearch={(term) => {
                 setSearchTerm(term)
                 // Don't reset page for search since it's client-side filtering
             }} />

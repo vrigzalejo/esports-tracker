@@ -3,16 +3,25 @@
  */
 
 import { cacheManager } from './cache'
+import { logApiRequest, logApiResponse, logApiError } from './utils'
+
+// Request deduplication - store ongoing requests to prevent duplicates
+const ongoingRequests = new Map<string, Promise<unknown>>()
 
 const request = async (endpoint: string, params?: Record<string, string>) => {
+    // Create a unique key for this request
+    const requestKey = `${endpoint}?${new URLSearchParams(params || {}).toString()}`
+    
     // Check cache first
     const cachedData = cacheManager.get(endpoint, params)
     if (cachedData) {
-        console.log(`🎯 Cache HIT for ${endpoint}`, params)
         return cachedData
     }
     
-    console.log(`🌐 Cache MISS for ${endpoint}, fetching...`, params)
+    // Check if this exact request is already in progress
+    if (ongoingRequests.has(requestKey)) {
+        return ongoingRequests.get(requestKey)
+    }
 
     const url = new URL(`${window.location.origin}${endpoint}`);
 
@@ -24,46 +33,67 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
         });
     }
 
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    // Log the API request
+    logApiRequest(endpoint, url.toString(), 'GET', params);
 
-        const response = await fetch(url.toString(), {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            signal: controller.signal
-        });
+    // Create the request promise and store it for deduplication
+    const requestPromise = (async () => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-        clearTimeout(timeoutId);
+            const startTime = Date.now();
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                signal: controller.signal
+            });
 
-        if (!response.ok) {
-            let errorBody = null;
-            try {
-                errorBody = await response.json();
-            } catch {
-                // Ignore JSON parse error
+            clearTimeout(timeoutId);
+            const duration = Date.now() - startTime;
+
+            if (!response.ok) {
+                let errorBody = null;
+                try {
+                    errorBody = await response.json();
+                } catch {
+                    // Ignore JSON parse error
+                }
+
+                throw new Error(
+                    `API request failed: ${response.status} ${response.statusText}\n` +
+                    `URL: ${url.toString()}\n` +
+                    `Error details: ${JSON.stringify(errorBody, null, 2)}`
+                );
             }
 
-            throw new Error(
-                `API request failed: ${response.status} ${response.statusText}\n` +
-                `URL: ${url.toString()}\n` +
-                `Error details: ${JSON.stringify(errorBody, null, 2)}`
-            );
+            const data = await response.json();
+            
+            // Cache the response
+            cacheManager.set(endpoint, data, params)
+            
+            // Log the response
+            logApiResponse(endpoint, response.status, response.statusText, duration, {
+                count: Array.isArray(data) ? data.length : undefined,
+                hasData: !!data
+            });
+            
+            return data;
+        } catch (error) {
+            logApiError(endpoint, error);
+            throw error;
+        } finally {
+            // Remove from ongoing requests when done (success or failure)
+            ongoingRequests.delete(requestKey)
         }
+    })()
 
-        const data = await response.json();
-        
-        // Cache the response
-        cacheManager.set(endpoint, data, params)
-        console.log(`💾 Cached response for ${endpoint}`, params)
-        
-        return data;
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
+    // Store the promise for deduplication
+    ongoingRequests.set(requestKey, requestPromise)
+    
+    return requestPromise
 };
 
 export interface MatchFilters {
@@ -77,12 +107,9 @@ export interface MatchFilters {
 }
 
 export interface TeamFilters {
-    game?: string;
     page?: number;
     per_page?: number;
-    since?: string;
-    until?: string;
-    region?: string;
+    search?: string;
 }
 
 export interface TournamentFilters {
@@ -91,6 +118,12 @@ export interface TournamentFilters {
     per_page?: number;
     since?: string;
     until?: string;
+}
+
+export interface PlayerFilters {
+    page?: number;
+    per_page?: number;
+    search?: string;
 }
 
 export const getMatches = async (filters?: MatchFilters) => {
@@ -156,9 +189,23 @@ export const getTournaments = async (filters?: TournamentFilters) => {
 export const getTeams = async (filters?: TeamFilters) => {
     const params: Record<string, string> = {};
 
-    if (filters?.game && filters.game !== 'all') {
-        params['game'] = filters.game;
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
     }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.search) {
+        params['search'] = filters.search;
+    }
+
+    return request('/api/teams', params);
+}
+
+export const getPlayers = async (filters?: PlayerFilters) => {
+    const params: Record<string, string> = {};
 
     if (filters?.page) {
         params['page'] = filters.page.toString();
@@ -168,19 +215,11 @@ export const getTeams = async (filters?: TeamFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
-    if (filters?.since) {
-        params['since'] = filters.since;
+    if (filters?.search) {
+        params['search'] = filters.search;
     }
 
-    if (filters?.until) {
-        params['until'] = filters.until;
-    }
-
-    if (filters?.region && filters.region !== 'all') {
-        params['region'] = filters.region;
-    }
-
-    return request('/api/teams', params);
+    return request('/api/players', params);
 }
 
 export const getGames = async () => {
@@ -189,4 +228,47 @@ export const getGames = async () => {
 
 export const getMatchDetails = async (matchId: string | number) => {
     return request(`/api/matches/${matchId}`);
+}
+
+// New tournament endpoints for different statuses
+export const getUpcomingTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/upcoming', params);
+}
+
+export const getRunningTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/running', params);
+}
+
+export const getPastTournaments = async (filters?: { page?: number; per_page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    return request('/api/tournaments/past', params);
 }

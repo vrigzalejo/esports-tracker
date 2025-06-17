@@ -46,19 +46,43 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
             
             const data = await response.json();
             
-            // Filter standings to show only relevant teams first, then others
-            const relevantStandings = data.filter((standing: TournamentStanding) => 
-                memoizedTeamIds.includes(standing.team.id)
-            );
-            const otherStandings = data.filter((standing: TournamentStanding) => 
-                !memoizedTeamIds.includes(standing.team.id)
-            );
+            // Sort all standings by rank first
+            const sortedData = data.sort((a: TournamentStanding, b: TournamentStanding) => {
+                const rankA = a.rank || 999;
+                const rankB = b.rank || 999;
+                return rankA - rankB;
+            });
             
-            // Show relevant teams first, then top 5 others
-            const filteredStandings = [
-                ...relevantStandings,
-                ...otherStandings.slice(0, Math.max(0, 8 - relevantStandings.length))
-            ];
+            // If we have specific team IDs to highlight, take the top 8 but prioritize relevant teams
+            let filteredStandings: TournamentStanding[];
+            
+            if (memoizedTeamIds.length > 0) {
+                // Get all relevant teams regardless of rank
+                const relevantStandings = sortedData.filter((standing: TournamentStanding) => 
+                    memoizedTeamIds.includes(standing.team.id)
+                );
+                
+                // Get other teams to fill remaining slots
+                const otherStandings = sortedData.filter((standing: TournamentStanding) => 
+                    !memoizedTeamIds.includes(standing.team.id)
+                );
+                
+                // Combine but maintain overall rank order by sorting the final result
+                const combined = [
+                    ...relevantStandings,
+                    ...otherStandings.slice(0, Math.max(0, 8 - relevantStandings.length))
+                ];
+                
+                // Sort the final result by rank to maintain proper order
+                filteredStandings = combined.sort((a: TournamentStanding, b: TournamentStanding) => {
+                    const rankA = a.rank || 999;
+                    const rankB = b.rank || 999;
+                    return rankA - rankB;
+                });
+            } else {
+                // No specific teams to highlight, just take top 8 by rank
+                filteredStandings = sortedData.slice(0, 8);
+            }
             
             setStandings(filteredStandings);
         } catch (err) {

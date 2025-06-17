@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Crown } from 'lucide-react'
 
 interface Opponent {
+    type?: 'Player' | 'Team'
     opponent: {
         id: number
         name: string
@@ -31,6 +32,9 @@ export default function TeamDisplay({
 
     const getTeamImage = (opponent: Opponent) => {
         const imageUrl = opponent?.opponent?.image_url;
+        if (opponent?.type === 'Player') {
+            return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-player.svg';
+        }
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg';
     }
 
@@ -40,7 +44,8 @@ export default function TeamDisplay({
 
     const handleTeamClick = () => {
         if (opponent?.opponent?.id) {
-            router.push(`/teams/${opponent.opponent.id}`)
+            const basePath = opponent?.type === 'Player' ? '/players' : '/teams';
+            router.push(`${basePath}/${opponent.opponent.id}`);
         }
     }
 
@@ -59,7 +64,11 @@ export default function TeamDisplay({
                         priority={false}
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images/placeholder-team.svg';
+                            if (opponent?.type === 'Player') {
+                                target.src = '/images/placeholder-player.svg';
+                            } else {
+                                target.src = '/images/placeholder-team.svg';
+                            }
                         }}
                     />
                 </div>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logApiRequest, logApiResponse, logApiError } from '@/lib/utils'
 
 export async function GET(
     request: NextRequest,
@@ -16,18 +17,23 @@ export async function GET(
         }
 
         // Fetch matches for the specific team
-        const response = await fetch(
-            `https://api.pandascore.co/teams/${teamId}/matches?token=${token}`,
-            {
-                headers: {
-                    'Accept': 'application/json',
-                },
-                next: { revalidate: 300 } // Cache for 5 minutes
-            }
-        )
+        const apiUrl = `https://api.pandascore.co/teams/${teamId}/matches?token=${token}`
+        logApiRequest(`/teams/${teamId}/matches`, apiUrl, 'GET')
+
+        const startTime = Date.now()
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Accept': 'application/json',
+            },
+            next: { revalidate: 300 } // Cache for 5 minutes
+        })
+        const duration = Date.now() - startTime
 
         if (!response.ok) {
-            console.error('PandaScore API error:', response.status, response.statusText)
+            logApiError(`/teams/${teamId}/matches`, `${response.status} ${response.statusText}`, {
+                status: response.status,
+                statusText: response.statusText
+            })
             return NextResponse.json(
                 { error: 'Failed to fetch matches data' },
                 { status: response.status }
@@ -35,6 +41,9 @@ export async function GET(
         }
 
         const matches = await response.json()
+        logApiResponse(`/teams/${teamId}/matches`, response.status, response.statusText, duration, {
+            count: matches.length
+        })
 
         // Transform the data to match our interface
         const transformedMatches = matches.map((match: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -107,7 +116,7 @@ export async function GET(
         return NextResponse.json(transformedMatches)
 
     } catch (error) {
-        console.error('Error fetching matches:', error)
+        logApiError(`/teams/${(await params).teamId}/matches`, error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

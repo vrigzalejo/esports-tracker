@@ -1,21 +1,16 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Trophy, Clock, CheckCircle } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import TournamentCard from '@/components/tournaments/TournamentCard'
-import { useTournaments } from '@/hooks/useEsportsData'
+import { useUpcomingTournaments, useRunningTournaments, usePastTournaments } from '@/hooks/useEsportsData'
 import type { Tournament } from '@/types/esports'
-import { useGamesContext } from '@/contexts/GamesContext'
 
-interface Game {
-    id: string | number
-    slug: string
-    name: string
-}
+type TournamentStatus = 'upcoming' | 'running' | 'past'
 
 export default function TournamentsContent() {
     const router = useRouter()
@@ -23,7 +18,9 @@ export default function TournamentsContent() {
 
     // Initialize state from URL parameters
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || 'valorant')
+    const [selectedStatus, setSelectedStatus] = useState<TournamentStatus>(
+        (searchParams.get('status') as TournamentStatus) || 'running'
+    )
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
     const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
@@ -52,7 +49,7 @@ export default function TournamentsContent() {
     useEffect(() => {
         const updates: Record<string, string | null> = {
             search: searchTerm || null,
-            game: selectedGame,
+            status: selectedStatus,
             page: currentPage.toString(),
             per_page: itemsPerPage.toString(),
             date_filter: dateFilter
@@ -64,11 +61,11 @@ export default function TournamentsContent() {
         }
 
         updateUrlParams(updates)
-    }, [searchTerm, selectedGame, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
+    }, [searchTerm, selectedStatus, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
     // Modified filter handlers
-    const handleGameChange = (game: string) => {
-        setSelectedGame(game)
+    const handleStatusChange = (status: TournamentStatus) => {
+        setSelectedStatus(status)
         setCurrentPage(1) // Reset to first page
     }
 
@@ -80,129 +77,158 @@ export default function TournamentsContent() {
         }
     }
 
-    // Fetch games data
-    const { games, loading: gamesLoading } = useGamesContext()
+    // Fetch tournaments based on selected status - only call the API for the current status
+    const { data: upcomingTournaments, loading: upcomingLoading } = useUpcomingTournaments(
+        selectedStatus === 'upcoming' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
-    // Prepare date filters for the API
-    const getDateFilters = () => {
-        const filters: {
-            since?: string;
-            until?: string;
-        } = {}
+    const { data: runningTournaments, loading: runningLoading } = useRunningTournaments(
+        selectedStatus === 'running' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
-        switch (dateFilter) {
-            case 'today': {
-                // Get today's date at UTC midnight
-                const today = new Date()
-                today.setUTCHours(0, 0, 0, 0)
-                filters.since = today.toISOString().split('T')[0]
+    const { data: pastTournaments, loading: pastLoading } = usePastTournaments(
+        selectedStatus === 'past' ? {
+            page: currentPage,
+            per_page: itemsPerPage
+        } : undefined
+    )
 
-                // Get tomorrow's date at UTC midnight
-                const tomorrow = new Date(today)
-                tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
-                filters.until = tomorrow.toISOString().split('T')[0]
-                break
-            }
-            case 'week': {
-                const now = new Date()
-                // Get the start of current week (Sunday) at UTC midnight
-                const weekStart = new Date(now)
-                weekStart.setUTCHours(0, 0, 0, 0)
-                weekStart.setUTCDate(now.getUTCDate() - now.getUTCDay())
-                filters.since = weekStart.toISOString().split('T')[0]
-
-                // Get the end of current week (Saturday) at UTC midnight
-                const weekEnd = new Date(weekStart)
-                weekEnd.setUTCDate(weekStart.getUTCDate() + 7)
-                filters.until = weekEnd.toISOString().split('T')[0]
-                break
-            }
-            case 'month': {
-                const now = new Date()
-                // Get the start of current month at UTC midnight
-                const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-                filters.since = monthStart.toISOString().split('T')[0]
-
-                // Get the start of next month at UTC midnight
-                const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))
-                filters.until = monthEnd.toISOString().split('T')[0]
-                break
-            }
-            case 'custom': {
-                if (customDateRange.start) {
-                    filters.since = customDateRange.start // Already in YYYY-MM-DD format
-                }
-                if (customDateRange.end) {
-                    // For custom end date, include the entire day by using the next day as the until date
-                    const nextDay = new Date(customDateRange.end)
-                    nextDay.setDate(nextDay.getDate() + 1)
-                    filters.until = nextDay.toISOString().split('T')[0]
-                }
-                break
-            }
-            case 'all':
-            default: {
-                // For "All Dates", start from current date and time to show current and future tournaments
-                const now = new Date()
-                filters.since = now.toISOString().split('T')[0]
-                break
-            }
+    // Get current tournaments and loading state based on selected status
+    const getCurrentTournaments = () => {
+        switch (selectedStatus) {
+            case 'upcoming':
+                return { tournaments: upcomingTournaments, loading: upcomingLoading }
+            case 'running':
+                return { tournaments: runningTournaments, loading: runningLoading }
+            case 'past':
+                return { tournaments: pastTournaments, loading: pastLoading }
+            default:
+                return { tournaments: [], loading: false }
         }
-
-        return filters
     }
 
-    // Pass all filters to the hook, including date filters
-    const { data: tournaments, loading: tournamentsLoading } = useTournaments({
-        game: selectedGame,
-        page: currentPage,
-        per_page: itemsPerPage,
-        ...getDateFilters()
-    })
+    const { tournaments, loading: tournamentsLoading } = getCurrentTournaments()
 
-    // Only filter by search term since sorting and pagination are handled by the hook
+    // Filter by search term, date, and sort by descending date
     const filteredTournaments = useMemo(() => {
-        if (!searchTerm || searchTerm.trim() === '') return tournaments
+        let filtered = tournaments
 
-        const searchTermLower = searchTerm.toLowerCase().trim()
-        
-        return tournaments.filter((tournament: Tournament) => {
-            // Search in tournament name
-            const tournamentName = tournament.name?.toLowerCase() || ''
+        // Apply search filter if search term exists
+        if (searchTerm && searchTerm.trim() !== '') {
+            const searchTermLower = searchTerm.toLowerCase().trim()
             
-            // Search in league name
-            const leagueName = tournament.league?.name?.toLowerCase() || ''
+            filtered = tournaments.filter((tournament: Tournament) => {
+                // Search in tournament name
+                const tournamentName = tournament.name?.toLowerCase() || ''
+                
+                // Search in league name
+                const leagueName = tournament.league?.name?.toLowerCase() || ''
+                
+                // Search in serie name
+                const serieName = tournament.serie?.name?.toLowerCase() || ''
+                const serieFullName = tournament.serie?.full_name?.toLowerCase() || ''
+                
+                // Search in videogame name
+                const videogameName = tournament.videogame?.name?.toLowerCase() || ''
+                
+                // Search in region
+                const region = tournament.region?.toLowerCase() || ''
+                const leagueRegion = tournament.league?.region?.toLowerCase() || ''
+                
+                // Search in country
+                const country = tournament.country?.toLowerCase() || ''
+                
+                // Check if search term matches any of these fields
+                return tournamentName.includes(searchTermLower) ||
+                       leagueName.includes(searchTermLower) ||
+                       serieName.includes(searchTermLower) ||
+                       serieFullName.includes(searchTermLower) ||
+                       videogameName.includes(searchTermLower) ||
+                       region.includes(searchTermLower) ||
+                       leagueRegion.includes(searchTermLower) ||
+                       country.includes(searchTermLower)
+            })
+        }
+
+        // Apply date filter
+        if (dateFilter !== 'all') {
+            filtered = filtered.filter((tournament: Tournament) => {
+                const tournamentDate = new Date(tournament.begin_at || 0)
+                const now = new Date()
+
+                switch (dateFilter) {
+                    case 'today': {
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        const tomorrow = new Date(today)
+                        tomorrow.setDate(tomorrow.getDate() + 1)
+                        return tournamentDate >= today && tournamentDate < tomorrow
+                    }
+                    case 'week': {
+                        const weekStart = new Date(now)
+                        weekStart.setHours(0, 0, 0, 0)
+                        weekStart.setDate(now.getDate() - now.getDay())
+                        const weekEnd = new Date(weekStart)
+                        weekEnd.setDate(weekStart.getDate() + 7)
+                        return tournamentDate >= weekStart && tournamentDate < weekEnd
+                    }
+                    case 'month': {
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+                        return tournamentDate >= monthStart && tournamentDate < monthEnd
+                    }
+                    case 'custom': {
+                        let matchesStart = true
+                        let matchesEnd = true
+                        
+                        if (customDateRange.start) {
+                            const startDate = new Date(customDateRange.start)
+                            startDate.setHours(0, 0, 0, 0)
+                            matchesStart = tournamentDate >= startDate
+                        }
+                        
+                        if (customDateRange.end) {
+                            const endDate = new Date(customDateRange.end)
+                            endDate.setHours(23, 59, 59, 999)
+                            matchesEnd = tournamentDate <= endDate
+                        }
+                        
+                        return matchesStart && matchesEnd
+                    }
+                    default:
+                        return true
+                }
+            })
+        }
+
+        // Sort by begin_at date - ascending for upcoming, descending for running/past
+        return filtered.sort((a: Tournament, b: Tournament) => {
+            const dateA = new Date(a.begin_at || 0).getTime()
+            const dateB = new Date(b.begin_at || 0).getTime()
             
-            // Search in serie name
-            const serieName = tournament.serie?.name?.toLowerCase() || ''
-            const serieFullName = tournament.serie?.full_name?.toLowerCase() || ''
-            
-            // Search in videogame name
-            const videogameName = tournament.videogame?.name?.toLowerCase() || ''
-            
-            // Search in region
-            const region = tournament.region?.toLowerCase() || ''
-            const leagueRegion = tournament.league?.region?.toLowerCase() || ''
-            
-            // Search in country
-            const country = tournament.country?.toLowerCase() || ''
-            
-            // Check if search term matches any of these fields
-            return tournamentName.includes(searchTermLower) ||
-                   leagueName.includes(searchTermLower) ||
-                   serieName.includes(searchTermLower) ||
-                   serieFullName.includes(searchTermLower) ||
-                   videogameName.includes(searchTermLower) ||
-                   region.includes(searchTermLower) ||
-                   leagueRegion.includes(searchTermLower) ||
-                   country.includes(searchTermLower)
+            if (selectedStatus === 'upcoming') {
+                return dateA - dateB // Ascending order (earliest first) for upcoming
+            } else {
+                return dateB - dateA // Descending order (newest first) for running/past
+            }
         })
-    }, [tournaments, searchTerm])
+    }, [tournaments, searchTerm, dateFilter, customDateRange, selectedStatus])
 
     const currentTournaments = filteredTournaments
 
-    // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = tournaments.length === itemsPerPage
+    // Pagination logic - more robust check for available pages
+    // Only show "next" if:
+    // 1. We got a full page of data from the API (tournaments.length === itemsPerPage)
+    // 2. AND we have tournaments to show after filtering (currentTournaments.length > 0)
+    // 3. AND we're not applying search/date filters that might reduce the dataset
+    const isFiltering = searchTerm.trim() !== '' || dateFilter !== 'all'
+    const hasMorePages = !isFiltering && tournaments.length === itemsPerPage && currentTournaments.length > 0
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
     // Reset to first page when filters change
@@ -256,7 +282,19 @@ export default function TournamentsContent() {
         return pages
     }
 
-    // Format date for display
+    // Get status display info
+    const getStatusInfo = (status: TournamentStatus) => {
+        switch (status) {
+            case 'upcoming':
+                return { label: 'Upcoming', icon: Clock, color: 'text-blue-400' }
+            case 'running':
+                return { label: 'On-going', icon: Trophy, color: 'text-green-400' }
+            case 'past':
+                return { label: 'Finished', icon: CheckCircle, color: 'text-gray-400' }
+        }
+    }
+
+    // Format date filter for display
     const formatDateFilter = () => {
         switch (dateFilter) {
             case 'today': return 'Today'
@@ -271,13 +309,13 @@ export default function TournamentsContent() {
                     return `Until ${customDateRange.end}`
                 }
                 return 'Custom Range'
-            default: return 'Most Recent'
+            default: return 'All'
         }
     }
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearchChange={(term) => {
+            <Header searchTerm={searchTerm} onSearch={(term) => {
                 setSearchTerm(term)
                 setCurrentPage(1) // Reset to first page when searching
             }} />
@@ -290,23 +328,20 @@ export default function TournamentsContent() {
                     </h1>
 
                     <div className="flex items-center space-x-4 flex-wrap gap-2">
-                        {/* Game Filter */}
+                        {/* Status Filter */}
                         <div className="flex items-center space-x-2">
-                            <Filter className="w-4 h-4 text-gray-400" />
+                            <Calendar className="w-4 h-4 text-gray-400" />
                             <select
-                                value={selectedGame}
+                                value={selectedStatus}
                                 onChange={(e) => {
-                                    handleGameChange(e.target.value)
+                                    handleStatusChange(e.target.value as TournamentStatus)
                                 }}
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                                disabled={gamesLoading}
-                                aria-label="Select game"
+                                aria-label="Select tournament status"
                             >
-                                {!gamesLoading && games.map((game: Game) => (
-                                    <option key={game.id || game.slug} value={game.slug || game.id} className="cursor-pointer">
-                                        {game.name}
-                                    </option>
-                                ))}
+                                <option value="upcoming" className="cursor-pointer">Upcoming</option>
+                                <option value="running" className="cursor-pointer">On-going</option>
+                                <option value="past" className="cursor-pointer">Finished</option>
                             </select>
                         </div>
 
@@ -321,7 +356,7 @@ export default function TournamentsContent() {
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                                 aria-label="Select date filter"
                             >
-                                <option value="all" className="cursor-pointer">Most Recent</option>
+                                <option value="all" className="cursor-pointer">All</option>
                                 <option value="today" className="cursor-pointer">Today</option>
                                 <option value="week" className="cursor-pointer">This Week</option>
                                 <option value="month" className="cursor-pointer">This Month</option>
@@ -342,6 +377,7 @@ export default function TournamentsContent() {
                             <option value="10" className="cursor-pointer">10 per page</option>
                             <option value="20" className="cursor-pointer">20 per page</option>
                             <option value="50" className="cursor-pointer">50 per page</option>
+                            <option value="100" className="cursor-pointer">100 per page</option>
                         </select>
                     </div>
                 </div>
@@ -358,7 +394,7 @@ export default function TournamentsContent() {
                                     value={customDateRange.start}
                                     onChange={(e) => {
                                         setCustomDateRange(prev => ({ ...prev, start: e.target.value }))
-                                        resetPage()
+                                        setCurrentPage(1)
                                     }}
                                     className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
                                     aria-label="From date"
@@ -372,7 +408,7 @@ export default function TournamentsContent() {
                                     value={customDateRange.end}
                                     onChange={(e) => {
                                         setCustomDateRange(prev => ({ ...prev, end: e.target.value }))
-                                        resetPage()
+                                        setCurrentPage(1)
                                     }}
                                     className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
                                     aria-label="To date"
@@ -381,7 +417,7 @@ export default function TournamentsContent() {
                             <button
                                 onClick={() => {
                                     setCustomDateRange({ start: '', end: '' })
-                                    resetPage()
+                                    setCurrentPage(1)
                                 }}
                                 className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm transition-colors duration-200 cursor-pointer"
                             >
@@ -396,7 +432,7 @@ export default function TournamentsContent() {
                     <div className="mb-4 text-gray-400 text-sm">
                         {currentTournaments.length > 0 ? (
                             <>
-                                Page {currentPage} - Showing {currentTournaments.length} tournaments
+                                Page {currentPage} - Showing {currentTournaments.length} {getStatusInfo(selectedStatus).label.toLowerCase()} tournaments
                                 {searchTerm && ` (filtered by "${searchTerm}")`}
                                 {dateFilter !== 'all' && ` (${formatDateFilter()})`}
                                 {hasMorePages && <span> (more available)</span>}
@@ -404,9 +440,9 @@ export default function TournamentsContent() {
                         ) : (
                             <>
                                 {searchTerm ? (
-                                    `No tournaments found matching "${searchTerm}"`
+                                    `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found matching "${searchTerm}"`
                                 ) : (
-                                    'No tournaments found'
+                                    `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found`
                                 )}
                                 {dateFilter !== 'all' && ` for ${formatDateFilter()}`}
                             </>
@@ -545,8 +581,8 @@ export default function TournamentsContent() {
                     <div className="text-center py-12">
                         <p className="text-gray-400 text-lg">
                             {searchTerm
-                                ? `No tournaments found matching "${searchTerm}"`
-                                : "No tournaments found matching your criteria"
+                                ? `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found matching "${searchTerm}"`
+                                : `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found`
                             }
                         </p>
                         {(searchTerm || dateFilter !== 'all') && (
@@ -564,7 +600,7 @@ export default function TournamentsContent() {
                                         onClick={() => {
                                             setDateFilter('all')
                                             setCustomDateRange({ start: '', end: '' })
-                                            resetPage()
+                                            setCurrentPage(1)
                                         }}
                                         className="text-blue-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer"
                                     >

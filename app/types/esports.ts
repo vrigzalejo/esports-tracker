@@ -48,6 +48,7 @@ export interface Match {
         }>
     }
     opponents: Array<{
+        type?: 'Player' | 'Team'
         opponent: {
             id: number
             name: string
@@ -134,6 +135,11 @@ export interface Team {
     current_streak?: number
     win_rate?: number
     rating?: number
+    current_videogame?: {
+        id: number
+        name: string
+        slug: string
+    }
     players?: Array<{
         id: number
         name: string

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import type { Match } from '@/types/esports'
 
 interface OddsAssistantProps {
@@ -141,7 +142,22 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 {team1?.image_url && (
-                                    <img src={team1.image_url} alt={team1.name} className="w-8 h-8 rounded-full" />
+                                    <div className="relative w-8 h-8">
+                                        <Image 
+                                            src={team1.image_url} 
+                                            alt={team1.name} 
+                                            fill
+                                            className="rounded-full object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement
+                                                if (match.opponents?.[0]?.type === 'Player') {
+                                                    target.src = '/images/placeholder-player.svg'
+                                                } else {
+                                                    target.src = '/images/placeholder-team.svg'
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 )}
                                 <span className="font-semibold text-white">{team1?.name || 'TBD'}</span>
                             </div>
@@ -149,7 +165,22 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                             <div className="flex items-center gap-3">
                                 <span className="font-semibold text-white">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
-                                    <img src={team2.image_url} alt={team2.name} className="w-8 h-8 rounded-full" />
+                                    <div className="relative w-8 h-8">
+                                        <Image 
+                                            src={team2.image_url} 
+                                            alt={team2.name} 
+                                            fill
+                                            className="rounded-full object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement
+                                                if (match.opponents?.[1]?.type === 'Player') {
+                                                    target.src = '/images/placeholder-player.svg'
+                                                } else {
+                                                    target.src = '/images/placeholder-team.svg'
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>

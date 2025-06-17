@@ -12,6 +12,7 @@ export interface TeamFilters {
     game?: string;
     page?: number;
     per_page?: number;
+    search?: string;
 }
 
 export interface TournamentFilters {
@@ -70,6 +71,7 @@ export interface Match {
         }>;
     };
     opponents: Array<{
+        type?: 'Player' | 'Team';
         opponent: {
             id: number;
             name: string;

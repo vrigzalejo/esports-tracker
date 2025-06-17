@@ -1,4 +1,5 @@
 import type { MatchFilters, TeamFilters, TournamentFilters } from './types';
+import { logApiRequest, logApiResponse, logApiError } from './utils';
 
 const BASE_URL = 'https://api.pandascore.co';
 
@@ -23,17 +24,14 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
     // Add API token
     url.searchParams.append('token', process.env.PANDASCORE_TOKEN || '');
 
-    // Log the request details
-    console.log('🚀 PandaScore API Request:', {
-        endpoint,
-        params,
-        fullUrl: url.toString()
-    });
+    // Log the request with hidden token
+    logApiRequest(endpoint, url.toString(), 'GET', params);
 
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+        const startTime = Date.now();
         const response = await fetch(url.toString(), {
             headers: {
                 'Accept': 'application/json',
@@ -44,14 +42,7 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
         });
 
         clearTimeout(timeoutId);
-
-        // Log response status
-        console.log('📡 PandaScore API Response:', {
-            endpoint,
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok
-        });
+        const duration = Date.now() - startTime;
 
         if (!response.ok) {
             let errorBody = null;
@@ -61,35 +52,29 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
                 // Ignore JSON parse error
             }
 
-            console.error('❌ PandaScore API Error:', {
-                endpoint,
+            logApiError(endpoint, `${response.status} ${response.statusText}`, {
                 status: response.status,
                 statusText: response.statusText,
-                url: url.toString(),
+                url: url.toString().replace(/([?&]token=)[^&]+/, '$1***HIDDEN***'),
                 errorBody
             });
 
             throw new Error(
                 `API request failed: ${response.status} ${response.statusText}\n` +
-                `URL: ${url.toString()}\n` +
+                `URL: ${url.toString().replace(/([?&]token=)[^&]+/, '$1***HIDDEN***')}\n` +
                 `Error details: ${JSON.stringify(errorBody, null, 2)}`
             );
         }
 
         const data = await response.json();
-        console.log('✅ PandaScore API Success:', {
-            endpoint,
-            dataLength: Array.isArray(data) ? data.length : 'N/A (not array)',
+        logApiResponse(endpoint, response.status, response.statusText, duration, {
+            count: Array.isArray(data) ? data.length : undefined,
             hasData: !!data
         });
 
         return data;
     } catch (error) {
-        console.error('💥 PandaScore API Exception:', {
-            endpoint,
-            error: error instanceof Error ? error.message : error,
-            params
-        });
+        logApiError(endpoint, error, { params });
         throw error;
     }
 }
@@ -189,6 +174,13 @@ export const getTeams = async (filters?: TeamFilters) => {
         params['per_page'] = filters.per_page.toString();
     }
 
+    if (filters?.search) {
+        params['search[name]'] = filters.search;
+    }
+
+    // Include current videogame data
+    params['include'] = 'current_videogame';
+
     return request('/teams', params);
 }
 
@@ -214,4 +206,67 @@ export const getTournamentMatches = async (tournamentId: string | number) => {
 
 export const getMatchDetails = async (matchId: string | number) => {
     return request(`/matches/${matchId}`);
+}
+
+// Player endpoints
+export const getPlayers = async (filters?: { per_page?: number; page?: number; search?: string; game?: string }) => {
+    const params: Record<string, string> = {};
+    
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+    
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+    
+    if (filters?.search) {
+        params['search[name]'] = filters.search;
+    }
+    
+    // Include current team data with image_url
+    params['include'] = 'current_team';
+    
+    return request('/players', params);
+}
+
+export const getPlayer = async (playerId: string | number) => {
+    const params: Record<string, string> = {};
+    
+    // Include current team data with image_url
+    params['include'] = 'current_team';
+    
+    return request(`/players/${playerId}`, params);
+}
+
+export const getPlayerMatches = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    return request(`/players/${playerId}/matches`, params);
+}
+
+export const getPlayerTournaments = async (playerId: string | number, filters?: { per_page?: number; page?: number }) => {
+    const params: Record<string, string> = {};
+
+    if (filters?.per_page) {
+        params['per_page'] = filters.per_page.toString();
+    }
+
+    if (filters?.page) {
+        params['page'] = filters.page.toString();
+    }
+
+    return request(`/players/${playerId}/tournaments`, params);
+}
+
+export const getTournamentBrackets = async (tournamentId: string | number) => {
+    return request(`/tournaments/${tournamentId}/brackets`);
 }

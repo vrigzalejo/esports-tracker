@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Users, Trophy, User, Calendar, Clock, Globe, Star } from 'lucide-react'
+import { Users, Trophy, User, Calendar, Clock, Globe, Star, Gamepad2 } from 'lucide-react'
 import type { Team } from '@/types/esports'
 
 interface TeamCardProps {
@@ -13,6 +13,11 @@ export default function TeamCard({ team }: TeamCardProps) {
     const handleImageClick = (e: React.MouseEvent) => {
         e.stopPropagation()
         router.push(`/teams/${team.id}`)
+    }
+
+    const handlePlayerClick = (e: React.MouseEvent, playerId: string | number) => {
+        e.stopPropagation()
+        router.push(`/players/${playerId}`)
     }
     const getTeamImage = () => {
         const imageUrl = team.image_url;
@@ -194,6 +199,18 @@ export default function TeamCard({ team }: TeamCardProps) {
                 </div>
 
                 <div className="space-y-4">
+                    {/* Current Videogame */}
+                    {team.current_videogame && (
+                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                            <div className="flex items-center justify-center text-sm">
+                                <Gamepad2 className="w-4 h-4 mr-2 flex-shrink-0 text-purple-400" />
+                                <span className="text-gray-300 group-hover:text-gray-200 transition-colors duration-200">
+                                    {team.current_videogame.name}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Tournament Information */}
                     {tournamentInfo && (
                         <div className="space-y-3">
@@ -272,7 +289,11 @@ export default function TeamCard({ team }: TeamCardProps) {
                             </div>
                             <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {players.map((player, index) => (
-                                    <div key={player.id || index} className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 transition-colors duration-200">
+                                    <div 
+                                        key={player.id || index} 
+                                        onClick={(e) => handlePlayerClick(e, player.id)}
+                                        className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 hover:bg-gray-700/70 transition-colors duration-200 cursor-pointer"
+                                    >
                                         {/* Player Image */}
                                         <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0">
                                             <Image
