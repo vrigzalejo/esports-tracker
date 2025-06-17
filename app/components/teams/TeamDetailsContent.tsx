@@ -389,6 +389,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-player.svg'
     }
 
+    const getTournamentImage = (imageUrl: string) => {
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-tournament.svg'
+    }
+
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString)
         return {
@@ -791,25 +795,23 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     {/* Tournament Header */}
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
-                                                        {tournament.league?.image_url && (
-                                                            <div 
-                                                                className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
-                                                                onClick={() => router.push(`/tournaments/${tournament.id}`)}
-                                                            >
-                                                                <div className="relative w-full h-full">
-                                                                    <Image
-                                                                        src={tournament.league.image_url}
-                                                                        alt={tournament.league.name}
-                                                                        fill
-                                                                        className="object-contain"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement
-                                                                            target.src = '/images/placeholder-team.svg'
-                                                                        }}
-                                                                    />
-                                                                </div>
+                                                        <div 
+                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
+                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                        >
+                                                            <div className="relative w-full h-full">
+                                                                <Image
+                                                                    src={getTournamentImage(tournament.league?.image_url || '')}
+                                                                    alt={tournament.league?.name || 'Tournament'}
+                                                                    fill
+                                                                    className="object-contain"
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement
+                                                                        target.src = '/images/placeholder-tournament.svg'
+                                                                    }}
+                                                                />
                                                             </div>
-                                                        )}
+                                                        </div>
                                                         
                                                         {/* Tournament Info */}
                                                         <div className="flex-1">
@@ -1055,22 +1057,20 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                         .map((tournament) => (
                                             <div key={tournament.id} className="flex items-start space-x-3 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/10 hover:bg-yellow-500/10 transition-all duration-200 cursor-pointer" onClick={() => router.push(`/tournaments/${tournament.id}`)}>
                                                 {/* League Image */}
-                                                {tournament.league?.image_url && (
-                                                    <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-1 ring-yellow-500/30 flex-shrink-0 p-1">
-                                                        <div className="relative w-full h-full">
-                                                            <Image
-                                                                src={tournament.league.image_url}
-                                                                alt={tournament.league.name}
-                                                                fill
-                                                                className="object-contain"
-                                                                onError={(e) => {
-                                                                    const target = e.target as HTMLImageElement
-                                                                    target.src = '/images/placeholder-team.svg'
-                                                                }}
-                                                            />
-                                                        </div>
+                                                <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-1 ring-yellow-500/30 flex-shrink-0 p-1">
+                                                    <div className="relative w-full h-full">
+                                                        <Image
+                                                            src={getTournamentImage(tournament.league?.image_url || '')}
+                                                            alt={tournament.league?.name || 'Tournament'}
+                                                            fill
+                                                            className="object-contain"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement
+                                                                target.src = '/images/placeholder-tournament.svg'
+                                                            }}
+                                                        />
                                                     </div>
-                                                )}
+                                                </div>
                                                 
                                                 {/* Tournament Details */}
                                                 <div className="flex-1 min-w-0">
@@ -1214,22 +1214,20 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {/* Match Header */}
                                                 <div className="flex items-start space-x-4 mb-4">
                                                     {/* League Image */}
-                                                    {match.league?.image_url && (
-                                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-blue-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-1">
-                                                            <div className="relative w-full h-full">
-                                                                <Image
-                                                                    src={match.league.image_url}
-                                                                    alt={match.league.name}
-                                                                    fill
-                                                                    className="object-contain"
-                                                                    onError={(e) => {
-                                                                        const target = e.target as HTMLImageElement
-                                                                        target.src = '/images/placeholder-team.svg'
-                                                                    }}
-                                                                />
-                                                            </div>
+                                                    <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-blue-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-1">
+                                                        <div className="relative w-full h-full">
+                                                            <Image
+                                                                src={getTournamentImage(match.league?.image_url || '')}
+                                                                alt={match.league?.name || 'Tournament'}
+                                                                fill
+                                                                className="object-contain"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement
+                                                                    target.src = '/images/placeholder-tournament.svg'
+                                                                }}
+                                                            />
                                                         </div>
-                                                    )}
+                                                    </div>
                                                     
                                                     {/* Match Info */}
                                                     <div className="flex-1">
