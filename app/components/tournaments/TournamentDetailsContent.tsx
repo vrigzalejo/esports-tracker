@@ -20,13 +20,21 @@ interface Match {
     winner_id?: number
     results: Array<{
         score: number
-        team_id: number
+        team_id?: number
+        player_id?: number
     }>
     opponents: Array<{
+        type: 'Team' | 'Player'
         opponent: {
             id: number
             name: string
             image_url: string
+            acronym?: string // Only for teams
+            first_name?: string // Only for players
+            last_name?: string // Only for players
+            nationality?: string // Only for players
+            role?: string // Only for players
+            age?: number // Only for players
         }
     }>
     videogame: {
@@ -422,6 +430,10 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
         return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-team.svg'
     }
 
+    const getPlayerImage = (imageUrl: string) => {
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-player.svg'
+    }
+
     const getFlagPath = (countryCode: string): string => {
         return countryCode ? `/flags/3x2/${countryCode}.svg` : ''
     }
@@ -486,15 +498,23 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     const getMatchResult = (match: Match) => {
         if (!match.results || match.results.length === 0) return null
         
-        const team1Result = match.results[0]
-        const team2Result = match.results[1]
+        const result1 = match.results[0]
+        const result2 = match.results[1]
         
-        if (!team1Result || !team2Result) return null
+        if (!result1 || !result2) return null
+        
+        // Determine winner ID based on whether it's a team or player match
+        let winnerId: number
+        if (result1.score > result2.score) {
+            winnerId = result1.team_id || result1.player_id || 0
+        } else {
+            winnerId = result2.team_id || result2.player_id || 0
+        }
         
         return {
-            team1Score: team1Result.score,
-            team2Score: team2Result.score,
-            winnerId: team1Result.score > team2Result.score ? team1Result.team_id : team2Result.team_id
+            team1Score: result1.score,
+            team2Score: result2.score,
+            winnerId: winnerId
         }
     }
 
@@ -964,11 +984,11 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                             <div className="flex flex-col items-center space-y-3">
                                                                 <div 
                                                                     className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
-                                                                    onClick={() => team1?.id && router.push(`/teams/${team1.id}`)}
+                                                                    onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
                                                                 >
                                                                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
                                                                     <Image
-                                                                        src={getTeamImage(team1?.image_url || '')}
+                                                                        src={match.opponents[0]?.type === 'Player' ? getPlayerImage(team1?.image_url || '') : getTeamImage(team1?.image_url || '')}
                                                                         alt={team1?.name || 'TBD'}
                                                                         fill
                                                                         className="object-contain p-2"
@@ -979,12 +999,30 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                         className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
                                                                             result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
                                                                         }`}
-                                                                        onClick={() => team1?.id && router.push(`/teams/${team1.id}`)}
+                                                                        onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
                                                                     >
                                                                         {team1?.name || 'TBD'}
                                                                     </div>
-                                                                    {(team1 as { acronym?: string })?.acronym && (
-                                                                        <div className="text-xs text-slate-400 mt-1">{(team1 as { acronym?: string }).acronym}</div>
+                                                                    {match.opponents[0]?.type === 'Team' && team1?.acronym && (
+                                                                        <div className="text-xs text-slate-400 mt-1">{team1.acronym}</div>
+                                                                    )}
+                                                                    {match.opponents[0]?.type === 'Player' && team1?.nationality && (
+                                                                        <div className="text-xs text-slate-400 mt-1 flex items-center space-x-1">
+                                                                            <div className="relative w-3 h-2">
+                                                                                <Image
+                                                                                    src={getFlagPath(team1.nationality)}
+                                                                                    alt={`${team1.nationality} flag`}
+                                                                                    width={12}
+                                                                                    height={8}
+                                                                                    className="object-cover rounded-sm"
+                                                                                    onError={(e) => {
+                                                                                        const target = e.target as HTMLImageElement
+                                                                                        target.style.display = 'none'
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <span>{team1.nationality}</span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                                 {result && (
@@ -1009,11 +1047,11 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                             <div className="flex flex-col items-center space-y-3">
                                                                 <div 
                                                                     className="relative w-16 h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
-                                                                    onClick={() => team2?.id && router.push(`/teams/${team2.id}`)}
+                                                                    onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
                                                                 >
                                                                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl" />
                                                                     <Image
-                                                                        src={getTeamImage(team2?.image_url || '')}
+                                                                        src={match.opponents[1]?.type === 'Player' ? getPlayerImage(team2?.image_url || '') : getTeamImage(team2?.image_url || '')}
                                                                         alt={team2?.name || 'TBD'}
                                                                         fill
                                                                         className="object-contain p-2"
@@ -1024,12 +1062,30 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                         className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
                                                                             result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
                                                                         }`}
-                                                                        onClick={() => team2?.id && router.push(`/teams/${team2.id}`)}
+                                                                        onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
                                                                     >
                                                                         {team2?.name || 'TBD'}
                                                                     </div>
-                                                                    {(team2 as { acronym?: string })?.acronym && (
-                                                                        <div className="text-xs text-slate-400 mt-1">{(team2 as { acronym?: string }).acronym}</div>
+                                                                    {match.opponents[1]?.type === 'Team' && team2?.acronym && (
+                                                                        <div className="text-xs text-slate-400 mt-1">{team2.acronym}</div>
+                                                                    )}
+                                                                    {match.opponents[1]?.type === 'Player' && team2?.nationality && (
+                                                                        <div className="text-xs text-slate-400 mt-1 flex items-center space-x-1">
+                                                                            <div className="relative w-3 h-2">
+                                                                                <Image
+                                                                                    src={getFlagPath(team2.nationality)}
+                                                                                    alt={`${team2.nationality} flag`}
+                                                                                    width={12}
+                                                                                    height={8}
+                                                                                    className="object-cover rounded-sm"
+                                                                                    onError={(e) => {
+                                                                                        const target = e.target as HTMLImageElement
+                                                                                        target.style.display = 'none'
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                            <span>{team2.nationality}</span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                                 {result && (
