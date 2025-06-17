@@ -1,155 +1,104 @@
-# Caching System Documentation
+# Esports Tracker - Caching & Request Optimization
 
-## Overview
+This document outlines the caching and request optimization strategies implemented in the Esports Tracker application.
 
-The application now implements a comprehensive 1-hour caching system for all API responses to improve performance and reduce redundant API calls.
+## Request Deduplication
 
-## Features
+### Frontend API Client (`app/lib/api.ts`)
+- **Request deduplication**: Prevents duplicate API calls by storing ongoing requests in a Map
+- **Cache integration**: Checks cache before making new requests
+- **Request key generation**: Creates unique keys based on endpoint and parameters
+- **Automatic cleanup**: Removes completed requests from the ongoing requests map
 
-### 🚀 **1-Hour Cache Duration**
-- All API responses are cached for 1 hour
-- Automatic expiration and cleanup of old entries
-- Consistent cache keys based on endpoint and parameters
+### Custom Hooks Optimization (`app/hooks/useEsportsData.ts`)
+- **Memoized filters**: Uses `useMemo` to prevent unnecessary re-renders when filter objects change
+- **Optimized dependencies**: Reduced useEffect dependency arrays to use memoized values
+- **Request cancellation**: Implements proper cleanup to cancel requests when components unmount
+- **Batched requests**: New `useBatchedRequests` hook for components that need multiple API calls
 
-### 📊 **Cached Data Types**
-- **Games/Videogames**: Dropdown data used across all pages
-- **Matches**: Match listings with filters
-- **Match Details**: Individual match information and statistics
-- **Tournaments**: Tournament data with filters  
-- **Teams**: Team information with filters
+### Component-Level Optimizations
 
-### 🎯 **Smart Cache Management**
-- Automatic cache hit/miss detection
-- Parameter-based cache keys (same endpoint with different filters = different cache entries)
-- Expired entry cleanup every 5 minutes
-- Manual cache management tools
+#### Detail Components
+- **TeamDetailsContent**: Uses `useCallback` for fetch functions to prevent unnecessary re-renders
+- **TournamentDetailsContent**: Optimized parallel API calls with proper memoization
+- **PlayerDetailsContent**: Implemented memoized fetch functions
 
-## Implementation Details
+#### Tournament Status Hooks
+- **Conditional fetching**: Only fetches data for the active tournament status (upcoming/running/past)
+- **Proper cleanup**: Cancels requests when switching between statuses
+- **Memoized filters**: Prevents unnecessary API calls when filter objects haven't changed
 
-### Core Components
+## Cache Management
 
-#### 1. **Cache Manager** (`app/lib/cache.ts`)
-```typescript
-// Singleton cache manager with 1-hour expiration
-export const cacheManager = new CacheManager()
-```
+### Memory Cache (`app/lib/cache.ts`)
+- **TTL-based expiration**: Automatic cleanup of expired entries
+- **Memory usage monitoring**: Tracks cache size and performance
+- **Configurable limits**: Set maximum cache size and entry TTL
 
-#### 2. **API Layer** (`app/lib/api.ts`)
-```typescript
-// All API calls now check cache first, then fetch if needed
-const request = async (endpoint: string, params?: Record<string, string>) => {
-  const cachedData = cacheManager.get(endpoint, params)
-  if (cachedData) return cachedData
-  
-  // Fetch and cache response
-  const data = await fetch(...)
-  cacheManager.set(endpoint, data, params)
-  return data
-}
-```
-
-#### 3. **Context Providers**
-- **GamesProvider**: Manages games data cache
-- **DataProvider**: Provides cache management utilities
-
-### Cache Key Strategy
-
-Cache keys are generated using:
-```
-endpoint:sorted_parameters
-```
-
-Examples:
-- `/api/games` → Simple key for games data
-- `/api/matches:{"game":"valorant","page":"1"}` → Matches for Valorant, page 1
-- `/api/matches/12345` → Individual match details for match ID 12345
-- `/api/tournaments:{"game":"lol","since":"2024-01-01"}` → Tournaments with filters
-
-## Usage
-
-### Automatic Caching
-All existing API calls automatically benefit from caching with no code changes required.
-
-### Manual Cache Management
-```typescript
-import { useDataContext } from '@/contexts/DataContext'
-
-const { clearAllCache, clearExpiredCache, getCacheStats } = useDataContext()
-
-// Clear all cached data
-clearAllCache()
-
-// Clear only expired entries
-clearExpiredCache()
-
-// Get cache statistics
-const stats = getCacheStats()
-```
-
-### Using Match Details with Caching
-```typescript
-import { useMatchDetails } from '@/hooks/useEsportsData'
-
-// Fetch individual match details (automatically cached)
-const { data: match, loading, error } = useMatchDetails(matchId)
-
-// The match details will be cached for 1 hour
-// Subsequent calls with the same matchId will return cached data
-```
-
-### Cache Status Monitoring
-A debug component shows real-time cache status:
-- Total cached entries
-- Breakdown by data type (games, matches, match details, tournaments, teams)
-- Expired entries count
-- Manual cache clearing buttons
+### Next.js Route Caching
+- **API route caching**: 5-minute cache for most endpoints
+- **Static data caching**: Longer cache times for relatively static data like games
 
 ## Performance Benefits
 
-### Before Caching
-- Games data fetched on every page load (3+ requests)
-- Match/tournament/team data refetched on every filter change
-- Match details fetched every time a match is viewed
-- Redundant API calls when navigating between pages
+### Reduced API Calls
+- **Deduplication**: Prevents identical simultaneous requests
+- **Conditional fetching**: Only fetches data when needed (e.g., active tournament status)
+- **Memoized dependencies**: Reduces unnecessary useEffect triggers
 
-### After Caching
-- Games data fetched once, reused for 1 hour
-- Filtered results cached per unique filter combination
-- Match details cached for 1 hour per individual match
-- Instant page loads when data is cached
-- Reduced API server load
+### Improved User Experience
+- **Faster navigation**: Cached data loads instantly
+- **Reduced loading states**: Less flickering between states
+- **Better responsiveness**: Fewer network requests mean faster interactions
 
-## Console Logging
+### Server Load Reduction
+- **Request batching**: Multiple related requests are handled efficiently
+- **Cache hits**: Reduces load on external APIs (PandaScore)
+- **Smart invalidation**: Only refetches when data might have changed
 
-The system provides helpful console logs:
-- `🎯 Cache HIT` - Data served from cache
-- `🌐 Cache MISS` - Data fetched from API
-- `💾 Cached response` - New data cached
+## Implementation Details
 
-## Cache Expiration
+### Request Deduplication Flow
+1. Generate unique request key from endpoint + parameters
+2. Check if request is already in progress
+3. If yes, return the existing promise
+4. If no, create new request and store promise
+5. Clean up completed requests automatically
 
-- **Duration**: 1 hour per entry
-- **Cleanup**: Automatic cleanup every 5 minutes
-- **Manual**: Clear cache anytime via debug component
+### Memoization Strategy
+- Filter objects are memoized to prevent object reference changes
+- useCallback is used for fetch functions in detail components
+- useMemo is used for expensive computations and filtering
 
-## Development
+### Cache Strategy
+- Short TTL (5 minutes) for dynamic data like matches and tournaments
+- Longer TTL for static data like games and player profiles
+- Automatic cleanup prevents memory leaks
 
-### Debug Component
-The `CacheStatus` component (bottom-right corner) shows:
-- Real-time cache statistics
-- Manual cache management
-- Cache health monitoring
+## Monitoring
 
-### Environment Considerations
-- Cache is in-memory (resets on page refresh)
-- Production-ready for client-side caching
-- Consider server-side caching for additional performance
+### Debug Components
+- **CacheStatus**: Shows cache hit/miss rates and memory usage
+- **Request logging**: Tracks API calls and response times
+- **Performance metrics**: Monitors cache effectiveness
 
-## Future Enhancements
+### Metrics Tracked
+- Cache hit/miss ratios
+- Request deduplication effectiveness
+- Memory usage patterns
+- API response times
 
-Potential improvements:
-- Persistent cache (localStorage/IndexedDB)
-- Configurable cache durations per endpoint
-- Cache warming strategies
-- Background refresh for critical data
-- Cache size limits and LRU eviction 
+## Best Practices
+
+1. **Always use memoized filters** in custom hooks
+2. **Implement request cancellation** for long-running operations
+3. **Use conditional fetching** for inactive UI states
+4. **Batch related API calls** when possible
+5. **Monitor cache performance** regularly
+
+## Future Improvements
+
+- Implement service worker for offline caching
+- Add request retry logic with exponential backoff
+- Implement more sophisticated cache invalidation strategies
+- Add request prioritization for critical data

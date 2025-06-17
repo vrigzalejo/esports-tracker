@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowLeft, Users, Calendar, Trophy, Gamepad2, Clock, Star, MapPin, Crown, Medal, Tv, Play, ExternalLink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -8,10 +8,6 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo, cleanMatchName } from '@/lib/textUtils'
 import { getStatusColor, getStatusText } from '@/lib/utils'
-
-
-
-
 
 interface Match {
     id: number
@@ -60,8 +56,6 @@ interface Match {
         url?: string
     }>
 }
-
-
 
 interface TournamentDetails {
     id: number
@@ -321,54 +315,57 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
+    const [countdowns, setCountdowns] = useState<{ [key: number]: string }>({})
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const matchesRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        const fetchTournamentData = async () => {
-            try {
-                setLoading(true)
-                
-                // Fetch tournament details and matches in parallel
-                const [tournamentResponse, matchesResponse] = await Promise.all([
-                    fetch(`/api/tournaments/${tournamentId}`),
-                    fetch(`/api/tournaments/${tournamentId}/matches`)
-                ])
-                
-                if (!tournamentResponse.ok) {
-                    const errorData = await tournamentResponse.json().catch(() => ({ error: 'Unknown error' }))
-                    throw new Error(errorData.error || `Failed to fetch tournament data (${tournamentResponse.status})`)
-                }
-                
-                const tournamentData = await tournamentResponse.json()
-                
-                // Validate that we have the minimum required data
-                if (!tournamentData || !tournamentData.id) {
-                    throw new Error('Invalid tournament data received')
-                }
-                
-                setTournament(tournamentData)
-                
-                // Fetch and set matches data
-                if (matchesResponse.ok) {
-                    const matchesData = await matchesResponse.json()
-                    // Sort matches by date (newest first)
-                    matchesData.sort((a: any, b: any) => new Date(b.begin_at).getTime() - new Date(a.begin_at).getTime()) // eslint-disable-line @typescript-eslint/no-explicit-any
-                    setMatches(matchesData)
-                }
-
-                // Note: Standings are now calculated from match results
-                
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred')
-            } finally {
-                setLoading(false)
+    // Memoize the fetch function to prevent unnecessary re-renders
+    const fetchTournamentData = useCallback(async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            // Fetch tournament details and matches in parallel
+            const [tournamentResponse, matchesResponse] = await Promise.all([
+                fetch(`/api/tournaments/${tournamentId}`),
+                fetch(`/api/tournaments/${tournamentId}/matches`)
+            ])
+            
+            if (!tournamentResponse.ok) {
+                const errorData = await tournamentResponse.json().catch(() => ({ error: 'Unknown error' }))
+                throw new Error(errorData.error || `Failed to fetch tournament data (${tournamentResponse.status})`)
             }
-        }
+            
+            const tournamentData = await tournamentResponse.json()
+            
+            // Validate that we have the minimum required data
+            if (!tournamentData || !tournamentData.id) {
+                throw new Error('Invalid tournament data received')
+            }
+            
+            setTournament(tournamentData)
+            
+            // Fetch and set matches data
+            if (matchesResponse.ok) {
+                const matchesData = await matchesResponse.json()
+                // Sort matches by date (newest first)
+                matchesData.sort((a: any, b: any) => new Date(b.begin_at).getTime() - new Date(a.begin_at).getTime()) // eslint-disable-line @typescript-eslint/no-explicit-any
+                setMatches(matchesData)
+            }
 
+            // Note: Standings are now calculated from match results
+            
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred')
+        } finally {
+            setLoading(false)
+        }
+    }, [tournamentId]) // Only depend on tournamentId
+
+    useEffect(() => {
         fetchTournamentData()
-    }, [tournamentId])
+    }, [fetchTournamentData]) // Use the memoized function
 
     // Height matching effect
     useEffect(() => {
@@ -526,8 +523,6 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
         return 'External';
     };
 
-
-
     // Determine if streams should be enabled based on match status and timing
     const getStreamsAvailability = (match: Match) => {
         const streams = getMatchStreams(match);
@@ -576,12 +571,9 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     };
 
     // Real-time countdown state for all matches
-    const [countdowns, setCountdowns] = useState<{ [matchId: number]: string }>({})
-
-    // Update countdowns every second
     useEffect(() => {
         const updateCountdowns = () => {
-            const newCountdowns: { [matchId: number]: string } = {}
+            const newCountdowns: { [key: number]: string } = {}
             
             matches.forEach(match => {
                 if (match.status === 'not_started') {
@@ -622,8 +614,6 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
         
         return () => clearInterval(interval)
     }, [matches])
-
-
 
     // Calculate team statistics from matches
     const calculateTeamStats = () => {
@@ -1298,8 +1288,6 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                 </div>
                             );
                         })()}
-
-
 
                         {/* Tournament Standings */}
                         {calculatedStandings.length > 0 && (

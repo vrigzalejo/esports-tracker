@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowLeft, Users, Calendar, Trophy, Gamepad2, Award, Clock, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -250,8 +250,8 @@ const formatMatchName = (matchName: string | undefined | null): string => {
 
 export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) {
     const [team, setTeam] = useState<Team | null>(null)
-    const [matches, setMatches] = useState<Match[]>([])
     const [tournaments, setTournaments] = useState<Tournament[]>([])
+    const [matches, setMatches] = useState<Match[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -260,77 +260,79 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        const fetchTeamData = async () => {
-            try {
-                setLoading(true)
-                
-                // Fetch tournaments and matches data in parallel
-                const [tournamentsResponse, matchesResponse] = await Promise.all([
-                    fetch(`/api/teams/${teamId}/tournaments`),
-                    fetch(`/api/teams/${teamId}/matches`)
-                ])
-                
-                if (!tournamentsResponse.ok) {
-                    const errorData = await tournamentsResponse.json()
-                    throw new Error(errorData.error || 'Failed to fetch tournaments data')
-                }
-                
-                const tournamentsData = await tournamentsResponse.json()
-                setTournaments(tournamentsData)
-                
-                // Extract team data from tournaments
-                let extractedTeam = null
-                
-                for (const tournament of tournamentsData) {
-                    // Extract team data from the first tournament that has this team
-                    if (!extractedTeam && tournament.expected_roster) {
-                        const rosterEntry = tournament.expected_roster.find((roster: any) => roster.team.id === parseInt(teamId)) // eslint-disable-line @typescript-eslint/no-explicit-any
-                        if (rosterEntry) {
-                            extractedTeam = {
-                                id: rosterEntry.team.id,
-                                name: rosterEntry.team.name,
-                                acronym: rosterEntry.team.acronym || '',
-                                image_url: rosterEntry.team.image_url || '',
-                                location: rosterEntry.team.location || '',
-                                players: rosterEntry.players || []
-                            }
+    // Memoize the fetch function to prevent unnecessary re-renders
+    const fetchTeamData = useCallback(async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            
+            // Fetch tournaments and matches data in parallel
+            const [tournamentsResponse, matchesResponse] = await Promise.all([
+                fetch(`/api/teams/${teamId}/tournaments`),
+                fetch(`/api/teams/${teamId}/matches`)
+            ])
+            
+            if (!tournamentsResponse.ok) {
+                const errorData = await tournamentsResponse.json()
+                throw new Error(errorData.error || 'Failed to fetch tournaments data')
+            }
+            
+            const tournamentsData = await tournamentsResponse.json()
+            setTournaments(tournamentsData)
+            
+            // Extract team data from tournaments
+            let extractedTeam = null
+            
+            for (const tournament of tournamentsData) {
+                // Extract team data from the first tournament that has this team
+                if (!extractedTeam && tournament.expected_roster) {
+                    const rosterEntry = tournament.expected_roster.find((roster: any) => roster.team.id === parseInt(teamId)) // eslint-disable-line @typescript-eslint/no-explicit-any
+                    if (rosterEntry) {
+                        extractedTeam = {
+                            id: rosterEntry.team.id,
+                            name: rosterEntry.team.name,
+                            acronym: rosterEntry.team.acronym || '',
+                            image_url: rosterEntry.team.image_url || '',
+                            location: rosterEntry.team.location || '',
+                            players: rosterEntry.players || []
                         }
                     }
                 }
-                
-                // Set the extracted team data
-                if (extractedTeam) {
-                    setTeam(extractedTeam)
-                } else {
-                    // Create a basic team object if not found in tournaments
-                    setTeam({
-                        id: parseInt(teamId),
-                        name: 'Unknown Team',
-                        acronym: '',
-                        image_url: '',
-                        location: '',
-                        players: []
-                    })
-                }
-                
-                // Fetch and set matches data
-                if (matchesResponse.ok) {
-                    const matchesData = await matchesResponse.json()
-                    // Sort matches by date (newest first)
-                    matchesData.sort((a: any, b: any) => new Date(b.begin_at).getTime() - new Date(a.begin_at).getTime()) // eslint-disable-line @typescript-eslint/no-explicit-any
-                    setMatches(matchesData)
-                }
-                
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred')
-            } finally {
-                setLoading(false)
             }
+            
+            // Set the extracted team data
+            if (extractedTeam) {
+                setTeam(extractedTeam)
+            } else {
+                // Create a basic team object if not found in tournaments
+                setTeam({
+                    id: parseInt(teamId),
+                    name: 'Unknown Team',
+                    acronym: '',
+                    image_url: '',
+                    location: '',
+                    players: []
+                })
+            }
+            
+            // Fetch and set matches data
+            if (matchesResponse.ok) {
+                const matchesData = await matchesResponse.json()
+                // Sort matches by date (newest first)
+                matchesData.sort((a: any, b: any) => new Date(b.begin_at).getTime() - new Date(a.begin_at).getTime()) // eslint-disable-line @typescript-eslint/no-explicit-any
+                setMatches(matchesData)
+            }
+            
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred')
+        } finally {
+            setLoading(false)
         }
+    }, [teamId]) // Only depend on teamId
 
+    useEffect(() => {
         fetchTeamData()
-    }, [teamId])
+    }, [fetchTeamData]) // Use the memoized function
 
     // Height matching effect
     useEffect(() => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
@@ -12,8 +12,6 @@ import { parseLeagueInfo } from '@/lib/textUtils'
 interface PlayerDetailsContentProps {
     playerId: string
 }
-
-
 
 interface Tournament {
     id: number
@@ -48,8 +46,6 @@ interface Tournament {
         slug: string
     } | null
 }
-
-
 
 // Prize pool formatting utility
 const formatPrizePool = (prizePool: string | undefined | null): string => {
@@ -118,8 +114,6 @@ const formatPrizePool = (prizePool: string | undefined | null): string => {
     }
 }
 
-
-
 export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentProps) {
     const [player, setPlayer] = useState<Player | null>(null)
     const [tournaments, setTournaments] = useState<Tournament[]>([])
@@ -130,35 +124,36 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        const fetchPlayerData = async () => {
-            setLoading(true)
-            setError(null)
-            
-            try {
-                // Fetch player details
-                const playerResponse = await fetch(`/api/players/${playerId}`)
-                if (!playerResponse.ok) {
-                    throw new Error('Failed to fetch player details')
-                }
-                const playerData = await playerResponse.json()
-                setPlayer(playerData)
-
-                // Fetch player tournaments
-                const tournamentsResponse = await fetch(`/api/players/${playerId}/tournaments`)
-                if (tournamentsResponse.ok) {
-                    const tournamentsData = await tournamentsResponse.json()
-                    setTournaments(tournamentsData || [])
-                }
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch player data')
-            } finally {
-                setLoading(false)
+    // Memoize the fetch function to prevent unnecessary re-renders
+    const fetchPlayerData = useCallback(async () => {
+        setLoading(true)
+        setError(null)
+        
+        try {
+            // Fetch player details
+            const playerResponse = await fetch(`/api/players/${playerId}`)
+            if (!playerResponse.ok) {
+                throw new Error('Failed to fetch player details')
             }
-        }
+            const playerData = await playerResponse.json()
+            setPlayer(playerData)
 
+            // Fetch player tournaments
+            const tournamentsResponse = await fetch(`/api/players/${playerId}/tournaments`)
+            if (tournamentsResponse.ok) {
+                const tournamentsData = await tournamentsResponse.json()
+                setTournaments(tournamentsData || [])
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch player data')
+        } finally {
+            setLoading(false)
+        }
+    }, [playerId]) // Only depend on playerId
+
+    useEffect(() => {
         fetchPlayerData()
-    }, [playerId])
+    }, [fetchPlayerData]) // Use the memoized function
 
     // Height matching effect
     useEffect(() => {
@@ -267,10 +262,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
         
         return tierInfo
     }
-
-
-
-
 
     if (loading) {
         return (

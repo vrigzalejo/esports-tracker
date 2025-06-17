@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPlayerTournaments } from '@/lib/pandaScore'
 
+type Props = {
+    params: Promise<{
+        playerId: string
+    }>
+}
+
 export async function GET(
     request: NextRequest,
-    { params }: { params: { playerId: string } }
+    { params }: Props
 ) {
     try {
-        const playerId = params.playerId
+        const { playerId } = await params
         
         if (!playerId) {
             return NextResponse.json(
