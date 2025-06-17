@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(tournaments);
     } catch (error) {
-        logApiError('/tournaments/upcoming', error);
+        console.error('Error fetching upcoming tournaments:', error)
         return NextResponse.json(
             { error: 'Failed to fetch upcoming tournaments' },
             { status: 500 }

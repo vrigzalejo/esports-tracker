@@ -266,3 +266,7 @@ export const getPlayerTournaments = async (playerId: string | number, filters?: 
 
     return request(`/players/${playerId}/tournaments`, params);
 }
+
+export const getTournamentBrackets = async (tournamentId: string | number) => {
+    return request(`/tournaments/${tournamentId}/brackets`);
+}

@@ -123,6 +123,92 @@ interface TournamentDetails {
     }>
 }
 
+interface BracketMatch {
+    id: number
+    name: string
+    status: 'running' | 'finished' | 'not_started' | 'completed'
+    begin_at: string
+    scheduled_at: string
+    end_at?: string
+    number_of_games: number
+    winner_id?: number
+    results: Array<{
+        score: number
+        team_id?: number
+        player_id?: number
+    }>
+    opponents: Array<{
+        type: 'Team' | 'Player'
+        opponent: {
+            id: number
+            name: string
+            image_url: string
+            acronym?: string
+            first_name?: string
+            last_name?: string
+            nationality?: string
+            role?: string
+            age?: number
+        }
+    }>
+    position?: number
+    group_position?: number
+    previous_matches?: Array<{
+        match_id: number
+        type: 'winner' | 'loser'
+    }>
+}
+
+interface BracketStage {
+    id: number
+    name: string
+    type: 'single_elimination' | 'double_elimination' | 'round_robin' | 'swiss' | 'group_stage'
+    settings?: {
+        nb_bo?: number
+        match_type?: string
+    }
+    matches: BracketMatch[]
+}
+
+interface TournamentBracket {
+    id: number
+    name: string
+    tournament_id: number
+    stages: BracketStage[]
+}
+
+interface BracketAPIMatch {
+    id: number
+    name: string
+    status: string
+    begin_at: string
+    scheduled_at: string
+    end_at?: string
+    number_of_games: number
+    winner_id?: number
+    results: Array<{
+        score: number
+        team_id?: number
+    }>
+    opponents: Array<{
+        type: string
+        opponent: {
+            id: number
+            name: string
+            image_url: string
+            acronym?: string
+            location?: string
+        }
+    }>
+    position?: number
+    previous_matches?: Array<{
+        match_id: number
+        type: 'winner' | 'loser'
+    }>
+}
+
+
+
 interface TournamentDetailsContentProps {
     tournamentId: string
 }
@@ -317,9 +403,409 @@ const formatPrizePool = (prizePool: string | undefined | null): string => {
     }
 }
 
+// Tournament Bracket Stage Component
+interface TournamentBracketStageProps {
+    stage: BracketStage
+    getTeamImage: (imageUrl: string) => string
+    getPlayerImage: (imageUrl: string) => string
+    router: any // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+function TournamentBracketStage({ stage, getTeamImage, getPlayerImage, router }: TournamentBracketStageProps) {
+    const getMatchResult = (match: BracketMatch) => {
+        // Check if match has results and is finished
+        if (!match.results || match.results.length < 2 || 
+            (match.status !== 'finished' && match.status !== 'completed')) {
+            
+            // For matches without scores, check if there's a winner_id
+            if (match.winner_id && match.opponents.length >= 2) {
+                return {
+                    team1Score: null,
+                    team2Score: null,
+                    winnerId: match.winner_id,
+                    hasScores: false
+                }
+            }
+            return null
+        }
+        
+        const result1 = match.results[0]
+        const result2 = match.results[1]
+        
+        if (!result1 || !result2) return null
+        
+        // Use the match's winner_id if available, otherwise determine from scores
+        let winnerId: number
+        if (match.winner_id) {
+            winnerId = match.winner_id
+        } else if (result1.score > result2.score) {
+            winnerId = result1.team_id || result1.player_id || 0
+        } else if (result2.score > result1.score) {
+            winnerId = result2.team_id || result2.player_id || 0
+        } else {
+            // Tie or no clear winner from scores
+            winnerId = match.winner_id || 0
+        }
+        
+        // Match results to opponents correctly
+        const team1Id = match.opponents[0]?.opponent?.id
+        const team2Id = match.opponents[1]?.opponent?.id
+        
+        // Find the scores for each team
+        const team1Result = match.results.find(r => r.team_id === team1Id || r.player_id === team1Id)
+        const team2Result = match.results.find(r => r.team_id === team2Id || r.player_id === team2Id)
+        
+        return {
+            team1Score: team1Result?.score || 0,
+            team2Score: team2Result?.score || 0,
+            winnerId: winnerId,
+            hasScores: true
+        }
+    }
+
+    // Add null check for stage.matches
+    if (!stage.matches || !Array.isArray(stage.matches)) {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                    <h4 className="text-lg font-bold text-orange-300">{stage.name}</h4>
+                    <span className="px-2 py-1 bg-orange-500/20 text-orange-300 rounded text-xs font-medium">
+                        {stage.type.replace('_', ' ').toUpperCase()}
+                    </span>
+                </div>
+                <div className="text-center py-6 text-gray-400">
+                    <p className="text-sm">No matches available for this stage</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (stage.type === 'single_elimination') {
+        // Organize matches into rounds following the exact pattern
+        const organizeRounds = () => {
+            const rounds: { name: string; matches: BracketMatch[] }[] = []
+            
+            // Group by BO format and organize chronologically
+            const matchesByBO = stage.matches.reduce((acc, match) => {
+                const bo = match.number_of_games || 1
+                if (!acc[bo]) acc[bo] = []
+                acc[bo].push(match)
+                return acc
+            }, {} as { [key: number]: BracketMatch[] })
+            
+            // Create rounds in tournament order
+            const sortedBOs = Object.keys(matchesByBO).map(Number).sort((a, b) => a - b)
+            
+            sortedBOs.forEach(bo => {
+                const boMatches = matchesByBO[bo].sort((a, b) => 
+                    new Date(a.scheduled_at || a.begin_at).getTime() - new Date(b.scheduled_at || b.begin_at).getTime()
+                )
+                
+                let roundName = ''
+                if (bo === 1) {
+                    roundName = boMatches.length > 4 ? 'Round 1' : 'Quarterfinals'
+                } else if (bo === 3) {
+                    roundName = 'Semifinals'
+                } else if (bo === 5) {
+                    roundName = 'Grand Final'
+                } else {
+                    roundName = `BO${bo} Round`
+                }
+                
+                rounds.push({
+                    name: roundName,
+                    matches: boMatches
+                })
+            })
+            
+            return rounds
+        }
+
+        // Team Logo Component
+        const TeamLogo = ({ team, type, onClick }: { team: BracketMatch['opponents'][0]['opponent'], type: 'Team' | 'Player', onClick: () => void }) => (
+            <div 
+                className="w-6 h-6 rounded bg-gradient-to-br from-red-400 to-cyan-400 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                onClick={onClick}
+            >
+                <Image
+                    src={type === 'Player' ? getPlayerImage(team?.image_url || '') : getTeamImage(team?.image_url || '')}
+                    alt={team?.name || 'TBD'}
+                    width={24}
+                    height={24}
+                    className="object-contain rounded"
+                />
+            </div>
+        )
+
+        // Team Component
+        const Team = ({ team, winner, score, type, onClick }: { 
+            team: BracketMatch['opponents'][0]['opponent'], 
+            winner: boolean | null, 
+            score: string | number | null, 
+            type: 'Team' | 'Player',
+            onClick: () => void 
+        }) => (
+            <div className={`flex items-center justify-between p-2 mx-0 my-1 rounded-lg transition-all duration-200 ${
+                winner === true 
+                    ? 'bg-gradient-to-r from-green-500/30 to-green-400/20 border border-green-500/50' 
+                    : winner === false 
+                    ? 'bg-white/5 opacity-70' 
+                    : 'bg-white/5'
+            }`}>
+                <div className="flex items-center gap-2">
+                    <TeamLogo team={team} type={type} onClick={onClick} />
+                    <div className="font-semibold text-sm cursor-pointer hover:text-blue-300 transition-colors" onClick={onClick}>
+                        {team?.name || 'TBD'}
+                    </div>
+                </div>
+                <div className={`font-bold text-lg min-w-5 text-center ${
+                    score === "TBD" ? 'text-white/40 italic text-sm' : ''
+                }`}>
+                    {score}
+                </div>
+            </div>
+        )
+
+        // Match Component
+        const Match = ({ match }: { match: BracketMatch }) => {
+            const result = getMatchResult(match)
+            const team1 = match.opponents[0]?.opponent
+            const team2 = match.opponents[1]?.opponent
+            
+            // Determine winner status for each team
+            const team1Winner = result?.winnerId === team1?.id ? true : result?.winnerId === team2?.id ? false : null
+            const team2Winner = result?.winnerId === team2?.id ? true : result?.winnerId === team1?.id ? false : null
+            
+            // Get scores
+            const team1Score = result && result.hasScores ? (result.team1Score ?? 0) : 
+                              result && !result.hasScores && result.winnerId === team1?.id ? '✓' :
+                              team1 ? '-' : 'TBD'
+            const team2Score = result && result.hasScores ? (result.team2Score ?? 0) : 
+                              result && !result.hasScores && result.winnerId === team2?.id ? '✓' :
+                              team2 ? '-' : 'TBD'
+            
+            return (
+                <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/30 hover:border-white/20 relative">
+                    <Team 
+                        team={team1} 
+                        winner={team1Winner} 
+                        score={team1Score}
+                        type={match.opponents[0]?.type as 'Team' | 'Player'}
+                        onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
+                    />
+                    <Team 
+                        team={team2} 
+                        winner={team2Winner} 
+                        score={team2Score}
+                        type={match.opponents[1]?.type as 'Team' | 'Player'}
+                        onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
+                    />
+                    <div className="text-center text-xs text-white/60 mt-2">
+                        BO{match.number_of_games || 1} • {new Date(match.begin_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </div>
+                </div>
+            )
+        }
+
+        // Round Title Component
+        const RoundTitle = ({ title }: { title: string }) => (
+            <div className="text-center text-lg font-bold mb-5 p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                {title}
+            </div>
+        )
+
+        // Connector Component
+        const Connector = () => (
+            <div className="hidden lg:flex items-center justify-center w-8 h-0.5 bg-gradient-to-r from-white/30 to-white/10 relative">
+                <div className="absolute w-0.5 h-10 bg-gradient-to-b from-white/30 to-white/10 -top-10"></div>
+                <div className="absolute w-0.5 h-10 bg-gradient-to-b from-white/30 to-white/10 -bottom-10"></div>
+            </div>
+        )
+
+        const rounds = organizeRounds()
+
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <h4 className="text-lg font-bold text-orange-300">{stage.name}</h4>
+                        <span className="px-2 py-1 bg-orange-500/15 text-orange-300 rounded text-xs font-medium border border-orange-500/25">
+                            TOURNAMENT BRACKET
+                        </span>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                        {stage.matches.length} matches
+                    </div>
+                </div>
+
+                {/* Tournament Bracket using exact pattern */}
+                <div className="max-w-7xl mx-auto p-5">
+                    <div className="flex lg:flex-row flex-col justify-between items-center gap-10 overflow-x-auto p-5">
+                        {rounds.map((round, roundIndex) => (
+                            <React.Fragment key={roundIndex}>
+                                {/* Round Column */}
+                                <div className="flex flex-col gap-5 min-w-64 w-full lg:w-auto">
+                                    <RoundTitle title={round.name} />
+                                    {round.name === 'Semifinals' && <div className="mb-5"></div>}
+                                    {round.name === 'Grand Final' && <div className="mt-10"></div>}
+                                    {round.matches.map((match) => (
+                                        <div key={match.id} className={round.name === 'Semifinals' ? "mb-5" : ""}>
+                                            <Match match={match} />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Connector between rounds */}
+                                {roundIndex < rounds.length - 1 && <Connector />}
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    // For other bracket types (round_robin, group_stage, etc.), show a simpler list view
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+                <h4 className="text-lg font-bold text-orange-300">{stage.name}</h4>
+                <span className="px-2 py-1 bg-orange-500/20 text-orange-300 rounded text-xs font-medium">
+                    {stage.type.replace('_', ' ').toUpperCase()}
+                </span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {stage.matches && stage.matches.map((match) => {
+                    const result = getMatchResult(match)
+                    const team1 = match.opponents[0]?.opponent
+                    const team2 = match.opponents[1]?.opponent
+                    
+                    return (
+                        <div key={match.id} className="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30 hover:border-blue-400/40 transition-all duration-300">
+                            {/* Match Header */}
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-2">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                        match.status === 'running' ? 'bg-red-400 animate-pulse' :
+                                        match.status === 'finished' || match.status === 'completed' ? 'bg-green-400' :
+                                        'bg-yellow-400'
+                                    }`} />
+                                    <span className="text-xs text-gray-400">
+                                        {match.status === 'running' ? 'LIVE' :
+                                         match.status === 'finished' || match.status === 'completed' ? 'FINISHED' :
+                                         'UPCOMING'}
+                                    </span>
+                                </div>
+                                {match.number_of_games && (
+                                    <span className="text-xs text-purple-300 bg-purple-500/20 px-2 py-1 rounded">
+                                        BO{match.number_of_games}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Teams */}
+                            <div className="space-y-2">
+                                {/* Team 1 */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                        <div 
+                                            className="relative w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg border border-gray-600/40 overflow-hidden cursor-pointer hover:border-blue-400/50 transition-colors"
+                                            onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
+                                        >
+                                            <Image
+                                                src={match.opponents[0]?.type === 'Player' ? getPlayerImage(team1?.image_url || '') : getTeamImage(team1?.image_url || '')}
+                                                alt={team1?.name || 'TBD'}
+                                                fill
+                                                className="object-contain p-1"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div 
+                                                className={`text-sm font-medium truncate cursor-pointer hover:text-blue-300 transition-colors ${
+                                                    result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
+                                                }`}
+                                                onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
+                                            >
+                                                {team1?.name || 'TBD'}
+                                            </div>
+                                            {match.opponents[0]?.type === 'Team' && team1?.acronym && (
+                                                <div className="text-xs text-gray-400">{team1.acronym}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {result && result.hasScores && (
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border ${
+                                            result.winnerId === team1?.id 
+                                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                                : 'bg-gray-500/20 text-gray-400 border-gray-500/40'
+                                        }`}>
+                                            {result.team1Score}
+                                        </div>
+                                    )}
+                                    {result && !result.hasScores && result.winnerId === team1?.id && (
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                                            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Team 2 */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                        <div 
+                                            className="relative w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg border border-gray-600/40 overflow-hidden cursor-pointer hover:border-blue-400/50 transition-colors"
+                                            onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
+                                        >
+                                            <Image
+                                                src={match.opponents[1]?.type === 'Player' ? getPlayerImage(team2?.image_url || '') : getTeamImage(team2?.image_url || '')}
+                                                alt={team2?.name || 'TBD'}
+                                                fill
+                                                className="object-contain p-1"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div 
+                                                className={`text-sm font-medium truncate cursor-pointer hover:text-blue-300 transition-colors ${
+                                                    result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
+                                                }`}
+                                                onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
+                                            >
+                                                {team2?.name || 'TBD'}
+                                            </div>
+                                            {match.opponents[1]?.type === 'Team' && team2?.acronym && (
+                                                <div className="text-xs text-gray-400">{team2.acronym}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {result && result.hasScores && (
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border ${
+                                            result.winnerId === team2?.id 
+                                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                                : 'bg-gray-500/20 text-gray-400 border-gray-500/40'
+                                        }`}>
+                                            {result.team2Score}
+                                        </div>
+                                    )}
+                                    {result && !result.hasScores && result.winnerId === team2?.id && (
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                                            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 export default function TournamentDetailsContent({ tournamentId }: TournamentDetailsContentProps) {
     const [tournament, setTournament] = useState<TournamentDetails | null>(null)
     const [matches, setMatches] = useState<Match[]>([])
+    const [brackets, setBrackets] = useState<TournamentBracket[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -339,6 +825,14 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                 fetch(`/api/tournaments/${tournamentId}`),
                 fetch(`/api/tournaments/${tournamentId}/matches`)
             ])
+            
+            // Try to fetch brackets separately to avoid breaking the page if it fails
+            let bracketsResponse: Response | null = null
+            try {
+                bracketsResponse = await fetch(`/api/tournaments/${tournamentId}/brackets`)
+            } catch (error) {
+                console.warn('Failed to fetch brackets:', error)
+            }
             
             if (!tournamentResponse.ok) {
                 const errorData = await tournamentResponse.json().catch(() => ({ error: 'Unknown error' }))
@@ -360,6 +854,58 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                 // Sort matches by date (newest first)
                 matchesData.sort((a: any, b: any) => new Date(b.begin_at).getTime() - new Date(a.begin_at).getTime()) // eslint-disable-line @typescript-eslint/no-explicit-any
                 setMatches(matchesData)
+            }
+
+            // Fetch and set brackets data
+            if (bracketsResponse && bracketsResponse.ok) {
+                const bracketsData = await bracketsResponse.json()
+                // The API returns an array of matches directly, so we need to structure it properly
+                if (Array.isArray(bracketsData) && bracketsData.length > 0) {
+                    // Convert the flat array of matches into a bracket structure
+                    const bracketStructure: TournamentBracket = {
+                        id: tournament?.id || 0,
+                        name: 'Tournament Bracket',
+                        tournament_id: tournament?.id || 0,
+                        stages: [{
+                            id: 1,
+                            name: 'Main Bracket',
+                            type: 'single_elimination',
+                            matches: bracketsData.map((match: BracketAPIMatch) => ({
+                                id: match.id,
+                                name: match.name,
+                                status: match.status as 'running' | 'finished' | 'not_started' | 'completed',
+                                begin_at: match.scheduled_at || match.begin_at,
+                                scheduled_at: match.scheduled_at || match.begin_at,
+                                end_at: match.end_at,
+                                number_of_games: match.number_of_games,
+                                winner_id: match.winner_id,
+                                results: match.results.map(result => ({
+                                    score: result.score,
+                                    team_id: result.team_id,
+                                    player_id: undefined
+                                })),
+                                opponents: match.opponents.map(opp => ({
+                                    type: opp.type as 'Team' | 'Player',
+                                    opponent: {
+                                        id: opp.opponent.id,
+                                        name: opp.opponent.name,
+                                        image_url: opp.opponent.image_url,
+                                        acronym: opp.opponent.acronym,
+                                        first_name: undefined,
+                                        last_name: undefined,
+                                        nationality: opp.opponent.location,
+                                        role: undefined,
+                                        age: undefined
+                                    }
+                                })),
+                                position: match.position || 0,
+                                group_position: undefined,
+                                previous_matches: match.previous_matches || []
+                            }))
+                        }]
+                    }
+                    setBrackets([bracketStructure])
+                }
             }
 
             // Note: Standings are now calculated from match results
@@ -503,17 +1049,28 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
         
         if (!result1 || !result2) return null
         
-        // Determine winner ID based on whether it's a team or player match
+        // Match results to opponents correctly
+        const team1Id = match.opponents[0]?.opponent?.id
+        const team2Id = match.opponents[1]?.opponent?.id
+        
+        // Find the scores for each team
+        const team1Result = match.results.find(r => r.team_id === team1Id || r.player_id === team1Id)
+        const team2Result = match.results.find(r => r.team_id === team2Id || r.player_id === team2Id)
+        
+        // Determine winner ID - use match.winner_id if available, otherwise calculate from scores
         let winnerId: number
-        if (result1.score > result2.score) {
-            winnerId = result1.team_id || result1.player_id || 0
+        if (match.winner_id) {
+            winnerId = match.winner_id
+        } else if (team1Result && team2Result) {
+            winnerId = team1Result.score > team2Result.score ? team1Id : team2Id
         } else {
-            winnerId = result2.team_id || result2.player_id || 0
+            // Fallback to old logic
+            winnerId = result1.score > result2.score ? (result1.team_id || result1.player_id || 0) : (result2.team_id || result2.player_id || 0)
         }
         
         return {
-            team1Score: result1.score,
-            team2Score: result2.score,
+            team1Score: team1Result?.score || result1.score,
+            team2Score: team2Result?.score || result2.score,
             winnerId: winnerId
         }
     }
@@ -872,6 +1429,44 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                     </div>
                 </div>
 
+                {/* Tournament Bracket */}
+                {brackets && brackets.length > 0 && (
+                    <div className="mb-6">
+                        <div className="bg-gradient-to-br from-gray-800/70 to-gray-900/70 backdrop-blur-sm rounded-xl p-4 border border-gray-700/40 shadow-lg">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center space-x-2">
+                                    <div className="p-1.5 bg-orange-500/15 rounded-lg">
+                                        <Trophy className="w-4 h-4 text-orange-400" />
+                                    </div>
+                                    <h2 className="text-lg font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                                        Tournament Bracket
+                                    </h2>
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                    {brackets[0]?.stages[0]?.matches?.length || 0} matches
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-8">
+                                {brackets.map((bracket) => (
+                                    <div key={bracket.id} className="space-y-6">
+                                        <h3 className="text-xl font-bold text-white">{bracket.name}</h3>
+                                        {bracket.stages && bracket.stages.map((stage) => (
+                                            <TournamentBracketStage 
+                                                key={stage.id}
+                                                stage={stage}
+                                                getTeamImage={getTeamImage}
+                                                getPlayerImage={getPlayerImage}
+                                                router={router}
+                                            />
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content - Matches */}
                     <div className="lg:col-span-2 flex">
@@ -894,7 +1489,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                             </div>
                             <div className="flex-1 overflow-hidden">
                                 <div className="space-y-4 overflow-y-auto pr-2 pb-4 matches-scroll-content">
-                                    {matches.length > 0 ? matches
+                                    {matches && matches.length > 0 ? matches
                                         .sort((a, b) => {
                                             // Priority order: 1. LIVE, 2. UPCOMING, 3. FINISHED
                                             if (a.status === 'running' && b.status !== 'running') return -1;
