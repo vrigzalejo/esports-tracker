@@ -19,18 +19,18 @@ function StatCard({ icon: Icon, title, value, subtitle, trend }: {
   trend?: string
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <Icon className="w-8 h-8 text-purple-400" />
+    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
         {trend && (
-          <span className="text-sm text-green-400 font-medium">
+          <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded-full">
             {trend}
           </span>
         )}
       </div>
-      <h3 className="text-2xl font-bold text-white mb-1">{value}</h3>
-      <p className="text-gray-400 text-sm">{title}</p>
-      <p className="text-gray-500 text-xs">{subtitle}</p>
+      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-purple-100 transition-colors duration-300">{value}</h3>
+      <p className="text-gray-400 text-xs sm:text-sm leading-tight font-medium">{title}</p>
+      <p className="text-gray-500 text-xs leading-tight hidden sm:block mt-1">{subtitle}</p>
     </div>
   )
 }
@@ -94,7 +94,7 @@ function useCountdown(match: Match) {
   return { countdown, isLive, isPast }
 }
 
-// Component for individual match row with countdown
+// Component for individual match row with countdown - Mobile Responsive
 function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof useRouter> }) {
   const { countdown, isLive, isPast } = useCountdown(match)
 
@@ -102,33 +102,34 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
     <button
       key={match.id}
       onClick={() => router.push(`/matches?game=${encodeURIComponent(match.videogame.slug)}`)}
-      className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 transition-all duration-200 text-left"
+      className="w-full flex flex-col sm:flex-row sm:items-center justify-between py-3 sm:py-4 border-b border-gray-700/50 hover:bg-gray-700/20 cursor-pointer rounded-lg px-3 sm:px-4 transition-all duration-200 text-left group min-h-[44px]"
     >
-      <div className="flex items-center space-x-3">
-        <div className="relative">
-          <div className={`w-2 h-2 rounded-full ${
+      {/* Mobile Layout */}
+      <div className="flex items-start space-x-3 sm:space-x-4 w-full">
+        <div className="relative flex-shrink-0 mt-1">
+          <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
             match.status === 'running' ? 'bg-red-500' :
             match.status === 'finished' ? 'bg-blue-500' : 'bg-yellow-500'
           }`} />
           {match.status === 'running' && (
-            <div className="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
+            <div className="absolute inset-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 animate-ping opacity-75" />
           )}
         </div>
         
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 min-w-0">
           {cleanMatchName(match.name) && (
-            <div className="mb-1">
-              <span className="text-sm font-bold text-purple-300">
+            <div className="mb-1 sm:mb-2">
+              <span className="text-sm sm:text-base font-bold text-purple-300 group-hover:text-purple-200 transition-colors duration-200 line-clamp-1">
                 {cleanMatchName(match.name)}
               </span>
             </div>
           )}
           
-          {/* Team Images and Names */}
-          <div className="flex items-center space-x-2 mb-1">
+          {/* Team Images and Names - Responsive */}
+          <div className="flex items-center space-x-2 mb-2 flex-wrap">
             {match.opponents?.slice(0, 2).map((opponent, index) => (
-              <div key={opponent.opponent.id || index} className="flex items-center space-x-2">
-                <div className="relative w-5 h-5 bg-gray-700 rounded-full overflow-hidden">
+              <div key={opponent.opponent.id || index} className="flex items-center space-x-2 min-w-0">
+                <div className="relative w-5 h-5 sm:w-6 sm:h-6 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
                   <Image
                     src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
                     alt={opponent.opponent.name}
@@ -140,61 +141,66 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
                     }}
                   />
                 </div>
-                <span className="text-sm text-gray-300 font-medium">{opponent.opponent.name}</span>
+                <span className="text-sm sm:text-base text-gray-300 font-medium truncate max-w-[120px] sm:max-w-none group-hover:text-white transition-colors duration-200">
+                  {opponent.opponent.name}
+                </span>
                 {index === 0 && match.opponents.length > 1 && (
-                  <span className="text-xs text-gray-500 mx-1">vs</span>
+                  <span className="text-xs sm:text-sm text-gray-500 mx-1 flex-shrink-0">vs</span>
                 )}
               </div>
             ))}
           </div>
           
-          {/* League, Serie, Tournament Info */}
-          <div className="flex items-center space-x-2 mb-1">
+          {/* League, Serie, Tournament Info - Mobile Responsive */}
+          <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
             {match.league?.name && (
-              <span className="text-xs text-blue-400 font-medium">{match.league.name}</span>
-            )}
-            {match.league?.name && match.serie?.full_name && (
-              <span className="text-xs text-gray-600">•</span>
+              <span className="text-xs sm:text-sm text-blue-400 font-medium bg-blue-400/10 px-2 py-1 rounded-full truncate max-w-[100px] sm:max-w-none">
+                {match.league.name}
+              </span>
             )}
             {match.serie?.full_name && (
-              <span className="text-xs text-green-400 font-medium">{capitalizeWords(match.serie.full_name)}</span>
-            )}
-            {(match.league?.name || match.serie?.full_name) && match.tournament?.name && (
-              <span className="text-xs text-gray-600">•</span>
+              <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded-full truncate max-w-[120px] sm:max-w-none">
+                {capitalizeWords(match.serie.full_name)}
+              </span>
             )}
             {match.tournament?.name && (
-              <span className="text-xs text-yellow-400 font-medium">{match.tournament.name}</span>
+              <span className="text-xs sm:text-sm text-yellow-400 font-medium bg-yellow-400/10 px-2 py-1 rounded-full truncate max-w-[100px] sm:max-w-none">
+                {match.tournament.name}
+              </span>
             )}
           </div>
           
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500">{match.videogame.name}</span>
-            <span className="text-xs text-gray-600">•</span>
-            <span className="text-xs text-gray-500">
+          {/* Game and Date Info - Mobile Layout */}
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+            <span className="text-xs sm:text-sm text-gray-500 font-medium">{match.videogame.name}</span>
+            <span className="text-xs sm:text-sm text-gray-500 hidden sm:block">•</span>
+            <span className="text-xs sm:text-sm text-gray-500">
               {formatMatchDateRange(match, { includeYear: true })}
             </span>
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
-        {/* Countdown Timer */}
+      
+      {/* Status and Countdown - Mobile Responsive */}
+      <div className="flex items-center justify-between sm:justify-end space-x-2 mt-3 sm:mt-0 sm:ml-4 flex-shrink-0">
+        {/* Countdown Timer - Mobile Optimized */}
         {!isPast && countdown && !isLive && match.status === 'not_started' && (
-          <div className="flex items-center text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/20 mr-2">
-            <Clock className="w-3 h-3 mr-1 text-green-400" size={12} />
-            <span>{countdown}</span>
+          <div className="flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 backdrop-blur-sm">
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-400 flex-shrink-0" />
+            <span className="font-medium">{countdown}</span>
           </div>
         )}
         
-        {/* Status Badge */}
-        <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+        {/* Status Badge - Enhanced */}
+        <div className="flex items-center space-x-2 bg-gray-900/60 backdrop-blur-sm rounded-full pl-2 sm:pl-3 pr-3 sm:pr-4 py-1 sm:py-2 border border-gray-700/50 group-hover:border-gray-600/50 transition-all duration-200">
           {match.status === 'running' ? (
-            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-400 rounded-full animate-pulse" />
           ) : match.status === 'finished' ? (
-            <div className="w-2 h-2 bg-gray-500 rounded-full ml-2" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-gray-500 rounded-full" />
           ) : (
-            <div className="w-2 h-2 bg-blue-500 rounded-full ml-2" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full" />
           )}
-          <span className="text-xs font-medium text-white">
+          <span className="text-xs sm:text-sm font-medium text-white">
             {match.status === 'running' ? 'LIVE' : 
              match.status === 'finished' ? 'FINISHED' : 'UPCOMING'}
           </span>
@@ -240,25 +246,25 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-                  <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
+      <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
       <Navigation />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
+      <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 main-content">
+        {/* Hero Section - Mobile Responsive */}
+        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-3 sm:mb-4 px-2">
             EsportsTracker
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base lg:text-xl text-gray-300 max-w-2xl mx-auto px-3 sm:px-4 leading-relaxed">
             Your ultimate destination for live matches, tournaments, and esports statistics
           </p>
         </div>
 
-        {/* Statistics Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Statistics Overview - Fully Responsive Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {matchesLoading ? (
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-              <div className="h-16 bg-gray-700 rounded-lg" />
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
+              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
             <StatCard
@@ -271,8 +277,8 @@ export default function HomePage() {
           )}
 
           {tournamentsLoading ? (
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-              <div className="h-16 bg-gray-700 rounded-lg" />
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
+              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
             <StatCard
@@ -284,8 +290,8 @@ export default function HomePage() {
           )}
 
           {teamsLoading ? (
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-              <div className="h-16 bg-gray-700 rounded-lg" />
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
+              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
             <StatCard
@@ -297,8 +303,8 @@ export default function HomePage() {
           )}
 
           {tournamentsLoading ? (
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-              <div className="h-16 bg-gray-700 rounded-lg" />
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
+              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
             <StatCard
@@ -310,113 +316,122 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Quick Actions - Mobile Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <button
             onClick={() => handleQuickAction('matches')}
-            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-6 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer"
+            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-4">
-              <Play className="w-8 h-8 text-white" />
-              <ExternalLink className="w-5 h-5 text-white/0 group-hover:text-white/100 transition-all duration-200" />
+            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
+              <Play className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Live Matches</h3>
-                                            <p className="text-blue-100">Watch live matches and get real-time updates</p>
+            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-blue-100 transition-colors duration-200">Live Matches</h3>
+            <p className="text-blue-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Watch live matches and get real-time updates</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('tournaments')}
-            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg p-6 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer"
+            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-4">
-              <Trophy className="w-8 h-8 text-white" />
-              <ExternalLink className="w-5 h-5 text-white/0 group-hover:text-white/100 transition-all duration-200" />
+            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
+              <Trophy className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Tournaments</h3>
-            <p className="text-purple-100">Explore upcoming and ongoing tournaments</p>
+            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-purple-100 transition-colors duration-200">Tournaments</h3>
+            <p className="text-purple-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Explore upcoming and ongoing tournaments</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('teams')}
-            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg p-6 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer"
+            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] sm:col-span-2 lg:col-span-1 transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 text-white" />
-              <ExternalLink className="w-5 h-5 text-white/0 group-hover:text-white/100 transition-all duration-200" />
+            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
+              <Users className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Teams</h3>
-            <p className="text-pink-100">Browse teams and player statistics</p>
+            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-pink-100 transition-colors duration-200">Teams</h3>
+            <p className="text-pink-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Browse teams and player statistics</p>
           </button>
         </div>
 
-        {/* Latest Activity */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
-          <h2 className="text-xl font-semibold mb-6 flex items-center">
-            <Play className="w-5 h-5 text-blue-400 mr-2" />
-            {searchTerm ? `Search Results for "${searchTerm}"` : 'Latest Matches'}
+        {/* Latest Activity - Mobile Responsive */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 border border-gray-700/50">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 sm:mb-5 lg:mb-6 flex items-center">
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400 mr-2 sm:mr-3 flex-shrink-0" />
+            <span className="truncate text-sm sm:text-base lg:text-xl">
+              {searchTerm ? (
+                <>
+                  <span className="hidden sm:inline">Search Results for &ldquo;</span>
+                  <span className="sm:hidden">Results for &ldquo;</span>
+                  {searchTerm}&rdquo;
+                </>
+              ) : (
+                'Latest Matches'
+              )}
+            </span>
           </h2>
-          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-            <div className="space-y-4 pr-2">
+          
+          {/* Scrollable Match List - Mobile Optimized */}
+          <div className="max-h-64 sm:max-h-80 lg:max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 rounded-lg">
+            <div className="space-y-2 sm:space-y-3 lg:space-y-4 pr-2">
               {matchesLoading ? (
-                [...Array(12)].map((_, i) => (
-                  <div key={i} className="w-full flex items-center justify-between py-3 border-b border-gray-700/50 hover:bg-gray-700/20 rounded-lg px-3 transition-all duration-200 animate-pulse">
-                    <div className="flex items-center space-x-3">
+                [...Array(8)].map((_, i) => (
+                  <div key={i} className="w-full flex flex-col sm:flex-row sm:items-center justify-between py-3 sm:py-4 border-b border-gray-700/50 hover:bg-gray-700/20 rounded-lg px-3 sm:px-4 transition-all duration-200 animate-pulse min-h-[44px]">
+                    <div className="flex items-start space-x-3 sm:space-x-4 w-full">
                       {/* Status indicator */}
-                      <div className="relative">
-                        <div className={`w-2 h-2 rounded-full ${
+                      <div className="relative flex-shrink-0 mt-1">
+                        <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
                           i % 3 === 0 ? 'bg-red-500/50' :
                           i % 3 === 1 ? 'bg-blue-500/50' : 'bg-yellow-500/50'
                         }`} />
                       </div>
                       
-                      <div className="flex flex-col">
+                      <div className="flex flex-col flex-1 min-w-0">
                         {/* Match name skeleton */}
                         {i % 2 === 0 && (
-                          <div className="mb-1">
-                            <div className="h-4 w-32 bg-purple-300/20 rounded" />
+                          <div className="mb-1 sm:mb-2">
+                            <div className="h-4 sm:h-5 w-24 sm:w-32 bg-purple-300/20 rounded" />
                           </div>
                         )}
                         
                         {/* Team Images and Names */}
-                        <div className="flex items-center space-x-2 mb-1">
+                        <div className="flex items-center space-x-2 mb-2 flex-wrap">
                           <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 bg-gray-700/50 rounded-full" />
-                            <div className="h-3 w-16 bg-gray-300/30 rounded" />
-                            <span className="text-xs text-gray-500 mx-1">vs</span>
-                            <div className="w-5 h-5 bg-gray-700/50 rounded-full" />
-                            <div className="h-3 w-14 bg-gray-300/30 rounded" />
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-700/50 rounded-full flex-shrink-0" />
+                            <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-300/30 rounded" />
+                            <span className="text-xs sm:text-sm text-gray-500 mx-1 flex-shrink-0">vs</span>
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-700/50 rounded-full flex-shrink-0" />
+                            <div className="h-3 sm:h-4 w-10 sm:w-14 bg-gray-300/30 rounded" />
                           </div>
                         </div>
                         
                         {/* League, Serie, Tournament Info */}
-                        <div className="flex items-center space-x-2 mb-1">
-                          <div className="h-3 w-20 bg-blue-400/20 rounded" />
-                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
-                          <div className="h-3 w-24 bg-green-400/20 rounded" />
-                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
-                          <div className="h-3 w-18 bg-yellow-400/20 rounded" />
+                        <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
+                          <div className="h-3 sm:h-4 w-16 sm:w-20 bg-blue-400/20 rounded-full" />
+                          <div className="h-3 sm:h-4 w-18 sm:w-24 bg-green-400/20 rounded-full" />
+                          <div className="h-3 sm:h-4 w-14 sm:w-18 bg-yellow-400/20 rounded-full" />
                         </div>
                         
                         {/* Game and date info */}
-                        <div className="flex items-center space-x-2">
-                          <div className="h-3 w-16 bg-gray-500/30 rounded" />
-                          <div className="w-1 h-1 bg-gray-600/50 rounded-full" />
-                          <div className="h-3 w-20 bg-gray-500/30 rounded" />
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                          <div className="h-3 w-12 sm:w-16 bg-gray-500/30 rounded" />
+                          <div className="h-3 w-16 sm:w-20 bg-gray-500/30 rounded" />
                         </div>
                       </div>
                     </div>
                     
                     {/* Status badge */}
-                    <div className="flex items-center space-x-2">
-                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${
+                    <div className="flex items-center justify-between sm:justify-end space-x-2 mt-3 sm:mt-0 sm:ml-4 flex-shrink-0">
+                      <div className={`flex items-center space-x-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full border backdrop-blur-sm ${
                         i % 3 === 0 ? 'bg-red-500/20 border-red-500/30' :
                         i % 3 === 1 ? 'bg-blue-500/20 border-blue-500/30' : 'bg-yellow-500/20 border-yellow-500/30'
                       }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${
+                        <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
                           i % 3 === 0 ? 'bg-red-500/50' :
                           i % 3 === 1 ? 'bg-blue-500/50' : 'bg-yellow-500/50'
                         }`} />
-                        <div className={`h-3 w-8 rounded ${
+                        <div className={`h-3 sm:h-4 w-12 sm:w-16 rounded ${
                           i % 3 === 0 ? 'bg-red-400/30' :
                           i % 3 === 1 ? 'bg-blue-400/30' : 'bg-yellow-400/30'
                         }`} />
@@ -485,9 +500,13 @@ export default function HomePage() {
                   // Show no results message if search term exists but no matches found
                   if (searchTerm && searchTerm.trim() !== '' && filteredMatches.length === 0) {
                     return (
-                      <div className="text-center py-8">
-                        <div className="text-gray-400 mb-2">No matches found for &quot;{searchTerm}&quot;</div>
-                        <div className="text-gray-500 text-sm">Try searching for a different term or check your spelling</div>
+                      <div className="text-center py-6 sm:py-8">
+                        <div className="text-gray-400 mb-2 text-sm sm:text-base">
+                          No matches found for &ldquo;{searchTerm}&rdquo;
+                        </div>
+                        <div className="text-gray-500 text-xs sm:text-sm">
+                          Try searching for a different term or check your spelling
+                        </div>
                       </div>
                     );
                   }
@@ -504,8 +523,6 @@ export default function HomePage() {
     </div>
   )
 }
-
-
 
 // Helper function to format match date range
 function formatMatchDateRange(match: Match, options?: { includeYear?: boolean }): string {

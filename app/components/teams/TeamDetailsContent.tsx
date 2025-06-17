@@ -507,7 +507,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Main Content - Tournaments Skeleton */}
                         <div className="lg:col-span-2">
                             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
@@ -544,7 +544,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                             {/* Roster skeleton */}
                                             <div className="mt-6 p-4 bg-gray-800/40 rounded-xl border border-gray-600/30">
                                                 <div className="h-6 w-20 bg-gray-700 rounded mb-4" />
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                                     {[...Array(5)].map((_, j) => (
                                                         <div key={j} className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg">
                                                             <div className="w-12 h-12 bg-gray-700 rounded-full" />
@@ -753,7 +753,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     {/* Main Content - Tournaments */}
                     <div className="lg:col-span-2 flex">
                         {/* Tournaments */}
@@ -912,7 +912,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                         </h4>
 
                                                         {teamRoster && teamRoster.players && teamRoster.players.length > 0 ? (
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                                                 {teamRoster.players.map((player: any) => ( /* eslint-disable-line @typescript-eslint/no-explicit-any */
                                                                     <div key={player.id} className="group">
                                                                         <div 

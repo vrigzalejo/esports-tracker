@@ -162,7 +162,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId, playerId }:
                                         src={player.image_url || '/images/placeholder-player.svg'}
                                         alt={player.name}
                                         fill
-                                        className="object-cover"
+                                        className="object-cover object-top"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.src = '/images/placeholder-player.svg';

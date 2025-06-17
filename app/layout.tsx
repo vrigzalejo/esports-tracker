@@ -22,7 +22,13 @@ export const metadata: Metadata = {
   description: 'Your ultimate destination for esports matches, tournaments, teams, and statistics',
   keywords: ['esports', 'gaming', 'tournaments', 'matches', 'teams', 'statistics'],
   authors: [{ name: 'EsportsTracker' }],
-  viewport: 'width=device-width, initial-scale=1',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover'
+  },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -48,6 +54,12 @@ export const metadata: Metadata = {
       }
     ]
   },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'theme-color': '#1f2937'
+  }
 }
 
 export default function RootLayout({
@@ -56,14 +68,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-gray-900 text-white safe-area-padding`}
       >
         <DataProvider>
           <GamesProvider>
             <AlphaBanner />
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col">
               {children}
             </div>
             <Footer />

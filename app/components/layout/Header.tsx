@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Gamepad2, Search } from 'lucide-react'
+import { Gamepad2, Search, X } from 'lucide-react'
 import Link from 'next/link'
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
 
 export default function Header({ searchTerm, onSearch }: HeaderProps) {
     const [inputValue, setInputValue] = useState(searchTerm)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
 
     // Sync input value with searchTerm prop when it changes
     useEffect(() => {
@@ -19,47 +20,91 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
 
     const handleSearch = () => {
         onSearch(inputValue)
+        setIsSearchOpen(false)
     }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleSearch()
         }
+        if (e.key === 'Escape') {
+            setIsSearchOpen(false)
+        }
+    }
+
+    const toggleSearch = () => {
+        setIsSearchOpen(!isSearchOpen)
     }
 
     return (
-        <header className="bg-gray-800 border-b border-gray-700">
+        <header className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-[100]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer">
-                        <Gamepad2 className="w-8 h-8 text-blue-500" />
-                        <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                            EsportsTracker
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer flex-shrink-0">
+                        <Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                            <span className="hidden sm:inline">EsportsTracker</span>
+                            <span className="sm:hidden">ET</span>
                         </span>
                     </Link>
 
-                    <div className="flex-1 max-w-lg mx-8">
+                    {/* Desktop Search */}
+                    <div className="flex-1 max-w-lg mx-4 sm:mx-8 flex">
+                        <div className="relative flex w-full">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className="block w-full px-4 py-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                                placeholder="Search matches, tournaments, teams, players..."
+                            />
+                            <button
+                                onClick={handleSearch}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                aria-label="Search"
+                            >
+                                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Search Toggle - Hidden for now since desktop search is always visible */}
+                    <div className="hidden">
+                        <button
+                            onClick={toggleSearch}
+                            className="md:hidden p-2 text-gray-300 hover:text-white transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label="Toggle search"
+                        >
+                            {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Search Bar - Hidden since desktop search is always visible */}
+                {false && isSearchOpen && (
+                    <div className="md:hidden pb-4 animate-slide-down">
                         <div className="relative flex">
                             <input
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyPress={handleKeyPress}
-                                className="block w-full px-4 py-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Search matches, tournaments, teams, players..."
+                                className="block w-full px-4 py-3 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                                placeholder="Search..."
+                                autoFocus
                             />
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                                className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 min-w-[44px] flex items-center justify-center"
                                 aria-label="Search"
                             >
                                 <Search className="h-5 w-5" />
                             </button>
                         </div>
                     </div>
-
-
-                </div>
+                )}
             </div>
         </header>
     )

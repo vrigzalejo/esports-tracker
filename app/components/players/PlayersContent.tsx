@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import PlayerCard from './PlayerCard'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
-import { Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Users, ChevronLeft, ChevronRight, List } from 'lucide-react'
 import { usePlayers } from '@/hooks/useEsportsData'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
@@ -132,20 +132,23 @@ export default function PlayersContent() {
                         Players
                     </h1>
 
-                    {/* Items per page */}
-                    <select
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            handleItemsPerPageChange(Number(e.target.value))
-                        }}
-                        className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                        aria-label="Select items per page"
-                    >
-                        <option value="10" className="cursor-pointer">10 per page</option>
-                        <option value="20" className="cursor-pointer">20 per page</option>
-                        <option value="50" className="cursor-pointer">50 per page</option>
-                        <option value="100" className="cursor-pointer">100 per page</option>
-                    </select>
+                                            {/* Items per page */}
+                        <div className="flex items-center space-x-2">
+                            <List className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    handleItemsPerPageChange(Number(e.target.value))
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                                aria-label="Select items per page"
+                            >
+                                <option value="10">10 per page</option>
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
                 </div>
 
                 {/* Loading State */}
