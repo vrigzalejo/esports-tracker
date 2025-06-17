@@ -723,11 +723,28 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mb-3">
                                 {team.name}
                             </h1>
-                            {team.acronym && (
-                                <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full mb-3">
-                                    <span className="text-lg font-semibold text-blue-300">{team.acronym}</span>
-                                </div>
-                            )}
+                            <div className="flex items-center space-x-3 mb-3">
+                                {team.acronym && (
+                                    <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full">
+                                        <span className="text-lg font-semibold text-blue-300">{team.acronym}</span>
+                                    </div>
+                                )}
+                                {(() => {
+                                    // Get the most recent videogame from tournaments or matches
+                                    const mostRecentGame = tournaments.length > 0 
+                                        ? tournaments[0]?.videogame 
+                                        : matches.length > 0 
+                                        ? matches[0]?.videogame 
+                                        : null;
+                                    
+                                    return mostRecentGame && (
+                                        <div className="inline-flex items-center px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
+                                            <Gamepad2 className="w-4 h-4 mr-2 text-green-400" />
+                                            <span className="text-lg font-semibold text-green-300">{mostRecentGame.name}</span>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1319,7 +1336,10 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             <span className="text-xs font-medium">{team.acronym || team.name}</span>
                                                         </div>
                                                         <span className="text-gray-400 text-xs">vs</span>
-                                                        <div className="flex items-center space-x-2">
+                                                        <div 
+                                                            className="flex items-center space-x-2 cursor-pointer hover:text-blue-300 transition-colors"
+                                                            onClick={() => opponent?.opponent.id && router.push(`/teams/${opponent.opponent.id}`)}
+                                                        >
                                                             <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                 <Image
                                                                     src={getTeamImage(opponent?.opponent.image_url || '')}

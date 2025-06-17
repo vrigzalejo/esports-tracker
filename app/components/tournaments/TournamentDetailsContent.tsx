@@ -1592,7 +1592,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 <div className="text-center">
                                                                     <div 
                                                                         className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
-                                                                            result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
+                                                                            (match.status === 'finished' || match.status === 'completed') && result?.winnerId === team1?.id ? 'text-emerald-400' : 'text-white'
                                                                         }`}
                                                                         onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
                                                                     >
@@ -1620,15 +1620,17 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                {result && (
-                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
-                                                                        result.winnerId === team1?.id 
-                                                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                                                                            : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
-                                                                    }`}>
-                                                                        {result.team1Score}
-                                                                    </div>
-                                                                )}
+                                                                                                                                    {result && (
+                                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
+                                                                            match.status === 'finished' || match.status === 'completed' 
+                                                                                ? (result.winnerId === team1?.id 
+                                                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                                                                                    : 'bg-slate-500/20 text-slate-400 border-slate-500/40')
+                                                                                : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                                                                        }`}>
+                                                                            {result.team1Score}
+                                                                        </div>
+                                                                    )}
                                                             </div>
 
                                                             {/* VS Divider */}
@@ -1655,7 +1657,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                 <div className="text-center">
                                                                     <div 
                                                                         className={`text-sm font-bold transition-colors duration-300 cursor-pointer hover:text-blue-300 ${
-                                                                            result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
+                                                                            (match.status === 'finished' || match.status === 'completed') && result?.winnerId === team2?.id ? 'text-emerald-400' : 'text-white'
                                                                         }`}
                                                                         onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
                                                                     >
@@ -1683,15 +1685,17 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                {result && (
-                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
-                                                                        result.winnerId === team2?.id 
-                                                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                                                                            : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
-                                                                    }`}>
-                                                                        {result.team2Score}
-                                                                    </div>
-                                                                )}
+                                                                                                                                    {result && (
+                                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border-2 backdrop-blur-sm transition-all duration-300 ${
+                                                                            match.status === 'finished' || match.status === 'completed' 
+                                                                                ? (result.winnerId === team2?.id 
+                                                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                                                                                    : 'bg-slate-500/20 text-slate-400 border-slate-500/40')
+                                                                                : 'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                                                                        }`}>
+                                                                            {result.team2Score}
+                                                                        </div>
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     </div>
