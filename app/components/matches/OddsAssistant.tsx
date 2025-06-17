@@ -140,7 +140,18 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                     {/* Match Info */}
                     <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:text-blue-300 transition-colors"
+                                onClick={() => {
+                                    if (team1?.id) {
+                                        if (match.opponents?.[0]?.type === 'Player') {
+                                            window.open(`/players/${team1.id}`, '_blank')
+                                        } else {
+                                            window.open(`/teams/${team1.id}`, '_blank')
+                                        }
+                                    }
+                                }}
+                            >
                                 {team1?.image_url && (
                                     <div className="relative w-8 h-8">
                                         <Image 
@@ -159,11 +170,22 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         />
                                     </div>
                                 )}
-                                <span className="font-semibold text-white">{team1?.name || 'TBD'}</span>
+                                <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team1?.name || 'TBD'}</span>
                             </div>
                             <span className="text-gray-400 font-medium">VS</span>
-                            <div className="flex items-center gap-3">
-                                <span className="font-semibold text-white">{team2?.name || 'TBD'}</span>
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:text-blue-300 transition-colors"
+                                onClick={() => {
+                                    if (team2?.id) {
+                                        if (match.opponents?.[1]?.type === 'Player') {
+                                            window.open(`/players/${team2.id}`, '_blank')
+                                        } else {
+                                            window.open(`/teams/${team2.id}`, '_blank')
+                                        }
+                                    }
+                                }}
+                            >
+                                <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
                                     <div className="relative w-8 h-8">
                                         <Image 

@@ -7,15 +7,16 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { Users, ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePlayers } from '@/hooks/useEsportsData'
+import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
 export default function PlayersContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     
-    // Initialize state from URL parameters
+    // Initialize state from URL parameters with local storage fallback
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('playerItemsPerPage', 20).toString()))
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {
@@ -57,6 +58,12 @@ export default function PlayersContent() {
 
     // Reset to first page when filters change
     const resetPage = () => setCurrentPage(1)
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items)
+        resetPage()
+        saveDropdownValue('playerItemsPerPage', items)
+    }
 
     // Fetch players data using the hook
     const { data: players, loading: playersLoading } = usePlayers({
@@ -129,8 +136,7 @@ export default function PlayersContent() {
                     <select
                         value={itemsPerPage}
                         onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value))
-                            resetPage()
+                            handleItemsPerPageChange(Number(e.target.value))
                         }}
                         className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                         aria-label="Select items per page"

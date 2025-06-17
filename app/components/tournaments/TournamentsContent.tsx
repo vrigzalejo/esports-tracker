@@ -9,6 +9,7 @@ import Navigation from '@/components/layout/Navigation'
 import TournamentCard from '@/components/tournaments/TournamentCard'
 import { useUpcomingTournaments, useRunningTournaments, usePastTournaments } from '@/hooks/useEsportsData'
 import type { Tournament } from '@/types/esports'
+import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
 type TournamentStatus = 'upcoming' | 'running' | 'past'
 
@@ -16,14 +17,14 @@ export default function TournamentsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    // Initialize state from URL parameters
+    // Initialize state from URL parameters with local storage fallback
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [selectedStatus, setSelectedStatus] = useState<TournamentStatus>(
-        (searchParams.get('status') as TournamentStatus) || 'running'
+        (searchParams.get('status') as TournamentStatus) || getDropdownValue('tournamentStatus', 'running')
     )
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
-    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('tournamentItemsPerPage', 20).toString()))
+    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || getDropdownValue('tournamentDateFilter', 'all'))
     const [customDateRange, setCustomDateRange] = useState({
         start: searchParams.get('date_start') || '',
         end: searchParams.get('date_end') || ''
@@ -63,18 +64,26 @@ export default function TournamentsContent() {
         updateUrlParams(updates)
     }, [searchTerm, selectedStatus, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
-    // Modified filter handlers
+    // Modified filter handlers with local storage
     const handleStatusChange = (status: TournamentStatus) => {
         setSelectedStatus(status)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('tournamentStatus', status)
     }
 
     const handleDateFilterChange = (filter: string) => {
         setDateFilter(filter)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('tournamentDateFilter', filter)
         if (filter !== 'custom') {
             setCustomDateRange({ start: '', end: '' })
         }
+    }
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items)
+        resetPage()
+        saveDropdownValue('tournamentItemsPerPage', items)
     }
 
     // Fetch tournaments based on selected status - only call the API for the current status
@@ -368,8 +377,7 @@ export default function TournamentsContent() {
                         <select
                             value={itemsPerPage}
                             onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value))
-                                resetPage()
+                                handleItemsPerPageChange(Number(e.target.value))
                             }}
                             className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                             aria-label="Select items per page"

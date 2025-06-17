@@ -10,6 +10,7 @@ import MatchCard from '@/components/matches/MatchCard'
 import { useMatches } from '@/hooks/useEsportsData'
 import type { Match } from '@/types/esports'
 import { useGamesContext } from '@/contexts/GamesContext'
+import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
 interface Game {
     id: string | number
@@ -21,12 +22,12 @@ export default function MatchesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    // Initialize state from URL parameters
+    // Initialize state from URL parameters with local storage fallback
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || 'valorant')
+    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || getDropdownValue('matchGame', 'valorant'))
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
-    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('matchItemsPerPage', 20).toString()))
+    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || getDropdownValue('matchDateFilter', 'all'))
     const [customDateRange, setCustomDateRange] = useState({
         start: searchParams.get('date_start') || '',
         end: searchParams.get('date_end') || ''
@@ -66,18 +67,26 @@ export default function MatchesContent() {
         updateUrlParams(updates)
     }, [searchTerm, selectedGame, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
-    // Modified filter handlers
+    // Modified filter handlers with local storage
     const handleGameChange = (game: string) => {
         setSelectedGame(game)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('matchGame', game)
     }
 
     const handleDateFilterChange = (filter: string) => {
         setDateFilter(filter)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('matchDateFilter', filter)
         if (filter !== 'custom') {
             setCustomDateRange({ start: '', end: '' })
         }
+    }
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items)
+        resetPage()
+        saveDropdownValue('matchItemsPerPage', items)
     }
 
     // Fetch games data
@@ -316,8 +325,7 @@ export default function MatchesContent() {
                         <select
                             value={itemsPerPage}
                             onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value))
-                                resetPage()
+                                handleItemsPerPageChange(Number(e.target.value))
                             }}
                             className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                             aria-label="Select items per page"
@@ -325,6 +333,7 @@ export default function MatchesContent() {
                             <option value="10" className="cursor-pointer">10 per page</option>
                             <option value="20" className="cursor-pointer">20 per page</option>
                             <option value="50" className="cursor-pointer">50 per page</option>
+                            <option value="100" className="cursor-pointer">100 per page</option>
                         </select>
                     </div>
                 </div>
