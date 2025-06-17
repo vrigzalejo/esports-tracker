@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.pandascore.co',
       },
     ],
+  },
+  compiler: {
+    // Remove console logs only from client-side code in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error'] // Keep console.error for debugging, remove others
+    } : false
   }
 };
 

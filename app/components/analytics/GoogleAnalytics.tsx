@@ -3,6 +3,7 @@
 import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, Suspense } from 'react'
+import { logger } from '@/lib/logger'
 
 declare global {
   interface Window {
@@ -26,15 +27,28 @@ interface GoogleAnalyticsProps {
   measurementId: string
 }
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+
 // Component that uses useSearchParams and needs Suspense
 function GoogleAnalyticsWithSearchParams({ measurementId }: GoogleAnalyticsProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (!measurementId || typeof window.gtag !== 'function') return
-
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
+    
+    if (isDevelopment) {
+      // Only log in development
+      logger.log('📊 [Analytics] Page view:', {
+        measurementId,
+        page_path: url,
+        timestamp: new Date().toISOString()
+      })
+      return
+    }
+
+    // Only make actual requests in production
+    if (!measurementId || typeof window.gtag !== 'function') return
     
     window.gtag('config', measurementId, {
       page_path: url,
@@ -47,6 +61,16 @@ function GoogleAnalyticsWithSearchParams({ measurementId }: GoogleAnalyticsProps
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   if (!measurementId) {
     return null
+  }
+
+  // In development, don't load Google Analytics scripts
+  if (isDevelopment) {
+    logger.log('📊 [Analytics] Development mode - Google Analytics scripts disabled')
+    return (
+      <Suspense fallback={null}>
+        <GoogleAnalyticsWithSearchParams measurementId={measurementId} />
+      </Suspense>
+    )
   }
 
   return (
@@ -83,6 +107,17 @@ export const trackEvent = (
   label?: string,
   value?: number
 ) => {
+  if (isDevelopment) {
+    logger.log('📊 [Analytics] Event:', {
+      action,
+      category,
+      label,
+      value,
+      timestamp: new Date().toISOString()
+    })
+    return
+  }
+
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', action, {
       event_category: category,
@@ -93,6 +128,15 @@ export const trackEvent = (
 }
 
 export const trackPageView = (url: string, title?: string) => {
+  if (isDevelopment) {
+    logger.log('📊 [Analytics] Page view:', {
+      url,
+      title,
+      timestamp: new Date().toISOString()
+    })
+    return
+  }
+
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'page_view', {
       page_path: url,

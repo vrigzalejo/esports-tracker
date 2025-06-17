@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isOriginAllowed, CORS_CONFIG, SECURITY_HEADERS } from './app/config/cors'
+import { performSecurityCheck, createSecurityErrorResponse } from './app/lib/apiSecurity'
+import { serverLogger } from './app/lib/logger'
 
 export function middleware(request: NextRequest) {
   // Only apply CORS protection to API routes
@@ -10,7 +12,7 @@ export function middleware(request: NextRequest) {
     // Check if request has an origin (CORS request)
     if (origin) {
       if (!isOriginAllowed(origin)) {
-        console.warn(`🚫 Blocked API request from unauthorized origin: ${origin}`)
+        serverLogger.warn(`🚫 Blocked API request from unauthorized origin: ${origin}`)
         return new NextResponse(
           JSON.stringify({ 
             error: 'CORS_ERROR',
@@ -32,7 +34,7 @@ export function middleware(request: NextRequest) {
       const refererOrigin = `${refererUrl.protocol}//${refererUrl.host}`
       
       if (!isOriginAllowed(refererOrigin)) {
-        console.warn(`🚫 Blocked API request from unauthorized referer: ${refererOrigin}`)
+        serverLogger.warn(`🚫 Blocked API request from unauthorized referer: ${refererOrigin}`)
         return new NextResponse(
           JSON.stringify({ 
             error: 'UNAUTHORIZED_REFERER',
@@ -76,6 +78,16 @@ export function middleware(request: NextRequest) {
       response.headers.set(key, value)
     })
     
+    // Apply security checks
+    const securityCheck = performSecurityCheck(request)
+    
+    if (!securityCheck.allowed) {
+      return createSecurityErrorResponse(
+        securityCheck.error || 'Access denied',
+        403
+      )
+    }
+    
     return response
   }
   
@@ -88,6 +100,6 @@ export const config = {
     // Apply to all API routes
     '/api/:path*',
     // Optionally apply to specific paths that need protection
-    // '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ]
 } 

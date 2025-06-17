@@ -61,6 +61,7 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 - **TypeScript**: Full type safety throughout the application
 - **Google Analytics Integration**: Comprehensive GA4 tracking with esports-specific events and user engagement analytics
 - **Scalable AI System**: Multi-provider LLM architecture with automatic failover and priority-based selection
+- **Production-Ready Logging**: Dual logger system with clean client-side production builds and full server-side logging
 - **Optimized Performance**: Memoized components and efficient data fetching
 - **Component Architecture**: Modular, reusable components with proper error handling
 - **Custom Hooks**: Optimized data fetching and state management
@@ -135,6 +136,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX  # Optional: For Google Analytics tra
 - **[GOOGLE_ANALYTICS_SETUP.md](GOOGLE_ANALYTICS_SETUP.md)** - Comprehensive Google Analytics setup and usage guide
 - **[ANALYTICS_USAGE_EXAMPLES.md](ANALYTICS_USAGE_EXAMPLES.md)** - Practical examples for implementing analytics tracking throughout the application
 - **[CACHE_README.md](CACHE_README.md)** - Comprehensive caching system documentation and performance optimization guide
+- **[CONSOLE_LOGS_PRODUCTION.md](CONSOLE_LOGS_PRODUCTION.md)** - Production logging system with clean client-side builds and full server-side monitoring
 
 ## 📁 Project Structure
 
@@ -199,6 +201,7 @@ app/
 │   └── useMatchData.tsx # Match-specific data hooks with timezone handling
 ├── lib/               # Utilities and API
 │   ├── analytics.ts   # Comprehensive analytics utilities for tracking user interactions
+│   ├── logger.ts      # Dual logging system for client/server-side logging
 │   ├── textUtils.ts   # Text formatting, capitalization, and region acronym utilities
 │   ├── tournamentUtils.ts # Tournament-specific utilities
 │   ├── timezoneUtils.ts # Timezone handling and date formatting
@@ -398,6 +401,34 @@ CMD ["npm", "start"]
 
 📖 **For complete analytics setup and usage, see [GOOGLE_ANALYTICS_SETUP.md](GOOGLE_ANALYTICS_SETUP.md) and [ANALYTICS_USAGE_EXAMPLES.md](ANALYTICS_USAGE_EXAMPLES.md)**
 
+## 🔍 Production Logging System
+
+### Dual Logger Architecture
+- **Client-Side Logging**: Only active in development, completely removed from production builds
+- **Server-Side Logging**: Always active for backend monitoring, debugging, and error tracking
+- **Smart Environment Detection**: Automatic detection of client vs server context
+- **Zero Performance Impact**: No runtime overhead in production client-side code
+
+### Logging Features
+- **Clean Production Builds**: Browser console remains clean for end users
+- **Full Backend Monitoring**: Complete server-side logging for API routes, middleware, and security events
+- **Development Friendly**: All logging remains available during development
+- **Type-Safe Logging**: TypeScript-friendly with proper type definitions
+- **Targeted Control**: Separate loggers for client (`clientLogger`) and server (`serverLogger`) contexts
+
+### Usage Examples
+```typescript
+// Client-side logging (development only)
+import { logger } from '@/lib/logger'
+logger.log('User interaction') // Hidden in production
+
+// Server-side logging (always active)
+import { serverLogger } from '@/lib/logger'
+serverLogger.error('API error') // Always logged for monitoring
+```
+
+📖 **For complete logging system documentation, see [CONSOLE_LOGS_PRODUCTION.md](CONSOLE_LOGS_PRODUCTION.md)**
+
 ### AI System Reliability
 - **Intelligent Model Detection**: Accurate identification of active analysis system with appropriate UI branding
 - **Transparent Fallback**: Clear messaging when switching between AI and algorithmic analysis
@@ -412,6 +443,7 @@ CMD ["npm", "start"]
 - **1-Hour Caching System**: Comprehensive API response caching for improved performance
 - **AI Response Caching**: Intelligent caching of AI analysis results
 - **Analytics Performance**: Optimized event tracking with minimal performance impact
+- **Production Logging**: Clean client-side builds with zero console log overhead in production
 - **Code Splitting**: Automatic route-based code splitting
 - **Image Optimization**: Next.js Image component with lazy loading and proper error handling
 - **Bundle Analysis**: Optimized bundle sizes and tree shaking
@@ -460,6 +492,7 @@ CMD ["npm", "start"]
 ### Documentation
 - **AI System**: See [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md) for AI configuration and troubleshooting
 - **Caching System**: See [CACHE_README.md](CACHE_README.md) for performance optimization and cache management
+- **Logging System**: See [CONSOLE_LOGS_PRODUCTION.md](CONSOLE_LOGS_PRODUCTION.md) for production logging configuration
 - **Setup Guides**: Detailed setup instructions for all system components
 
 ## 💖 Support
