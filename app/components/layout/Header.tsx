@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Gamepad2, Search, X } from 'lucide-react'
+import { Gamepad2, Search, X, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 interface HeaderProps {
@@ -40,10 +40,13 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
         <header className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-[100]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer flex-shrink-0">
-                        <Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
-                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    {/* Enhanced Logo */}
+                    <Link href="/" className="flex items-center space-x-2 hover:scale-105 transition-all duration-300 cursor-pointer flex-shrink-0 group animate-glitch">
+                        <div className="relative drop-shadow-lg hover:drop-shadow-xl transition-all duration-300">
+                            <Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 animate-pulse-glow group-hover:animate-spin group-hover:text-purple-500 transition-colors duration-300 filter drop-shadow-sm" />
+                            <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 opacity-0 group-hover:opacity-100 animate-ping transition-opacity duration-300 drop-shadow-sm" />
+                        </div>
+                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x bg-300% group-hover:from-pink-500 group-hover:via-purple-500 group-hover:to-blue-400 transition-all duration-500 group-hover:animate-neon-glow drop-shadow-sm">
                             <span className="hidden sm:inline">EsportsTracker</span>
                             <span className="sm:hidden">ET</span>
                         </span>
@@ -62,10 +65,10 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                             />
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-500 min-w-[44px] min-h-[44px] flex items-center justify-center animate-gradient-x bg-300% group cursor-pointer"
                                 aria-label="Search"
                             >
-                                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <Search className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300" />
                             </button>
                         </div>
                     </div>
@@ -97,10 +100,10 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                             />
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 min-w-[44px] flex items-center justify-center"
+                                className="px-4 py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-500 min-w-[44px] flex items-center justify-center animate-gradient-x bg-300% group"
                                 aria-label="Search"
                             >
-                                <Search className="h-5 w-5" />
+                                <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                             </button>
                         </div>
                     </div>

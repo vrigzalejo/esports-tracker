@@ -6,6 +6,7 @@ import AlphaBanner from "@/components/ui/AlphaBanner";
 import { GamesProvider } from "@/contexts/GamesContext";
 import { DataProvider } from "@/contexts/DataContext";
 import CacheStatus from "@/components/debug/CacheStatus";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-gray-900 text-white safe-area-padding`}
       >
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
         <DataProvider>
           <GamesProvider>
             <AlphaBanner />

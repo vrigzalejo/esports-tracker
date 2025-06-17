@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import PlayerCard from './PlayerCard'
 import Header from '@/components/layout/Header'
@@ -9,7 +9,8 @@ import { Users, ChevronLeft, ChevronRight, List } from 'lucide-react'
 import { usePlayers } from '@/hooks/useEsportsData'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
-export default function PlayersContent() {
+// Component that uses useSearchParams and needs Suspense
+function PlayersContentWithSearchParams() {
     const router = useRouter()
     const searchParams = useSearchParams()
     
@@ -43,7 +44,7 @@ export default function PlayersContent() {
         }
 
         updateUrlParams(updates)
-    }, [searchTerm, currentPage, itemsPerPage, searchParams, router])
+    }, [searchTerm, currentPage, itemsPerPage])
 
     const handleSearch = (value: string) => {
         setSearchTerm(value)
@@ -132,23 +133,23 @@ export default function PlayersContent() {
                         Players
                     </h1>
 
-                                            {/* Items per page */}
-                        <div className="flex items-center space-x-2">
-                            <List className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                            <select
-                                value={itemsPerPage}
-                                onChange={(e) => {
-                                    handleItemsPerPageChange(Number(e.target.value))
-                                }}
-                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                                aria-label="Select items per page"
-                            >
-                                <option value="10">10 per page</option>
-                                <option value="20">20 per page</option>
-                                <option value="50">50 per page</option>
-                                <option value="100">100 per page</option>
-                            </select>
-                        </div>
+                    {/* Items per page */}
+                    <div className="flex items-center space-x-2">
+                        <List className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                handleItemsPerPageChange(Number(e.target.value))
+                            }}
+                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                            aria-label="Select items per page"
+                        >
+                            <option value="10">10 per page</option>
+                            <option value="20">20 per page</option>
+                            <option value="50">50 per page</option>
+                            <option value="100">100 per page</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Loading State */}
@@ -161,45 +162,45 @@ export default function PlayersContent() {
                                 
                                 <div className="relative z-10">
                                     <div className="flex flex-col items-center">
-                                                                            {/* Player Image - Full Size */}
+                                        {/* Player Image - Full Size */}
                                         <div className="w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl mb-4 ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300" />
                                     
-                                    {/* Player Name */}
-                                    <div className="text-center mb-4">
-                                        <div className="h-5 w-24 bg-gray-700 rounded mb-1" />
-                                        <div className="h-4 w-16 bg-gray-700 rounded" />
-                                    </div>
+                                        {/* Player Name */}
+                                        <div className="text-center mb-4">
+                                            <div className="h-5 w-24 bg-gray-700 rounded mb-1" />
+                                            <div className="h-4 w-16 bg-gray-700 rounded" />
+                                        </div>
 
-                                    {/* Player Info */}
-                                    <div className="w-full space-y-3">
-                                        {/* Nationality & Age */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center">
-                                                <div className="w-4 h-3 bg-gray-700 rounded mr-2" />
-                                                <div className="h-4 w-8 bg-gray-700 rounded" />
+                                        {/* Player Info */}
+                                        <div className="w-full space-y-3">
+                                            {/* Nationality & Age */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <div className="w-4 h-3 bg-gray-700 rounded mr-2" />
+                                                    <div className="h-4 w-8 bg-gray-700 rounded" />
+                                                </div>
+                                                <div className="h-4 w-12 bg-gray-700 rounded" />
                                             </div>
-                                            <div className="h-4 w-12 bg-gray-700 rounded" />
-                                        </div>
-                                        
-                                        {/* Team */}
-                                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
-                                            <div className="flex items-center justify-center">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
-                                                <div className="h-4 w-20 bg-gray-700 rounded" />
+                                            
+                                            {/* Team */}
+                                            <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                                <div className="flex items-center justify-center">
+                                                    <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                    <div className="h-4 w-20 bg-gray-700 rounded" />
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        {/* Game */}
-                                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
-                                            <div className="flex items-center justify-center">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
-                                                <div className="h-4 w-16 bg-gray-700 rounded" />
+                                            
+                                            {/* Game */}
+                                            <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                                <div className="flex items-center justify-center">
+                                                    <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                    <div className="h-4 w-16 bg-gray-700 rounded" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         ))}
                     </div>
                 )}
@@ -272,5 +273,64 @@ export default function PlayersContent() {
                 )}
             </main>
         </div>
+    )
+}
+
+// Loading component for search params suspense
+function PlayersContentLoading() {
+    return (
+        <div className="min-h-screen bg-gray-900 text-white">
+            <Header searchTerm="" onSearch={() => {}} />
+            <Navigation />
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        Players
+                    </h1>
+                    <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(20)].map((_, i) => (
+                        <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
+                            <div className="w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl mb-4" />
+                            <div className="text-center mb-4">
+                                <div className="h-5 w-24 bg-gray-700 rounded mb-1 mx-auto" />
+                                <div className="h-4 w-16 bg-gray-700 rounded mx-auto" />
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className="w-4 h-3 bg-gray-700 rounded mr-2" />
+                                        <div className="h-4 w-8 bg-gray-700 rounded" />
+                                    </div>
+                                    <div className="h-4 w-12 bg-gray-700 rounded" />
+                                </div>
+                                <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                    <div className="flex items-center justify-center">
+                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                        <div className="h-4 w-20 bg-gray-700 rounded" />
+                                    </div>
+                                </div>
+                                <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                    <div className="flex items-center justify-center">
+                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                        <div className="h-4 w-16 bg-gray-700 rounded" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </main>
+        </div>
+    )
+}
+
+// Main export component with Suspense boundary
+export default function PlayersContent() {
+    return (
+        <Suspense fallback={<PlayersContentLoading />}>
+            <PlayersContentWithSearchParams />
+        </Suspense>
     )
 } 

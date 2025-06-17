@@ -59,11 +59,13 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 - **Next.js 15**: Latest features including Turbopack and improved performance
 - **Tailwind CSS 4**: Modern styling with custom animations and gradients
 - **TypeScript**: Full type safety throughout the application
+- **Google Analytics Integration**: Comprehensive GA4 tracking with esports-specific events and user engagement analytics
 - **Scalable AI System**: Multi-provider LLM architecture with automatic failover and priority-based selection
 - **Optimized Performance**: Memoized components and efficient data fetching
 - **Component Architecture**: Modular, reusable components with proper error handling
 - **Custom Hooks**: Optimized data fetching and state management
 - **API Integration**: Comprehensive PandaScore API wrapper with caching
+- **Analytics Utilities**: Centralized tracking system for user interactions, performance monitoring, and error tracking
 - **Text Utilities**: Advanced text processing for consistent formatting with region acronym support
 - **Timezone Utilities**: Robust timezone handling and date formatting
 - **EOF Compliance**: Proper file endings for better Git compatibility
@@ -94,6 +96,7 @@ Create a `.env.local` file:
 ```env
 PANDASCORE_TOKEN=your_api_token_here
 HUGGINGFACE_API_TOKEN=your_huggingface_token_here  # Optional: For AI match analysis
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX  # Optional: For Google Analytics tracking
 ```
 
 ### API Setup
@@ -113,11 +116,24 @@ HUGGINGFACE_API_TOKEN=your_huggingface_token_here  # Optional: For AI match anal
 
 **Note**: The AI analysis system works without any API tokens by falling back to enhanced algorithmic analysis. Hugging Face integration is optional but provides superior AI-powered predictions.
 
-📖 **For detailed AI setup instructions, see [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)**
+#### Google Analytics (Optional - For Website Analytics)
+1. Visit [Google Analytics](https://analytics.google.com)
+2. Create a new property for your esports tracker
+3. Get your Measurement ID (format: G-XXXXXXXXXX)
+4. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX` to your `.env.local`
+
+**Features**: The Google Analytics integration automatically tracks page views, user engagement, and provides esports-specific event tracking including match views, tournament visits, team page visits, and AI odds assistant usage.
+
+📖 **For detailed setup instructions:**
+- **AI Analysis**: [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)
+- **Google Analytics**: [GOOGLE_ANALYTICS_SETUP.md](GOOGLE_ANALYTICS_SETUP.md)
+- **Analytics Usage**: [ANALYTICS_USAGE_EXAMPLES.md](ANALYTICS_USAGE_EXAMPLES.md)
 
 ## 📚 Documentation
 
 - **[HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)** - Complete AI analysis system setup and configuration guide
+- **[GOOGLE_ANALYTICS_SETUP.md](GOOGLE_ANALYTICS_SETUP.md)** - Comprehensive Google Analytics setup and usage guide
+- **[ANALYTICS_USAGE_EXAMPLES.md](ANALYTICS_USAGE_EXAMPLES.md)** - Practical examples for implementing analytics tracking throughout the application
 - **[CACHE_README.md](CACHE_README.md)** - Comprehensive caching system documentation and performance optimization guide
 
 ## 📁 Project Structure
@@ -148,6 +164,8 @@ app/
 │   └── [teamId]/       # Dynamic team detail pages
 │       └── page.tsx    # Team detail page
 ├── components/          # Reusable components
+│   ├── analytics/      # Google Analytics integration
+│   │   └── GoogleAnalytics.tsx # GA4 component with esports-specific tracking
 │   ├── layout/         # Layout components (Header, Footer, Navigation)
 │   │   ├── Header.tsx  # Main header with search functionality
 │   │   ├── Navigation.tsx # Navigation bar with active states
@@ -180,6 +198,7 @@ app/
 │   ├── useEsportsData.tsx # Data fetching hooks
 │   └── useMatchData.tsx # Match-specific data hooks with timezone handling
 ├── lib/               # Utilities and API
+│   ├── analytics.ts   # Comprehensive analytics utilities for tracking user interactions
 │   ├── textUtils.ts   # Text formatting, capitalization, and region acronym utilities
 │   ├── tournamentUtils.ts # Tournament-specific utilities
 │   ├── timezoneUtils.ts # Timezone handling and date formatting
@@ -354,6 +373,31 @@ CMD ["npm", "start"]
 
 📖 **For complete AI system documentation, see [HUGGINGFACE_SETUP.md](HUGGINGFACE_SETUP.md)**
 
+## 📈 Analytics System
+
+### Google Analytics 4 Integration
+- **Automatic Page Tracking**: All page views and route changes automatically tracked
+- **Esports-Specific Events**: Custom events for match views, tournament visits, team page visits, and player profiles
+- **User Engagement Tracking**: AI odds assistant usage, search queries, filter usage, and navigation flow
+- **Performance Monitoring**: API response times, error tracking, and application performance metrics
+- **Privacy-First Design**: GDPR-compliant with anonymized data collection and optional cookie consent
+
+### Custom Event Tracking
+- **Match Analytics**: Track match views, live match interactions, and odds assistant usage
+- **Tournament Analytics**: Monitor tournament page visits, standings views, and roster interactions
+- **Team Analytics**: Track team profile visits, match history views, and championship tracking
+- **Search & Filter Analytics**: Monitor search queries, filter usage, and result engagement
+- **Navigation Analytics**: Track user flow between different sections of the application
+
+### Analytics Features
+- **Real-Time Tracking**: Immediate event processing with minimal performance impact
+- **Error Monitoring**: Automatic tracking of JavaScript errors and API failures
+- **User Journey Tracking**: Complete user flow analysis from entry to conversion
+- **Performance Insights**: Monitor Core Web Vitals and application performance metrics
+- **Custom Dimensions**: Esports-specific data points for detailed analysis
+
+📖 **For complete analytics setup and usage, see [GOOGLE_ANALYTICS_SETUP.md](GOOGLE_ANALYTICS_SETUP.md) and [ANALYTICS_USAGE_EXAMPLES.md](ANALYTICS_USAGE_EXAMPLES.md)**
+
 ### AI System Reliability
 - **Intelligent Model Detection**: Accurate identification of active analysis system with appropriate UI branding
 - **Transparent Fallback**: Clear messaging when switching between AI and algorithmic analysis
@@ -367,6 +411,7 @@ CMD ["npm", "start"]
 - **Efficient Data Fetching**: Smart caching and request deduplication
 - **1-Hour Caching System**: Comprehensive API response caching for improved performance
 - **AI Response Caching**: Intelligent caching of AI analysis results
+- **Analytics Performance**: Optimized event tracking with minimal performance impact
 - **Code Splitting**: Automatic route-based code splitting
 - **Image Optimization**: Next.js Image component with lazy loading and proper error handling
 - **Bundle Analysis**: Optimized bundle sizes and tree shaking
