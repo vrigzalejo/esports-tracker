@@ -23,10 +23,30 @@ export const metadata: Metadata = {
   keywords: ['esports', 'gaming', 'tournaments', 'matches', 'teams', 'statistics'],
   authors: [{ name: 'EsportsTracker' }],
   viewport: 'width=device-width, initial-scale=1',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
+    ],
+    other: [
+      { rel: 'icon', url: '/icon.svg', sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  },
   openGraph: {
     title: 'EsportsTracker',
     description: 'Your ultimate destination for esports matches, tournaments, teams, and statistics',
     type: 'website',
+    images: [
+      {
+        url: '/icon.svg',
+        width: 512,
+        height: 512,
+        alt: 'EsportsTracker Logo'
+      }
+    ]
   },
 }
 

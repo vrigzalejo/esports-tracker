@@ -1,0 +1,28 @@
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="12" cy="12" r="11" fill="url(#bgGradient)" stroke="#1F2937" stroke-width="1"/>
+  
+  <!-- Gamepad2 icon (simplified for favicon) -->
+  <g transform="translate(12, 12)">
+    <!-- Controller body -->
+    <path d="M-6 -2 C-8 -2 -8 0 -8 2 C-8 4 -6 6 -4 6 L4 6 C6 6 8 4 8 2 C8 0 8 -2 6 -2 Z" fill="white" stroke="none"/>
+    
+    <!-- D-pad -->
+    <rect x="-6" y="-1" width="1.5" height="3" fill="#3B82F6" rx="0.2"/>
+    <rect x="-7" y="0" width="3" height="1" fill="#3B82F6" rx="0.2"/>
+    
+    <!-- Action buttons -->
+    <circle cx="4" cy="-1" r="0.8" fill="#8B5CF6"/>
+    <circle cx="6" cy="1" r="0.8" fill="#8B5CF6"/>
+    <circle cx="2" cy="1" r="0.8" fill="#8B5CF6"/>
+    <circle cx="4" cy="3" r="0.8" fill="#8B5CF6"/>
+  </g>
+</svg> 
