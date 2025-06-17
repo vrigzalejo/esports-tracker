@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import type { RosterResponse, Player } from '@/types/roster';
 import { Users } from 'lucide-react';
 // Import country flags - you'll need to install: npm install country-flag-icons
@@ -21,6 +22,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId, playerId }:
     const [roster, setRoster] = useState<Player[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchRoster = async () => {
@@ -150,7 +152,10 @@ export default function TeamRoster({ teamId, teamName, tournamentId, playerId }:
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {roster.map((player) => (
                         <div key={player.id} className="group">
-                            <div className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden">
+                            <div 
+                                className="bg-gray-800/60 rounded-xl hover:bg-gray-800/80 transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 overflow-hidden cursor-pointer"
+                                onClick={() => router.push(`/players/${player.id}`)}
+                            >
                                 {/* Player Image - Full Size */}
                                 <div className="relative w-full h-64 bg-gray-700 overflow-hidden">
                                     <Image

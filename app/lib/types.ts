@@ -71,6 +71,7 @@ export interface Match {
         }>;
     };
     opponents: Array<{
+        type?: 'Player' | 'Team';
         opponent: {
             id: number;
             name: string;

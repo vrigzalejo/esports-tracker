@@ -1,6 +1,7 @@
 import TeamDisplay from './TeamDisplay'
 
 interface Opponent {
+    type?: 'Player' | 'Team'
     opponent: {
         id: number
         name: string

@@ -69,6 +69,7 @@ interface Match {
         current?: boolean
     }
     opponents: Array<{
+        type?: 'Player' | 'Team'
         opponent: {
             id: number
             name: string
