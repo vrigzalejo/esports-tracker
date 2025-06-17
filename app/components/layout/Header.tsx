@@ -41,9 +41,9 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer flex-shrink-0">
-                        <Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
-                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    <Link href="/" className="flex items-center space-x-2 hover:scale-105 transition-all duration-300 cursor-pointer flex-shrink-0 group">
+                        <Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 animate-pulse-glow group-hover:animate-spin group-hover:text-purple-500 transition-colors duration-300" />
+                        <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x bg-300% group-hover:from-pink-500 group-hover:via-purple-500 group-hover:to-blue-400 transition-all duration-500">
                             <span className="hidden sm:inline">EsportsTracker</span>
                             <span className="sm:hidden">ET</span>
                         </span>
