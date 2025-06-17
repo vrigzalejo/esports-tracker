@@ -183,20 +183,18 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                     </div>
                                                 )}
                                                 <div className="flex items-center space-x-2">
-                                                    {opponent?.image_url && (
-                                                        <div className="relative w-5 h-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded border border-gray-600/40 shadow-md overflow-hidden backdrop-blur-sm">
-                                                            <Image 
-                                                                src={opponent.image_url} 
-                                                                alt={opponent.name}
-                                                                fill
-                                                                className="object-contain p-0.5"
-                                                                onError={(e) => {
-                                                                    const target = e.target as HTMLImageElement
-                                                                    target.src = '/images/placeholder-team.svg'
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
+                                                                                                    <div className="relative w-5 h-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded border border-gray-600/40 shadow-md overflow-hidden backdrop-blur-sm">
+                                                    <Image 
+                                                        src={opponent?.image_url || '/images/placeholder-team.svg'} 
+                                                        alt={opponent?.name || 'Team'}
+                                                        fill
+                                                        className="object-contain p-0.5"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement
+                                                            target.src = '/images/placeholder-team.svg'
+                                                        }}
+                                                    />
+                                                </div>
                                                     <span className="text-white text-sm font-medium">
                                                         vs {opponent?.acronym || opponent?.name || 'TBD'}
                                                     </span>

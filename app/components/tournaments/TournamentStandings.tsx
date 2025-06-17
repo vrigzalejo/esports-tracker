@@ -188,20 +188,18 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                 }`}>
                                     {standing.rank || index + 1}
                                 </div>
-                                {standing.team.image_url && (
-                                    <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
-                                        <Image 
-                                            src={standing.team.image_url} 
-                                            alt={standing.team.name}
-                                            fill
-                                            className="object-contain p-0.5"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement
-                                                target.src = '/images/placeholder-team.svg'
-                                            }}
-                                        />
-                                    </div>
-                                )}
+                                <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                    <Image 
+                                        src={standing.team.image_url || '/images/placeholder-team.svg'} 
+                                        alt={standing.team.name}
+                                        fill
+                                        className="object-contain p-0.5"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement
+                                            target.src = '/images/placeholder-team.svg'
+                                        }}
+                                    />
+                                </div>
                                 <div className="min-w-0 flex-1">
                                     <div className={`text-sm font-medium truncate ${
                                         isRelevantTeam ? 'text-blue-300' : 'text-white'

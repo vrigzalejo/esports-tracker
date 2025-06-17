@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Users, List } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
@@ -9,15 +9,16 @@ import Navigation from '@/components/layout/Navigation'
 import TeamCard from '@/components/teams/TeamCard'
 import { useTeams } from '@/hooks/useEsportsData'
 import type { Team } from '@/types/esports'
+import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
 export default function TeamsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    // Initialize state from URL parameters
+    // Initialize state from URL parameters with local storage fallback
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('teamItemsPerPage', 20).toString()))
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {
@@ -59,6 +60,12 @@ export default function TeamsContent() {
 
     // Reset to first page when filters change
     const resetPage = () => setCurrentPage(1)
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items)
+        resetPage()
+        saveDropdownValue('teamItemsPerPage', items)
+    }
 
     // Fetch teams data using the hook
     const { data: teams, loading: teamsLoading } = useTeams({
@@ -130,21 +137,23 @@ export default function TeamsContent() {
                         Teams
                     </h1>
 
-                    {/* Items per page */}
-                    <select
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value))
-                            resetPage()
-                        }}
-                        className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                        aria-label="Select items per page"
-                    >
-                        <option value="10" className="cursor-pointer">10 per page</option>
-                        <option value="20" className="cursor-pointer">20 per page</option>
-                        <option value="50" className="cursor-pointer">50 per page</option>
-                        <option value="100" className="cursor-pointer">100 per page</option>
-                    </select>
+                                            {/* Items per page */}
+                        <div className="flex items-center space-x-2">
+                            <List className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    handleItemsPerPageChange(Number(e.target.value))
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                                aria-label="Select items per page"
+                            >
+                                <option value="10">10 per page</option>
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
                 </div>
 
                 {/* Loading State */}

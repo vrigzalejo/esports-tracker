@@ -12,7 +12,7 @@ export default function CacheStatus() {
     return (
       <button
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 right-4 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors z-50 cursor-pointer"
+                    className="fixed bottom-4 right-4 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors z-[1100] cursor-pointer"
         title="Show Cache Status"
       >
         Cache
@@ -21,7 +21,7 @@ export default function CacheStatus() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg max-w-sm z-50">
+            <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg max-w-sm z-[1100]">
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-semibold text-sm">Cache Status</h3>
         <button

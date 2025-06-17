@@ -263,6 +263,14 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
         return tierInfo
     }
 
+    const getPlayerImage = (imageUrl: string) => {
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-player.svg'
+    }
+
+    const getTournamentImage = (imageUrl: string) => {
+        return imageUrl && imageUrl !== '' ? imageUrl : '/images/placeholder-tournament.svg'
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
@@ -389,25 +397,23 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                     {/* Tournament Header */}
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
-                                                        {tournament.league?.image_url && (
-                                                            <div 
-                                                                className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
-                                                                onClick={() => router.push(`/tournaments/${tournament.id}`)}
-                                                            >
-                                                                <div className="relative w-full h-full">
-                                                                    <Image
-                                                                        src={tournament.league.image_url}
-                                                                        alt={tournament.league.name}
-                                                                        fill
-                                                                        className="object-contain"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement
-                                                                            target.src = '/images/placeholder-team.svg'
-                                                                        }}
-                                                                    />
-                                                                </div>
+                                                        <div 
+                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
+                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                        >
+                                                            <div className="relative w-full h-full">
+                                                                <Image
+                                                                    src={getTournamentImage(tournament.league?.image_url || '')}
+                                                                    alt={tournament.league?.name || 'Tournament'}
+                                                                    fill
+                                                                    className="object-contain"
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement
+                                                                        target.src = '/images/placeholder-tournament.svg'
+                                                                    }}
+                                                                />
                                                             </div>
-                                                        )}
+                                                        </div>
                                                         
                                                         {/* Tournament Info */}
                                                         <div className="flex-1">
@@ -526,7 +532,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                 {/* Player Image */}
                                 <div className="relative w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl overflow-hidden ring-4 ring-purple-500/30 hover:ring-cyan-500/50 transition-all duration-300 shadow-xl">
                                     <Image 
-                                        src={player.image_url || '/images/placeholder-player.svg'} 
+                                        src={getPlayerImage(player.image_url || '')} 
                                         alt={player.name}
                                         fill
                                         className="object-cover object-top"

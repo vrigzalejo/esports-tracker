@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { Filter, ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
@@ -10,6 +10,7 @@ import MatchCard from '@/components/matches/MatchCard'
 import { useMatches } from '@/hooks/useEsportsData'
 import type { Match } from '@/types/esports'
 import { useGamesContext } from '@/contexts/GamesContext'
+import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 
 interface Game {
     id: string | number
@@ -21,12 +22,12 @@ export default function MatchesContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    // Initialize state from URL parameters
+    // Initialize state from URL parameters with local storage fallback
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || 'valorant')
+    const [selectedGame, setSelectedGame] = useState(searchParams.get('game') || getDropdownValue('matchGame', 'valorant'))
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || '20'))
-    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || 'all')
+    const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('matchItemsPerPage', 20).toString()))
+    const [dateFilter, setDateFilter] = useState(searchParams.get('date_filter') || getDropdownValue('matchDateFilter', 'all'))
     const [customDateRange, setCustomDateRange] = useState({
         start: searchParams.get('date_start') || '',
         end: searchParams.get('date_end') || ''
@@ -66,18 +67,26 @@ export default function MatchesContent() {
         updateUrlParams(updates)
     }, [searchTerm, selectedGame, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
-    // Modified filter handlers
+    // Modified filter handlers with local storage
     const handleGameChange = (game: string) => {
         setSelectedGame(game)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('matchGame', game)
     }
 
     const handleDateFilterChange = (filter: string) => {
         setDateFilter(filter)
         setCurrentPage(1) // Reset to first page
+        saveDropdownValue('matchDateFilter', filter)
         if (filter !== 'custom') {
             setCustomDateRange({ start: '', end: '' })
         }
+    }
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items)
+        resetPage()
+        saveDropdownValue('matchItemsPerPage', items)
     }
 
     // Fetch games data
@@ -272,10 +281,10 @@ export default function MatchesContent() {
                         Matches
                     </h1>
 
-                    <div className="flex items-center space-x-4 flex-wrap gap-2">
+                    <div className="filter-controls">
                         {/* Game Filter */}
                         <div className="flex items-center space-x-2">
-                            <Filter className="w-4 h-4 text-gray-400" />
+                            <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             <select
                                 value={selectedGame}
                                 onChange={(e) => {
@@ -286,7 +295,7 @@ export default function MatchesContent() {
                                 aria-label="Select game"
                             >
                                 {!gamesLoading && games.map((game: Game) => (
-                                    <option key={game.id || game.slug} value={game.slug || game.id} className="cursor-pointer">
+                                    <option key={game.id || game.slug} value={game.slug || game.id}>
                                         {game.name}
                                     </option>
                                 ))}
@@ -295,7 +304,7 @@ export default function MatchesContent() {
 
                         {/* Date Filter */}
                         <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             <select
                                 value={dateFilter}
                                 onChange={(e) => {
@@ -304,28 +313,31 @@ export default function MatchesContent() {
                                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
                                 aria-label="Select date filter"
                             >
-                                <option value="all" className="cursor-pointer">Most Recent</option>
-                                <option value="today" className="cursor-pointer">Today</option>
-                                <option value="week" className="cursor-pointer">This Week</option>
-                                <option value="month" className="cursor-pointer">This Month</option>
-                                <option value="custom" className="cursor-pointer">Custom Range</option>
+                                <option value="all">Most Recent</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
                             </select>
                         </div>
 
                         {/* Items per page */}
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value))
-                                resetPage()
-                            }}
-                            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
-                            aria-label="Select items per page"
-                        >
-                            <option value="10" className="cursor-pointer">10 per page</option>
-                            <option value="20" className="cursor-pointer">20 per page</option>
-                            <option value="50" className="cursor-pointer">50 per page</option>
-                        </select>
+                        <div className="flex items-center space-x-2">
+                            <List className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    handleItemsPerPageChange(Number(e.target.value))
+                                }}
+                                className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 cursor-pointer"
+                                aria-label="Select items per page"
+                            >
+                                <option value="10">10 per page</option>
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -385,7 +397,7 @@ export default function MatchesContent() {
                 )}
 
                 {matchesLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {[...Array(6)].map((_, i) => (
                             <div key={i} className="group bg-gray-800/50 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-gray-700/50 transition-all duration-300 shadow-lg relative overflow-hidden animate-pulse">
                                 {/* Glowing effect */}
@@ -488,7 +500,7 @@ export default function MatchesContent() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {currentMatches.map((match: Match) => (
                                 <MatchCard key={match.id} match={match} />
                             ))}
