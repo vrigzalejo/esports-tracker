@@ -119,3 +119,45 @@ export const formatTournamentDate = (dateString: string, country?: string, regio
       })
     }
 }
+
+/**
+ * Logs API requests with query strings while hiding sensitive tokens
+ */
+export function logApiRequest(endpoint: string, url: string, method: string = 'GET', params?: Record<string, string>) {
+  // Hide token in URL for logging
+  const sanitizedUrl = url.replace(/([?&]token=)[^&]+/, '$1***HIDDEN***')
+  
+  console.log(`🌐 [API] ${method} ${endpoint}`, {
+    url: sanitizedUrl,
+    params: params ? Object.fromEntries(
+      Object.entries(params).map(([key, value]) => 
+        key.toLowerCase().includes('token') ? [key, '***HIDDEN***'] : [key, value]
+      )
+    ) : undefined,
+    timestamp: new Date().toISOString()
+  })
+}
+
+/**
+ * Logs API responses with timing and status information
+ */
+export function logApiResponse(endpoint: string, status: number, statusText: string, duration: number, dataInfo?: { count?: number; hasData?: boolean }) {
+  const emoji = status >= 200 && status < 300 ? '✅' : '❌'
+  console.log(`${emoji} [API] ${endpoint} response`, {
+    status,
+    statusText,
+    duration: `${duration}ms`,
+    ...dataInfo
+  })
+}
+
+/**
+ * Logs API errors with context
+ */
+export function logApiError(endpoint: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(`💥 [API] ${endpoint} error:`, {
+    error: error instanceof Error ? error.message : error,
+    ...context,
+    timestamp: new Date().toISOString()
+  })
+}

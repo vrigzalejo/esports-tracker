@@ -47,11 +47,6 @@ interface ModelConfig {
 }
 
 // Constants
-const PROCESSING_DELAY = {
-  WITH_AI: 1000,
-  WITHOUT_AI: 1500
-} as const
-
 const CONFIDENCE_RANGE = {
   MIN: 55,
   MAX: 88
@@ -181,30 +176,24 @@ class AIProviderFactory {
   static async tryProviders(team1: Team, team2: Team, match: Match): Promise<{ analysis: AnalysisResult; model: string } | null> {
     const providers = this.getAvailableProviders()
     
-    console.log(`🤖 AI Analysis Request: ${team1.name} vs ${team2.name}`)
-    console.log(`📊 Available AI providers: ${providers.length} (${providers.map(p => p.name).join(', ')})`)
+    console.log(`🤖 AI Analysis: ${team1.name} vs ${team2.name} (${providers.length} providers available)`)
     
     for (const provider of providers) {
       try {
-        console.log(`🔄 [${provider.name}] Starting analysis for ${match.videogame.name} match...`)
-        console.log(`📝 [${provider.name}] Match context: ${match.league?.name || 'Unknown Tournament'} - BO${match.number_of_games}`)
-        
         const startTime = Date.now()
         const analysis = await provider.generateAnalysis(team1, team2, match)
         const duration = Date.now() - startTime
         
-        console.log(`✅ [${provider.name}] Analysis completed successfully in ${duration}ms`)
-        console.log(`📈 [${provider.name}] Prediction: ${analysis.prediction === 'team1' ? team1.name : team2.name} (${analysis.confidence}% confidence)`)
-        console.log(`🎯 [${provider.name}] Odds: ${team1.name} ${analysis.team1Odds}% - ${team2.name} ${analysis.team2Odds}%`)
+        console.log(`✅ [${provider.name}] Analysis completed in ${duration}ms - ${analysis.prediction === 'team1' ? team1.name : team2.name} (${analysis.confidence}% confidence)`)
         
         return { analysis, model: `${provider.name}-enhanced` }
       } catch (error) {
-        console.log(`❌ [${provider.name}] Analysis failed:`, error instanceof Error ? error.message : error)
+        console.log(`❌ [${provider.name}] Analysis failed: ${error instanceof Error ? error.message : error}`)
         continue
       }
     }
     
-    console.log(`⚠️ All AI providers failed, falling back to algorithmic analysis`)
+    console.log(`⚠️ All AI providers failed, using algorithmic analysis`)
     return null
   }
 }
@@ -228,13 +217,8 @@ class HuggingFaceProvider implements AIProvider {
       throw new Error('Hugging Face API token not configured')
     }
 
-    console.log(`🔧 [${this.name}] Initializing Hugging Face client with model: ${this.modelConfig.model}`)
-    console.log(`⚙️ [${this.name}] Model config: maxTokens=${this.modelConfig.maxTokens}, temperature=${this.modelConfig.temperature}`)
-
     const client = new InferenceClient(HUGGINGFACE_API_TOKEN)
     const prompt = createAIPrompt(team1, team2, match)
-    
-    console.log(`📤 [${this.name}] Sending prompt to AI model (${prompt.length} characters)`)
 
     try {
       const apiStartTime = Date.now()
@@ -247,27 +231,22 @@ class HuggingFaceProvider implements AIProvider {
       })
       const apiDuration = Date.now() - apiStartTime
 
-      console.log(`📥 [${this.name}] Received AI response in ${apiDuration}ms`)
-
       const responseContent = chatCompletion.choices[0].message.content
       if (!responseContent) {
         throw new Error('No content in AI response')
       }
 
-      console.log(`🔍 [${this.name}] Processing AI response (${responseContent.length} characters)`)
       const parseStartTime = Date.now()
       const result = parseAndValidateAIResponse(responseContent, team1, team2, match)
       const parseDuration = Date.now() - parseStartTime
       
-      console.log(`✨ [${this.name}] Response parsed and validated in ${parseDuration}ms`)
+      console.log(`🔍 [${this.name}] Response processed in ${apiDuration + parseDuration}ms`)
       return result
 
     } catch (error) {
-      console.error(`💥 [${this.name}] Detailed error:`, {
+      console.error(`💥 [${this.name}] Error:`, {
         error: error instanceof Error ? error.message : error,
-        model: this.modelConfig.model,
-        provider: 'novita',
-        timestamp: new Date().toISOString()
+        model: this.modelConfig.model
       })
       throw new Error(`${this.name} analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -301,7 +280,7 @@ async function generateMatchAnalysis(
   match: Match
 ): Promise<{ analysis: AnalysisResult; model: string }> {
   
-  console.log(`🚀 Starting match analysis pipeline for ${team1.name} vs ${team2.name}`)
+  console.log(`🚀 Match analysis: ${team1.name} vs ${team2.name}`)
   
   // Initialize providers on first use
   initializeProviders()
@@ -310,19 +289,15 @@ async function generateMatchAnalysis(
   const aiResult = await AIProviderFactory.tryProviders(team1, team2, match)
   
   if (aiResult) {
-    console.log(`🎉 AI analysis pipeline completed successfully with ${aiResult.model}`)
     return aiResult
   }
 
   // Fallback to algorithmic analysis
-  console.log('🧠 Initializing enhanced algorithmic analysis fallback...')
   const startTime = Date.now()
   const analysis = await generateAlgorithmicAnalysis(team1, team2, match)
   const duration = Date.now() - startTime
   
-  console.log(`✅ Enhanced algorithmic analysis completed in ${duration}ms`)
-  console.log(`📈 Algorithmic prediction: ${analysis.prediction === 'team1' ? team1.name : team2.name} (${analysis.confidence}% confidence)`)
-  console.log(`🎯 Algorithmic odds: ${team1.name} ${analysis.team1Odds}% - ${team2.name} ${analysis.team2Odds}%`)
+  console.log(`✅ Algorithmic analysis completed in ${duration}ms - ${analysis.prediction === 'team1' ? team1.name : team2.name} (${analysis.confidence}% confidence)`)
   
   return { analysis, model: 'enhanced-algorithmic' }
 }
@@ -448,46 +423,27 @@ async function generateAlgorithmicAnalysis(
   match: Match
 ): Promise<AnalysisResult> {
   
-  console.log(`🧮 [Algorithmic] Analyzing match factors and team statistics...`)
-  
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, PROCESSING_DELAY.WITHOUT_AI))
-
   // Generate analysis factors
-  console.log(`📊 [Algorithmic] Calculating key analysis factors...`)
   const factors = createAnalysisFactors(team1, team2, match)
-  console.log(`🔍 [Algorithmic] Generated ${factors.length} analysis factors:`, factors.map(f => `${f.factor} (${f.impact})`).join(', '))
   
-  // Calculate odds using algorithmic approach
-  console.log(`⚖️ [Algorithmic] Computing odds based on tournament context and team metrics...`)
+  // Calculate odds based on various factors
   const { team1Odds, team2Odds } = calculateAlgorithmicOdds(team1, team2, match, factors)
   
   // Determine prediction and confidence
-  const prediction: 'team1' | 'team2' = team1Odds > team2Odds ? 'team1' : 'team2'
+  const prediction = team1Odds > team2Odds ? 'team1' : 'team2'
   const confidence = calculateAlgorithmicConfidence(team1Odds, factors)
   
-  console.log(`🎯 [Algorithmic] Final calculations: ${prediction === 'team1' ? team1.name : team2.name} favored with ${confidence}% confidence`)
-  
   // Generate reasoning
-  console.log(`📝 [Algorithmic] Generating detailed analysis reasoning...`)
-  const reasoning = createDefaultReasoning(
-    team1, 
-    team2, 
-    { team1Odds, team2Odds, confidence, prediction }, 
-    false
-  )
-
-  const result = {
-    team1Odds: Math.round(team1Odds * 10) / 10,
-    team2Odds: Math.round(team2Odds * 10) / 10,
+  const reasoning = createDefaultReasoning(team1, team2, { team1Odds, team2Odds, confidence, prediction }, false)
+  
+  return {
+    team1Odds,
+    team2Odds,
     prediction,
-    confidence: Math.round(confidence),
+    confidence,
     reasoning,
     keyFactors: factors
   }
-  
-  console.log(`🏁 [Algorithmic] Analysis complete with ${reasoning.length} reasoning points`)
-  return result
 }
 
 // Create analysis factors

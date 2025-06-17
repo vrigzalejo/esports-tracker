@@ -3,6 +3,7 @@
  */
 
 import { cacheManager } from './cache'
+import { logApiRequest, logApiResponse, logApiError } from './utils'
 
 // Request deduplication - store ongoing requests to prevent duplicates
 const ongoingRequests = new Map<string, Promise<unknown>>()
@@ -14,17 +15,13 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
     // Check cache first
     const cachedData = cacheManager.get(endpoint, params)
     if (cachedData) {
-        console.log(`🎯 Cache HIT for ${endpoint}`, params)
         return cachedData
     }
     
     // Check if this exact request is already in progress
     if (ongoingRequests.has(requestKey)) {
-        console.log(`🔄 Request DEDUPLICATION for ${endpoint}`, params)
         return ongoingRequests.get(requestKey)
     }
-    
-    console.log(`🌐 Cache MISS for ${endpoint}, fetching...`, params)
 
     const url = new URL(`${window.location.origin}${endpoint}`);
 
@@ -36,12 +33,16 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
         });
     }
 
+    // Log the API request
+    logApiRequest(endpoint, url.toString(), 'GET', params);
+
     // Create the request promise and store it for deduplication
     const requestPromise = (async () => {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+            const startTime = Date.now();
             const response = await fetch(url.toString(), {
                 headers: {
                     'Accept': 'application/json',
@@ -51,6 +52,7 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
             });
 
             clearTimeout(timeoutId);
+            const duration = Date.now() - startTime;
 
             if (!response.ok) {
                 let errorBody = null;
@@ -71,11 +73,16 @@ const request = async (endpoint: string, params?: Record<string, string>) => {
             
             // Cache the response
             cacheManager.set(endpoint, data, params)
-            console.log(`💾 Cached response for ${endpoint}`, params)
+            
+            // Log the response
+            logApiResponse(endpoint, response.status, response.statusText, duration, {
+                count: Array.isArray(data) ? data.length : undefined,
+                hasData: !!data
+            });
             
             return data;
         } catch (error) {
-            console.error('API Error:', error);
+            logApiError(endpoint, error);
             throw error;
         } finally {
             // Remove from ongoing requests when done (success or failure)

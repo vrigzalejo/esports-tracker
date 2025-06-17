@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTournaments } from '@/lib/pandaScore'
+import { logApiError } from '@/lib/utils'
 
 const PANDASCORE_TOKEN = process.env.PANDASCORE_TOKEN
 
@@ -17,12 +18,10 @@ export async function GET(
     try {
         const { teamId } = await params
         const teamIdNum = parseInt(teamId)
-        console.log('Fetching team details for ID:', teamIdNum)
 
         // First try the direct PandaScore teams endpoint
         try {
             const apiUrl = `https://api.pandascore.co/teams/${teamIdNum}?token=${PANDASCORE_TOKEN}`
-            console.log('Trying direct API URL:', apiUrl)
             
             const response = await fetch(apiUrl, {
                 headers: {
@@ -31,19 +30,15 @@ export async function GET(
                 next: { revalidate: 300 }
             })
 
-            console.log('Direct API response status:', response.status)
-
             if (response.ok) {
                 const team = await response.json()
-                console.log('Team data fetched successfully from direct API:', team.name || 'Unknown team')
                 return NextResponse.json(team)
             }
-        } catch (directApiError) {
-            console.log('Direct API failed, trying tournaments approach:', directApiError)
+        } catch {
+            // Continue to fallback approach
         }
 
         // Fallback: Get team data from tournaments
-        console.log('Fetching team from tournaments data...')
         const tournamentsResponse = await getTournaments({})
         const tournaments = tournamentsResponse && typeof tournamentsResponse === 'object' && 'data' in tournamentsResponse 
             ? tournamentsResponse.data 
@@ -87,18 +82,16 @@ export async function GET(
         }
 
         if (!foundTeam) {
-            console.log('Team not found in tournaments data')
             return NextResponse.json(
                 { error: 'Team not found' },
                 { status: 404 }
             )
         }
 
-        console.log('Team found in tournaments:', foundTeam.name)
         return NextResponse.json(foundTeam)
 
     } catch (error) {
-        console.error('Error fetching team details:', error)
+        logApiError(`/teams/${(await params).teamId}`, error)
         return NextResponse.json(
             { error: 'Failed to fetch team details' },
             { status: 500 }

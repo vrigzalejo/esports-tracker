@@ -25,14 +25,12 @@ interface DataProviderProps {
 }
 
 export function DataProvider({ children }: DataProviderProps) {
-  const clearAllCache = () => {
-    cacheManager.clear()
-    console.log('All cache cleared')
-  }
+      const clearAllCache = () => {
+        cacheManager.clear()
+    }
 
   const clearExpiredCache = () => {
     cacheManager.clearExpired()
-    console.log('Expired cache entries cleared')
   }
 
   const getCacheInfo = () => {
