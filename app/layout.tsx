@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import AlphaBanner from "@/components/ui/AlphaBanner";
+import CookieNotification from "@/components/ui/CookieNotification";
 import { GamesProvider } from "@/contexts/GamesContext";
 import { DataProvider } from "@/contexts/DataContext";
 import CacheStatus from "@/components/debug/CacheStatus";
@@ -83,6 +84,7 @@ export default function RootLayout({
               {children}
             </div>
             <Footer />
+            <CookieNotification />
             {process.env.NODE_ENV === 'development' && <CacheStatus />}
           </GamesProvider>
         </DataProvider>

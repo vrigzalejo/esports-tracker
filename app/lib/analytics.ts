@@ -3,6 +3,8 @@
  * Provides a centralized way to track esports-specific events
  */
 
+import { isAnalyticsAllowed } from '@/lib/cookieConsent'
+
 // Re-export analytics functions from the GoogleAnalytics component
 export {
   trackEvent,
@@ -21,6 +23,8 @@ export {
  * Track when a user clicks on a match to view details
  */
 export const trackMatchClick = (matchId: string, matchTitle: string, source: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'click', {
       event_category: 'engagement',
@@ -34,6 +38,8 @@ export const trackMatchClick = (matchId: string, matchTitle: string, source: str
  * Track when a user clicks on a tournament to view details
  */
 export const trackTournamentClick = (tournamentId: string, tournamentName: string, source: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'click', {
       event_category: 'engagement',
@@ -47,6 +53,8 @@ export const trackTournamentClick = (tournamentId: string, tournamentName: strin
  * Track when a user clicks on a team to view details
  */
 export const trackTeamClick = (teamId: string, teamName: string, source: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'click', {
       event_category: 'engagement',
@@ -60,6 +68,8 @@ export const trackTeamClick = (teamId: string, teamName: string, source: string)
  * Track when a user filters content (e.g., by game, status, etc.)
  */
 export const trackFilter = (filterType: string, filterValue: string, resultsCount: number) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'filter', {
       event_category: 'interaction',
@@ -73,6 +83,8 @@ export const trackFilter = (filterType: string, filterValue: string, resultsCoun
  * Track when a user navigates between sections
  */
 export const trackNavigation = (from: string, to: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'navigate', {
       event_category: 'navigation',
@@ -86,6 +98,8 @@ export const trackNavigation = (from: string, to: string) => {
  * Track when a user views match standings
  */
 export const trackStandingsView = (tournamentId: string, tournamentName: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'view_standings', {
       event_category: 'engagement',
@@ -99,6 +113,8 @@ export const trackStandingsView = (tournamentId: string, tournamentName: string)
  * Track when a user views team roster
  */
 export const trackRosterView = (teamId: string, teamName: string, context: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'view_roster', {
       event_category: 'engagement',
@@ -112,6 +128,8 @@ export const trackRosterView = (teamId: string, teamName: string, context: strin
  * Track errors or issues that occur
  */
 export const trackError = (errorType: string, errorMessage: string, location: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'exception', {
       description: `${errorType}: ${errorMessage} at ${location}`,
@@ -124,6 +142,8 @@ export const trackError = (errorType: string, errorMessage: string, location: st
  * Track API response times for performance monitoring
  */
 export const trackAPIPerformance = (endpoint: string, responseTime: number, success: boolean) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'timing_complete', {
       name: `API_${endpoint}`,
@@ -138,6 +158,8 @@ export const trackAPIPerformance = (endpoint: string, responseTime: number, succ
  * Track when users interact with live match features
  */
 export const trackLiveMatchInteraction = (matchId: string, interactionType: 'refresh' | 'stream_click' | 'odds_view') => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'live_match_interaction', {
       event_category: 'engagement',
@@ -151,6 +173,8 @@ export const trackLiveMatchInteraction = (matchId: string, interactionType: 'ref
  * Track game-specific engagement
  */
 export const trackGameEngagement = (gameName: string, action: string) => {
+  if (!isAnalyticsAllowed()) return
+  
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'game_engagement', {
       event_category: 'games',
