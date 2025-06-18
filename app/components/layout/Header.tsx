@@ -74,7 +74,7 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                                 {inputValue && (
                                     <button
                                         onClick={handleClear}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
                                         aria-label="Clear search"
                                     >
                                         <X className="w-4 h-4 hover:rotate-90 transition-transform duration-200" />
@@ -123,7 +123,7 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                                 {inputValue && (
                                     <button
                                         onClick={handleClear}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
                                         aria-label="Clear search"
                                     >
                                         <X className="w-5 h-5 hover:rotate-90 transition-transform duration-200" />
