@@ -188,7 +188,7 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                 }`}>
                                     {standing.rank || index + 1}
                                 </div>
-                                <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                <div className="relative w-8 h-8 bg-gradient-to-br from-gray-300 to-gray-400 rounded-lg border border-gray-500/50 shadow-lg overflow-hidden backdrop-blur-sm">
                                     <Image 
                                         src={standing.team.image_url || '/images/placeholder-team.svg'} 
                                         alt={standing.team.name}

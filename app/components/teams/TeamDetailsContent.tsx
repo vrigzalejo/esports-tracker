@@ -1336,14 +1336,23 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                         <span className="text-gray-400 text-xs">vs</span>
                                                         <div 
                                                             className="flex items-center space-x-2 cursor-pointer hover:text-blue-300 transition-colors"
-                                                            onClick={() => opponent?.opponent.id && router.push(`/teams/${opponent.opponent.id}`)}
+                                                            onClick={() => {
+                                                                if (opponent?.opponent.id) {
+                                                                    const basePath = opponent.type === 'Player' ? '/players' : '/teams';
+                                                                    router.push(`${basePath}/${opponent.opponent.id}`);
+                                                                }
+                                                            }}
                                                         >
-                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                                            <div className={`relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${opponent?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm`}>
                                                                 <Image
-                                                                    src={getTeamImage(opponent?.opponent.image_url || '')}
+                                                                    src={opponent?.type === 'Player' ? getPlayerImage(opponent?.opponent.image_url || '') : getTeamImage(opponent?.opponent.image_url || '')}
                                                                     alt={opponent?.opponent.name || 'TBD'}
                                                                     fill
-                                                                    className="object-contain p-0.5"
+                                                                    className={opponent?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-0.5'}
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement
+                                                                        target.src = opponent?.type === 'Player' ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <span className="text-xs font-medium">{opponent?.opponent.name || 'TBD'}</span>

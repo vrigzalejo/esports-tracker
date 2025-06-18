@@ -169,23 +169,19 @@ export default function TeamCard({ team }: TeamCardProps) {
                 <div className="flex items-center space-x-3 mb-4">
                     <div 
                         onClick={handleImageClick}
-                        className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300 cursor-pointer hover:ring-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105"
+                        className="relative w-12 h-12 bg-gray-700 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-600 transition-colors duration-200"
                     >
                         <Image
                             src={getTeamImage()}
                             alt={team.name}
                             fill
-                            className="rounded-lg object-cover"
+                            className="object-contain p-2"
                             priority={false}
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.src = '/images/placeholder-team.svg';
                             }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
-                        
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg" />
                     </div>
                     <div 
                         onClick={handleImageClick}
@@ -295,12 +291,12 @@ export default function TeamCard({ team }: TeamCardProps) {
                                         className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 hover:bg-gray-700/70 transition-colors duration-200 cursor-pointer"
                                     >
                                         {/* Player Image */}
-                                        <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full ring-1 ring-gray-600/30 flex-shrink-0">
+                                        <div className="relative w-8 h-8 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
                                             <Image
                                                 src={getPlayerImage(player)}
                                                 alt={player.name}
                                                 fill
-                                                className="rounded-full object-cover"
+                                                className="object-cover"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.src = '/images/placeholder-player.svg';
