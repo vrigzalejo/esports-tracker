@@ -204,21 +204,15 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                             <span className="relative z-10 font-extrabold">{result.result}</span>
                                                         </div>
                                                         
-                                                        {/* Cool Score Display */}
-                                                        <div className="flex items-center space-x-1 bg-gradient-to-r from-gray-800/80 to-gray-700/80 rounded-lg px-2 py-1 border border-gray-600/30 shadow-lg backdrop-blur-sm">
-                                                            <span className={`text-sm font-bold ${
-                                                                result.isDraw ? 'text-amber-400' : 
-                                                                result.isWinner ? 'text-emerald-400' : 'text-red-400'
-                                                            }`}>
-                                                                {result.teamScore}
-                                                            </span>
-                                                            <span className="text-gray-400 text-xs">-</span>
-                                                            <span className={`text-sm font-bold ${
-                                                                result.isDraw ? 'text-amber-400' : 
-                                                                !result.isWinner ? 'text-emerald-400' : 'text-red-400'
-                                                            }`}>
-                                                                {result.opponentScore}
-                                                            </span>
+                                                        {/* Score Display */}
+                                                        <div className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                                                            result.isDraw 
+                                                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20'
+                                                                : result.isWinner 
+                                                                ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                                                                : 'bg-red-500/20 text-red-400 border border-red-500/20'
+                                                        }`}>
+                                                            {result.teamScore} - {result.opponentScore}
                                                         </div>
                                                     </div>
                                                 )}

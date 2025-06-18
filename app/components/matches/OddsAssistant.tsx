@@ -153,12 +153,16 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                 }}
                             >
                                 {team1?.image_url && (
-                                    <div className="relative w-10 h-10 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden">
+                                    <div className={`relative w-12 h-12 sm:w-14 sm:h-14 ${
+                                        match.opponents?.[0]?.type === 'Player' 
+                                            ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
+                                            : 'bg-gray-600/60 rounded-xl'
+                                    } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden`}>
                                         <Image 
                                             src={team1.image_url} 
                                             alt={team1.name} 
                                             fill
-                                            className="object-contain rounded-xl p-1"
+                                            className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[0]?.type === 'Player') {
@@ -187,12 +191,16 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                             >
                                 <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
-                                    <div className="relative w-10 h-10 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden">
+                                    <div className={`relative w-12 h-12 sm:w-14 sm:h-14 ${
+                                        match.opponents?.[1]?.type === 'Player' 
+                                            ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
+                                            : 'bg-gray-600/60 rounded-xl'
+                                    } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden`}>
                                         <Image 
                                             src={team2.image_url} 
                                             alt={team2.name} 
                                             fill
-                                            className="object-contain rounded-xl p-1"
+                                            className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[1]?.type === 'Player') {
