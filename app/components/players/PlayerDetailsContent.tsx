@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/layout/Header'
-import Navigation from '@/components/layout/Navigation'
 import { User, MapPin, Calendar, Gamepad2, Trophy, Award, Clock, Star, ArrowLeft } from 'lucide-react'
 import type { Player } from '@/types/roster'
 import { parseLeagueInfo } from '@/lib/textUtils'
@@ -119,7 +117,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     const [tournaments, setTournaments] = useState<Tournament[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [searchTerm, setSearchTerm] = useState('')
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
@@ -201,10 +198,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
         }
     }, [tournaments, player])
 
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value)
-    }
-
     // Helper function to get flag component from country code
     const getFlagPath = (countryCode: string): string => {
         return countryCode ? `/flags/3x2/${countryCode}.svg` : '';
@@ -274,38 +267,123 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
-                <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="animate-pulse">
-                        {/* Header */}
-                        <div className="flex items-center space-x-6 mb-8">
-                            <div className="w-24 h-24 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full ring-2 ring-gray-600/30" />
-                            <div className="flex-1">
-                                <div className="h-8 w-64 bg-gray-700 rounded mb-2" />
-                                <div className="h-4 w-32 bg-gray-700 rounded mb-2" />
-                                <div className="h-4 w-48 bg-gray-700 rounded" />
-                            </div>
+                        {/* Back button skeleton */}
+                        <div className="flex items-center space-x-2 mb-6">
+                            <div className="w-4 h-4 bg-gray-700 rounded" />
+                            <div className="h-4 w-12 bg-gray-700 rounded" />
                         </div>
 
-                        {/* Content sections */}
+                        {/* Content Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
-                                    <div className="h-6 w-32 bg-gray-700 rounded mb-4" />
-                                    <div className="space-y-3">
-                                        {[...Array(5)].map((_, i) => (
-                                            <div key={i} className="h-16 bg-gray-700/50 rounded" />
+                            {/* Tournaments Section Skeleton */}
+                            <div className="lg:col-span-2">
+                                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl p-6 border border-gray-700/50">
+                                    {/* Tournament Header */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-9 h-9 bg-orange-500/20 rounded-xl" />
+                                            <div className="h-8 w-32 bg-gray-700 rounded" />
+                                        </div>
+                                        <div className="bg-orange-500/20 rounded-xl px-4 py-2 border border-orange-500/20">
+                                            <div className="h-6 w-8 bg-gray-700 rounded mb-1" />
+                                            <div className="h-3 w-10 bg-gray-700 rounded" />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Tournament Cards */}
+                                    <div className="space-y-6">
+                                        {[...Array(3)].map((_, i) => (
+                                            <div key={i} className="bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+                                                <div className="flex items-start space-x-4">
+                                                    {/* Tournament Image */}
+                                                    <div className="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl flex-shrink-0" />
+                                                    
+                                                    {/* Tournament Info */}
+                                                    <div className="flex-1 space-y-3">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-4 h-4 bg-yellow-400/50 rounded" />
+                                                            <div className="h-5 w-48 bg-gray-700 rounded" />
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-4 h-4 bg-blue-400/50 rounded" />
+                                                            <div className="h-4 w-40 bg-gray-700 rounded" />
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-4 h-4 bg-orange-400/50 rounded" />
+                                                            <div className="h-6 w-56 bg-gray-700 rounded" />
+                                                            <div className="h-6 w-16 bg-gray-700 rounded-full" />
+                                                        </div>
+                                                        <div className="flex items-center space-x-4 mt-3">
+                                                            <div className="flex items-center space-x-2">
+                                                                <div className="w-4 h-4 bg-green-400/50 rounded" />
+                                                                <div className="h-4 w-24 bg-gray-700 rounded" />
+                                                            </div>
+                                                            <div className="h-6 w-20 bg-green-500/20 rounded-full" />
+                                                        </div>
+                                                        <div className="flex items-center space-x-4 text-sm">
+                                                            <div className="flex items-center space-x-1">
+                                                                <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                                <div className="h-3 w-32 bg-gray-700 rounded" />
+                                                            </div>
+                                                            <div className="flex items-center space-x-1">
+                                                                <div className="w-3 h-3 bg-gray-600 rounded" />
+                                                                <div className="h-3 w-28 bg-gray-700 rounded" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Sidebar Skeleton */}
                             <div className="space-y-6">
                                 <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
-                                    <div className="h-6 w-24 bg-gray-700 rounded mb-4" />
-                                    <div className="space-y-3">
-                                        {[...Array(3)].map((_, i) => (
-                                            <div key={i} className="h-12 bg-gray-700/50 rounded" />
+                                    {/* Player Info Header */}
+                                    <div className="flex items-center mb-6">
+                                        <div className="w-5 h-5 bg-purple-400/50 rounded mr-2" />
+                                        <div className="h-6 w-24 bg-gray-700 rounded" />
+                                    </div>
+                                    
+                                    {/* Player Image */}
+                                    <div className="relative w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl mb-6 ring-4 ring-purple-500/30">
+                                        {/* Status indicator */}
+                                        <div className="absolute top-4 right-4 w-6 h-6 bg-gray-600 rounded-full ring-2 ring-gray-900" />
+                                        
+                                        {/* Name overlay */}
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                                            <div className="h-8 w-48 bg-gray-700 rounded mb-2" />
+                                            <div className="h-4 w-32 bg-gray-700 rounded" />
+                                        </div>
+                                    </div>
+
+                                    {/* Info Cards */}
+                                    <div className="space-y-6">
+                                        {/* Current Team */}
+                                        <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/30">
+                                            <div className="w-16 h-16 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl border border-gray-600/50" />
+                                            <div className="flex-1">
+                                                <div className="h-3 w-20 bg-gray-700 rounded mb-2" />
+                                                <div className="h-5 w-32 bg-gray-700 rounded" />
+                                            </div>
+                                            <div className="w-5 h-5 bg-gray-700 rounded" />
+                                        </div>
+
+                                        {/* Other Info Cards */}
+                                        {[...Array(4)].map((_, i) => (
+                                            <div key={i} className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-700/30 to-gray-700/20 rounded-xl border border-gray-600/30">
+                                                <div className="p-3 bg-gray-500/20 rounded-xl">
+                                                    <div className="w-5 h-5 bg-gray-600 rounded" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="h-3 w-16 bg-gray-700 rounded mb-2" />
+                                                    <div className="h-5 w-24 bg-gray-700 rounded" />
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -320,8 +398,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (error || !player) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
-                <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
-                <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="text-center py-12">
                         <div className="text-red-400 text-lg mb-2">Error loading player</div>
@@ -334,8 +410,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Header searchTerm={searchTerm} onSearch={handleSearchChange} />
-            <Navigation />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Back button */}
                 <button
@@ -345,16 +419,6 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                     <ArrowLeft className="w-4 h-4" />
                     <span>Back</span>
                 </button>
-
-                {/* Player Header */}
-                <div className="mb-8">
-                    {player.role && (
-                        <div className="flex items-center space-x-2 text-gray-400 mb-2">
-                            <User className="w-4 h-4" />
-                            <span className="text-sm">{player.role}</span>
-                        </div>
-                    )}
-                </div>
 
                 {/* Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
