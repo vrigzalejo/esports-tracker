@@ -150,7 +150,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {/* Mobile Layout */}
                 <div className="block sm:hidden space-y-4">
                     {/* Team 1 */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[0]?.isWinner ? 'bg-green-500/20 border border-green-500/30' : 'bg-gray-700/30 border border-gray-600/30'}`}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[0]?.isWinner ? 'bg-green-500/20 border border-green-500/20' : 'bg-red-500/20 border border-red-500/20'}`}>
                         <div className="flex items-center space-x-3">
                             {scoreInfo[0]?.image && (
                                 <div 
@@ -173,13 +173,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                                 className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                             >
-                                <div className={`text-sm font-bold ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                                <div className={`text-sm font-bold ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                                     {scoreInfo[0]?.name}
                                 </div>
                                 <div className="text-xs text-gray-400">{scoreInfo[0]?.acronym}</div>
                             </div>
                         </div>
-                        <div className={`text-2xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                        <div className={`text-2xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                             {scoreInfo[0]?.score}
                         </div>
                     </div>
@@ -200,7 +200,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     </div>
 
                     {/* Team 2 */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[1]?.isWinner ? 'bg-green-500/20 border border-green-500/30' : 'bg-gray-700/30 border border-gray-600/30'}`}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[1]?.isWinner ? 'bg-green-500/20 border border-green-500/20' : 'bg-red-500/20 border border-red-500/20'}`}>
                         <div className="flex items-center space-x-3">
                             {scoreInfo[1]?.image && (
                                 <div 
@@ -223,13 +223,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
                                 className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                             >
-                                <div className={`text-sm font-bold ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                                <div className={`text-sm font-bold ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                                     {scoreInfo[1]?.name}
                                 </div>
                                 <div className="text-xs text-gray-400">{scoreInfo[1]?.acronym}</div>
                             </div>
                         </div>
-                        <div className={`text-2xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                        <div className={`text-2xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                             {scoreInfo[1]?.score}
                         </div>
                     </div>
@@ -238,7 +238,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {/* Desktop Layout */}
                 <div className="hidden sm:grid grid-cols-3 items-center gap-4 lg:gap-6">
                     {/* Team 1 */}
-                    <div className={`flex items-center justify-end space-x-3 lg:space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                    <div className={`flex items-center justify-end space-x-3 lg:space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                         <div 
                             onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                             className="text-right cursor-pointer hover:text-cyan-300 transition-colors duration-200"
@@ -264,7 +264,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
-                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                             {scoreInfo[0]?.score}
                         </div>
                     </div>
@@ -283,8 +283,8 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     </div>
 
                     {/* Team 2 */}
-                    <div className={`flex items-center justify-start space-x-3 lg:space-x-4 ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-white'}`}>
-                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-white'}`}>
+                    <div className={`flex items-center justify-start space-x-3 lg:space-x-4 ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
                             {scoreInfo[1]?.score}
                         </div>
                         {scoreInfo[1]?.image && (
@@ -327,7 +327,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 <button
                                     key={index}
                                     onClick={(e) => handleStreamClick(stream.url, e)}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 hover:border-red-500/50 text-sm rounded-full font-medium transition-all duration-200 cursor-pointer group min-h-[44px] sm:min-h-auto"
+                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 hover:border-red-500/50 text-sm rounded-lg font-medium transition-all duration-200 cursor-pointer group min-h-[44px] sm:min-h-auto"
                                 >
                                     <Play className="w-4 h-4 group-hover:animate-pulse" />
                                     <span>{stream.platform}</span>
@@ -341,7 +341,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {/* Winner indicator */}
                 {match.status === 'finished' && match.winner_id && (
                     <div className="mt-4 text-center">
-                        <div className="inline-flex items-center space-x-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full border border-green-500/30">
+                        <div className="inline-flex items-center space-x-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-lg border border-green-500/30">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>

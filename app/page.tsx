@@ -130,17 +130,21 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
           <div className="flex items-center space-x-2 mb-2 flex-wrap">
             {match.opponents?.slice(0, 2).map((opponent, index) => (
               <div key={opponent.opponent.id || index} className="flex items-center space-x-2 min-w-0">
-                <div className="relative w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden flex-shrink-0">
-                                      <Image
-                      src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
-                      alt={opponent.opponent.name}
-                      fill
-                      className="object-contain rounded-xl p-0.5"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = '/images/placeholder-team.svg'
-                      }}
-                    />
+                <div className={`relative w-6 h-6 sm:w-8 sm:h-8 ${
+                  opponent.type === 'Player' 
+                    ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
+                    : 'bg-gray-600/60 rounded-xl'
+                } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden flex-shrink-0`}>
+                  <Image
+                    src={opponent.opponent.image_url || (opponent.type === 'Player' ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg')}
+                    alt={opponent.opponent.name}
+                    fill
+                    className={opponent.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-0.5'}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = opponent.type === 'Player' ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                    }}
+                  />
                 </div>
                 <span className="text-sm sm:text-base text-gray-300 font-medium truncate max-w-[120px] sm:max-w-none group-hover:text-white transition-colors duration-200">
                   {opponent.opponent.name}
@@ -394,10 +398,14 @@ export default function HomePage() {
                         {/* Team Images and Names */}
                         <div className="flex items-center space-x-2 mb-2 flex-wrap">
                           <div className="flex items-center space-x-2">
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/50 rounded-xl border border-gray-700/40 flex-shrink-0" />
+                            <div className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                              i % 2 === 0 ? 'bg-gray-600/50 rounded-xl' : 'bg-gradient-to-br from-gray-600/50 to-gray-700/50 rounded-lg'
+                            } border border-gray-700/40 flex-shrink-0`} />
                             <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-300/30 rounded" />
                             <span className="text-xs sm:text-sm text-gray-500 mx-1 flex-shrink-0">vs</span>
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/50 rounded-xl border border-gray-700/40 flex-shrink-0" />
+                            <div className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                              i % 2 === 1 ? 'bg-gray-600/50 rounded-xl' : 'bg-gradient-to-br from-gray-600/50 to-gray-700/50 rounded-lg'
+                            } border border-gray-700/40 flex-shrink-0`} />
                             <div className="h-3 sm:h-4 w-10 sm:w-14 bg-gray-300/30 rounded" />
                           </div>
                         </div>
