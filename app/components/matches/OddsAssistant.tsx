@@ -112,7 +112,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1100] flex items-center justify-center p-4">
-            <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-700">
                     <div className="flex items-center gap-3">
@@ -153,12 +153,12 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                 }}
                             >
                                 {team1?.image_url && (
-                                    <div className="relative w-8 h-8">
+                                    <div className="relative w-10 h-10 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden">
                                         <Image 
                                             src={team1.image_url} 
                                             alt={team1.name} 
                                             fill
-                                            className="rounded-full object-cover"
+                                            className="object-contain rounded-xl p-1"
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[0]?.type === 'Player') {
@@ -187,12 +187,12 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                             >
                                 <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
-                                    <div className="relative w-8 h-8">
+                                    <div className="relative w-10 h-10 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden">
                                         <Image 
                                             src={team2.image_url} 
                                             alt={team2.name} 
                                             fill
-                                            className="rounded-full object-cover"
+                                            className="object-contain rounded-xl p-1"
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[1]?.type === 'Player') {

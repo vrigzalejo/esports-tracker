@@ -53,69 +53,91 @@ function TournamentsLoading() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 animate-pulse">
-                            {/* Subtle background glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div key={i} className="group relative bg-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 animate-pulse">
+                            {/* Clean background glow effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             
                             <div className="relative z-10">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="h-5 w-32 bg-gray-700 rounded leading-tight group-hover:text-purple-100 transition-colors duration-200" />
-                                            <div className="h-4 w-20 bg-gray-700 rounded text-sm group-hover:text-gray-300 transition-colors duration-200" />
-                                        </div>
+                                <div className="flex flex-col">
+                                    {/* Tournament Image - Top */}
+                                    <div className="flex justify-center mb-3">
+                                        <div className="relative w-32 h-32 bg-gray-600/60 rounded-xl border border-gray-700/40" />
                                     </div>
-                                    <div className="text-right flex flex-col items-end space-y-1">
-                                        <div className="h-5 w-16 bg-gray-700 rounded font-bold group-hover:text-green-300 transition-colors duration-200" />
-                                        <div className="h-3 w-12 bg-gray-700 rounded text-xs group-hover:text-gray-300 transition-colors duration-200" />
-                                        <div className="h-6 w-14 bg-gray-700 rounded-full px-2 py-1 text-xs font-semibold border group-hover:scale-105 transition-transform duration-200" />
-                                    </div>
-                                </div>
+                                    
+                                    {/* Content - Bottom */}
+                                    <div className="text-center">
+                                        <div className="mb-3">
+                                            <div className="h-5 w-48 bg-gray-700 rounded mb-1 mx-auto" />
+                                            <div className="h-4 w-32 bg-gray-700 rounded mx-auto" />
+                                        </div>
 
-                                <div className="space-y-3">
-                                    {/* Date */}
-                                    <div className="flex items-center text-sm">
-                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                        <div className="h-4 w-40 bg-gray-700 rounded" />
-                                    </div>
-
-                                    {/* Tournament Type/Stage Information */}
-                                    <div className="flex items-start text-sm">
-                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0 mt-0.5" />
-                                        <div className="h-4 w-24 bg-gray-700 rounded leading-tight" />
-                                    </div>
-
-                                    {/* Location Information (Country and Region) */}
-                                    <div className="space-y-1">
-                                        <div className="flex items-center text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                            <div className="h-4 w-24 bg-gray-700 rounded" />
-                                        </div>
-                                        <div className="flex items-center text-sm">
-                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                            <div className="h-4 w-28 bg-gray-700 rounded" />
-                                        </div>
-                                    </div>
-
-                                    {/* Participating Teams */}
-                                    <div className="mt-4 pt-3 border-t border-gray-700">
-                                        <div className="flex items-center justify-between text-sm mb-2">
-                                            <div className="flex items-center">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                <div className="h-4 w-20 bg-gray-700 rounded font-medium" />
-                                            </div>
-                                            <div className="h-3 w-16 bg-gray-700 rounded" />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto transition-all duration-300">
-                                            {[...Array(6)].map((_, j) => (
-                                                <div key={j} className="flex items-center space-x-2 text-xs">
-                                                    <div className="w-4 h-4 bg-gray-600 rounded-sm flex-shrink-0" />
-                                                    <div className="h-3 w-16 bg-gray-700 rounded truncate" />
+                                        {/* Date & Time - Clean Display */}
+                                        <div className="mb-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="w-4 h-4 bg-purple-400/50 rounded" />
+                                                <div className="text-center">
+                                                    <div className="h-4 w-32 bg-gray-700 rounded mb-1" />
+                                                    <div className="h-3 w-24 bg-gray-700 rounded mx-auto" />
                                                 </div>
-                                            ))}
+                                            </div>
+                                            <div className="flex items-center justify-center gap-2 mt-1">
+                                                <div className="w-3 h-3 bg-gray-400/50 rounded" />
+                                                <div className="h-3 w-16 bg-gray-700 rounded" />
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Tournament Info Badges */}
+                                        <div className="flex flex-wrap justify-center gap-2 mb-3">
+                                            {/* Status Badge */}
+                                            <div className={`h-6 px-3 rounded-lg border ${
+                                                i % 3 === 0 ? 'bg-blue-500/20 border-blue-500/30' : 
+                                                i % 3 === 1 ? 'bg-green-500/20 border-green-500/30' : 'bg-gray-500/20 border-gray-500/30'
+                                            }`}>
+                                                <div className={`h-3 w-12 rounded mt-1.5 ${
+                                                    i % 3 === 0 ? 'bg-blue-400/50' : 
+                                                    i % 3 === 1 ? 'bg-green-400/50' : 'bg-gray-400/50'
+                                                }`} />
+                                            </div>
+                                            
+                                            {/* Tier Badge */}
+                                            <div className={`h-6 px-3 rounded-lg border ${
+                                                i % 5 === 0 ? 'bg-yellow-500/20 border-yellow-500/30' :
+                                                i % 5 === 1 ? 'bg-blue-500/20 border-blue-500/30' :
+                                                i % 5 === 2 ? 'bg-green-500/20 border-green-500/30' :
+                                                i % 5 === 3 ? 'bg-orange-500/20 border-orange-500/30' : 'bg-red-500/20 border-red-500/30'
+                                            }`}>
+                                                <div className={`h-3 w-8 rounded mt-1.5 ${
+                                                    i % 5 === 0 ? 'bg-yellow-400/50' :
+                                                    i % 5 === 1 ? 'bg-blue-400/50' :
+                                                    i % 5 === 2 ? 'bg-green-400/50' :
+                                                    i % 5 === 3 ? 'bg-orange-400/50' : 'bg-red-400/50'
+                                                }`} />
+                                            </div>
+                                        </div>
+
+                                        {/* Prize Pool */}
+                                        <div className="mb-3 px-3 py-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="w-4 h-4 bg-green-400/50 rounded" />
+                                                <div className="h-4 w-16 bg-gray-700 rounded" />
+                                            </div>
+                                        </div>
+
+                                        {/* Teams Section */}
+                                        <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                            <div className="flex items-center justify-center gap-2 mb-2">
+                                                <div className="w-4 h-4 bg-gray-400/50 rounded" />
+                                                <div className="h-4 w-16 bg-gray-700 rounded" />
+                                                <div className="h-4 w-8 bg-gray-700 rounded" />
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {[...Array(6)].map((_, j) => (
+                                                    <div key={j} className="flex items-center space-x-1">
+                                                        <div className="w-6 h-6 bg-gray-600/60 rounded-xl" />
+                                                        <div className="h-3 w-8 bg-gray-700 rounded" />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

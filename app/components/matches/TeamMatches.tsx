@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { TeamMatch, Match } from '@/types/esports';
-import { formatMatchDateRange, parseLeagueInfo, cleanMatchName } from '@/lib/textUtils';
+import { formatMatchDateRange, parseLeagueInfo, cleanMatchName, capitalizeWords } from '@/lib/textUtils';
 
 interface TeamMatchesProps {
     teamId: number;
@@ -115,7 +115,7 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
         }
         
         if (match.serie.full_name && match.serie.full_name !== match.league.name) {
-            parts.push(match.serie.full_name);
+            parts.push(capitalizeWords(match.serie.full_name));
         }
         
         if (match.tournament.name && match.tournament.name !== match.serie.name) {

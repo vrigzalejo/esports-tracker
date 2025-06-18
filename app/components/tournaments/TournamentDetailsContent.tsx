@@ -179,7 +179,7 @@ function StreamsDropdownComponent({ streams, enabled, disabledReason }: StreamsD
                 }}
                 onMouseLeave={() => setShowTooltip(false)}
                 disabled={!enabled}
-                className={`flex items-center space-x-2 px-3 py-1.5 text-xs rounded-full font-medium transition-all duration-200 whitespace-nowrap min-h-[44px] sm:min-h-auto ${
+                className={`flex items-center space-x-2 px-3 py-1.5 text-xs rounded-lg font-medium transition-all duration-200 whitespace-nowrap min-h-[44px] sm:min-h-auto ${
                     enabled
                         ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/20 hover:border-purple-500/30 cursor-pointer group/stream'
                         : 'bg-gray-600/20 text-gray-500 border border-gray-600/20 cursor-not-allowed opacity-60'
@@ -219,7 +219,7 @@ function StreamsDropdownComponent({ streams, enabled, disabledReason }: StreamsD
                             </button>
                         </div>
                     </div>
-                    <div className="max-h-[200px] overflow-y-auto">
+                                                        <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                         {streams.map((stream, index) => (
                             <button
                                 key={index}
@@ -740,7 +740,15 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                             <div className="w-28 h-28 bg-gray-700 rounded-2xl" />
                             <div className="flex-1">
                                 <div className="h-10 w-64 bg-gray-700 rounded mb-3" />
-                                <div className="h-8 w-32 bg-gray-700 rounded" />
+                                <div className="flex items-center space-x-3 mb-3">
+                                    <div className="h-6 w-24 bg-blue-500/20 rounded-lg border border-blue-500/20" />
+                                    <div className="h-6 w-32 bg-purple-500/20 rounded-lg border border-purple-500/20" />
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <div className="h-6 w-20 bg-green-500/20 rounded-lg border border-green-500/20" />
+                                    <div className="h-6 w-16 bg-yellow-500/20 rounded-lg border border-yellow-500/20" />
+                                    <div className="h-6 w-18 bg-green-500/20 rounded-lg border border-green-500/20" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -755,10 +763,10 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                         <div key={i} className="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30 animate-pulse">
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center space-x-4">
-                                                    <div className="w-8 h-8 bg-gray-700 rounded" />
-                                                    <div className="w-8 h-8 bg-gray-700 rounded" />
+                                                    <div className="h-6 w-16 bg-red-500/20 rounded-lg border border-red-500/20" />
+                                                    <div className="h-6 w-20 bg-purple-500/20 rounded-lg border border-purple-500/20" />
                                                 </div>
-                                                <div className="h-6 w-16 bg-gray-700 rounded" />
+                                                <div className="h-6 w-16 bg-blue-500/20 rounded-lg border border-blue-500/20" />
                                             </div>
                                             <div className="h-4 w-48 bg-gray-700 rounded" />
                                         </div>
@@ -833,7 +841,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                             <div className="flex items-center space-x-4">
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-300" />
-                                    <div className="relative w-16 h-16 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
+                                    <div className="relative w-16 h-16 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm">
                                         <Image
                                             src={getLeagueImage(tournament.league.image_url)}
                                             alt={tournament.league.name}
@@ -860,25 +868,31 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                             {/* Mobile badges */}
                             <div className="flex flex-wrap gap-2">
                                 {tournament.serie && (
-                                    <div className="inline-flex items-center px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                                    <div className="inline-flex items-center px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
                                         <span className="text-sm font-medium text-purple-300">{parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}</span>
                                     </div>
                                 )}
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-bold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1`}>
-                                    <Clock className="w-3 h-3" />
-                                    {statusInfo.status.toUpperCase()}
-                                </span>
+                                <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
+                                    {statusInfo.status === 'ongoing' ? (
+                                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                                    ) : statusInfo.status === 'upcoming' ? (
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                    ) : (
+                                        <div className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
+                                    )}
+                                    <span className="text-xs font-medium text-gray-200">{statusInfo.status.toUpperCase()}</span>
+                                </div>
                                 {tournament.tier && (() => {
                                     const tierInfo = getTierDisplay(tournament.tier)
                                     return (
-                                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold border ${tierInfo.bgColor} ${tierInfo.color} ${tierInfo.borderColor} flex items-center gap-1`}>
+                                        <span className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${tierInfo.bgColor} ${tierInfo.color} ${tierInfo.borderColor} flex items-center gap-1`}>
                                             <Star className="w-3 h-3" />
                                             {tierInfo.label}
                                         </span>
                                     )
                                 })()}
                                 {tournament.prizepool && (
-                                    <span className="px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-xs font-bold">
+                                    <span className="px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg text-xs font-bold">
                                         {formatPrizePool(tournament.prizepool)}
                                     </span>
                                 )}
@@ -889,7 +903,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                         <div className="hidden sm:flex items-center space-x-6 lg:space-x-8">
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300" />
-                                <div className="relative w-20 h-20 lg:w-28 lg:h-28 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-600/40 shadow-2xl overflow-hidden backdrop-blur-sm">
+                                <div className="relative w-20 h-20 lg:w-28 lg:h-28 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-2xl border border-gray-600/40 shadow-2xl overflow-hidden backdrop-blur-sm">
                                     <Image
                                         src={getLeagueImage(tournament.league.image_url)}
                                         alt={tournament.league.name}
@@ -908,20 +922,26 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                     {tournament.name}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-3 mb-3">
-                                    <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full">
+                                                                            <div className="inline-flex items-center px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                                         <span className="text-base lg:text-lg font-semibold text-blue-300">{tournament.league.name}</span>
                                     </div>
                                     {tournament.serie && (
-                                        <div className="inline-flex items-center px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                                                                                    <div className="inline-flex items-center px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
                                             <span className="text-base lg:text-lg font-semibold text-purple-300">{parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}</span>
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <span className={`px-3 py-1 rounded-lg text-sm font-bold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1`}>
-                                        <Clock className="w-4 h-4" />
-                                        {statusInfo.status.toUpperCase()}
-                                    </span>
+                                    <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
+                                        {statusInfo.status === 'ongoing' ? (
+                                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                                        ) : statusInfo.status === 'upcoming' ? (
+                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                        ) : (
+                                            <div className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
+                                        )}
+                                        <span className="text-xs font-medium text-gray-200">{statusInfo.status.toUpperCase()}</span>
+                                    </div>
                                     {tournament.tier && (() => {
                                         const tierInfo = getTierDisplay(tournament.tier)
                                         return (
@@ -965,7 +985,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                 </div>
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <div className="space-y-4 overflow-y-auto pr-2 pb-4 matches-scroll-content">
+                                <div className="space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2 pb-4 matches-scroll-content">
                                     {matches && matches.length > 0 ? matches
                                         .sort((a, b) => {
                                             // Priority order: 1. LIVE, 2. UPCOMING, 3. FINISHED
@@ -1003,16 +1023,16 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                     {/* Header with Status and Info */}
                                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
                                                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                                            <div className="flex items-center space-x-2 bg-gray-900/50 backdrop-blur-sm rounded-full pl-1 pr-3 py-1 border border-gray-700/50">
+                                                            <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
                                                                 {match.status === 'running' ? (
-                                                                    <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse ml-2" />
+                                                                    <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
                                                                 ) : (
-                                                                    <div className={`w-2 h-2 rounded-full ml-2 ${getStatusColor(match.status)}`} />
+                                                                    <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor(match.status)}`} />
                                                                 )}
-                                                                <span className="text-xs font-medium text-white">{getStatusText(match.status)}</span>
+                                                                <span className="text-xs font-medium text-gray-200">{getStatusText(match.status)}</span>
                                                             </div>
                                                             {match.number_of_games && (
-                                                                <span className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-xl text-xs font-bold border border-purple-500/30 backdrop-blur-sm group-hover:bg-purple-400/30 transition-all duration-300">
+                                                                <span className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-lg text-xs font-bold border border-purple-500/30 backdrop-blur-sm group-hover:bg-purple-400/30 transition-all duration-300">
                                                                     BO{match.number_of_games}
                                                                 </span>
                                                             )}
@@ -1040,7 +1060,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                             {/* Countdown for upcoming matches */}
                                                             {match.status === 'not_started' && countdown && (
                                                                 <div className="mt-2 text-center">
-                                                                    <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/20 text-xs font-medium">
+                                                                    <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/20 text-xs font-medium">
                                                                         <Clock className="w-3 h-3 mr-1.5 text-green-400" size={12} />
                                                                         <span>{countdown}</span>
                                                                     </div>
@@ -1055,15 +1075,15 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                             {/* Team 1 */}
                                                             <div className="flex flex-col items-center space-y-2 sm:space-y-3">
                                                                 <div 
-                                                                    className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl sm:rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
+                                                                    className={`relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 ${match.opponents[0]?.type === 'Player' ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' : 'bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl sm:rounded-2xl'} border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50`}
                                                                     onClick={() => team1?.id && router.push(match.opponents[0]?.type === 'Player' ? `/players/${team1.id}` : `/teams/${team1.id}`)}
                                                                 >
-                                                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl sm:rounded-2xl" />
+                                                                    <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent ${match.opponents[0]?.type === 'Player' ? 'rounded-lg' : 'rounded-xl sm:rounded-2xl'}`} />
                                                                     <Image
                                                                         src={match.opponents[0]?.type === 'Player' ? getPlayerImage(team1?.image_url || '') : getTeamImage(team1?.image_url || '')}
                                                                         alt={team1?.name || 'TBD'}
                                                                         fill
-                                                                        className="object-contain p-1.5 sm:p-2"
+                                                                        className={match.opponents[0]?.type === 'Player' ? 'object-cover' : 'object-contain p-1.5 sm:p-2'}
                                                                     />
                                                                 </div>
                                                                 <div className="text-center">
@@ -1120,15 +1140,15 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                             {/* Team 2 */}
                                                             <div className="flex flex-col items-center space-y-2 sm:space-y-3">
                                                                 <div 
-                                                                    className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl sm:rounded-2xl border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50"
+                                                                    className={`relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 ${match.opponents[1]?.type === 'Player' ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' : 'bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl sm:rounded-2xl'} border border-slate-600/30 shadow-xl overflow-hidden backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-blue-400/50`}
                                                                     onClick={() => team2?.id && router.push(match.opponents[1]?.type === 'Player' ? `/players/${team2.id}` : `/teams/${team2.id}`)}
                                                                 >
-                                                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl sm:rounded-2xl" />
+                                                                    <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent ${match.opponents[1]?.type === 'Player' ? 'rounded-lg' : 'rounded-xl sm:rounded-2xl'}`} />
                                                                     <Image
                                                                         src={match.opponents[1]?.type === 'Player' ? getPlayerImage(team2?.image_url || '') : getTeamImage(team2?.image_url || '')}
                                                                         alt={team2?.name || 'TBD'}
                                                                         fill
-                                                                        className="object-contain p-1.5 sm:p-2"
+                                                                        className={match.opponents[1]?.type === 'Player' ? 'object-cover' : 'object-contain p-1.5 sm:p-2'}
                                                                     />
                                                                 </div>
                                                                 <div className="text-center">
@@ -1354,7 +1374,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                         {winnerRoster.players.map((player) => (
                                                             <div key={player.id} className="flex items-center space-x-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20 cursor-pointer hover:bg-yellow-500/20 transition-colors" onClick={() => router.push(`/players/${player.id}`)}>
-                                                                <div className="relative w-6 h-6 bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-full border border-yellow-500/30 overflow-hidden">
+                                                                <div className="relative w-10 h-10 bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-lg border border-yellow-500/30 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                     {player.image_url ? (
                                                                         <Image
                                                                             src={player.image_url}
@@ -1433,7 +1453,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                     </h2>
                                 </div>
                                 
-                                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                                                                    <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
                                     {calculatedStandings.slice(0, 8).map((standing) => (
                                         <div key={standing.team.id} className="flex items-center space-x-3 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer" onClick={() => router.push(`/teams/${standing.team.id}`)}>
                                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -1444,7 +1464,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                             }`}>
                                                 {standing.rank}
                                             </div>
-                                            <div className="relative w-8 h-8 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                            <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                 <Image
                                                     src={getTeamImage(standing.team.image_url || '')}
                                                     alt={standing.team.name}
@@ -1480,12 +1500,12 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                             </div>
                             
                             {tournament.expected_roster && tournament.expected_roster.length > 0 ? (
-                                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                                                                    <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
                                     {tournament.expected_roster.map((roster) => (
                                         <div key={roster.team.id} className="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30">
                                             {/* Team Header */}
                                             <div className="flex items-center space-x-3 mb-3 cursor-pointer hover:bg-gray-600/20 rounded-lg p-2 -m-2 transition-colors" onClick={() => router.push(`/teams/${roster.team.id}`)}>
-                                                <div className="relative w-10 h-10 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                                <div className="relative w-10 h-10 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                     <Image
                                                         src={getTeamImage(roster.team.image_url || '')}
                                                         alt={roster.team.name}
@@ -1499,7 +1519,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                         <div className="text-sm text-gray-400">{roster.team.acronym}</div>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-purple-400 bg-purple-500/20 px-2 py-1 rounded-full border border-purple-500/30">
+                                                <div className="text-xs text-purple-400 bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/30">
                                                     {roster.players.length} players
                                                 </div>
                                             </div>
@@ -1509,7 +1529,7 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                                 <div className="space-y-2">
                                                     {roster.players.map((player) => (
                                                         <div key={player.id} className="flex items-center space-x-3 p-2 bg-gray-600/20 rounded-lg hover:bg-gray-600/30 transition-colors cursor-pointer" onClick={() => router.push(`/players/${player.id}`)}>
-                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full border border-gray-600/40 overflow-hidden">
+                                                            <div className="relative w-10 h-10 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                 {player.image_url ? (
                                                                     <Image
                                                                         src={player.image_url}
@@ -1573,10 +1593,10 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                     ))}
                                 </div>
                             ) : tournament.teams && tournament.teams.length > 0 ? (
-                                <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                                                                                <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
                                     {tournament.teams.map((team) => (
                                         <div key={team.id} className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg hover:bg-gray-700/60 transition-colors cursor-pointer" onClick={() => router.push(`/teams/${team.id}`)}>
-                                            <div className="relative w-8 h-8 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                            <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                 <Image
                                                     src={getTeamImage(team.image_url || '')}
                                                     alt={team.name}

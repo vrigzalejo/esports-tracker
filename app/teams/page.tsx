@@ -53,56 +53,65 @@ function TeamsLoading() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer animate-slide-up hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 animate-pulse">
+                        <div key={i} className="group relative bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50 animate-pulse">
                             {/* Subtle background glow effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             
                             <div className="relative z-10">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg ring-2 ring-gray-600/30 group-hover:ring-purple-500/30 transition-all duration-300">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-lg" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="h-5 w-32 bg-gray-700 rounded leading-tight group-hover:text-purple-100 transition-colors duration-200" />
-                                            <div className="h-4 w-20 bg-gray-700 rounded text-sm group-hover:text-gray-300 transition-colors duration-200" />
-                                        </div>
-                                    </div>
-                                    <div className="text-right flex flex-col items-end space-y-1">
-                                        <div className="h-5 w-16 bg-gray-700 rounded font-bold group-hover:text-green-300 transition-colors duration-200" />
-                                        <div className="h-3 w-12 bg-gray-700 rounded text-xs group-hover:text-gray-300 transition-colors duration-200" />
+                                {/* Team Header */}
+                                <div className="flex items-center space-x-3 mb-4">
+                                    <div className="relative w-12 h-12 bg-gray-700 rounded-lg" />
+                                    <div className="flex-1">
+                                        <div className="h-5 w-32 bg-gray-700 rounded mb-1" />
+                                        <div className="h-4 w-20 bg-gray-700 rounded" />
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    {/* Location */}
-                                    <div className="flex items-center text-sm">
-                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                        <div className="h-4 w-40 bg-gray-700 rounded" />
-                                    </div>
-
-                                    {/* Stats */}
-                                    <div className="flex items-start text-sm">
-                                        <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0 mt-0.5" />
-                                        <div className="h-4 w-24 bg-gray-700 rounded leading-tight" />
-                                    </div>
-
-                                    {/* Tournaments */}
-                                    <div className="mt-4 pt-3 border-t border-gray-700">
-                                        <div className="flex items-center justify-between text-sm mb-2">
-                                            <div className="flex items-center">
-                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2 flex-shrink-0" />
-                                                <div className="h-4 w-20 bg-gray-700 rounded font-medium" />
-                                            </div>
-                                            <div className="h-3 w-16 bg-gray-700 rounded" />
+                                <div className="space-y-4">
+                                    {/* Current Videogame */}
+                                    <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                                        <div className="flex items-center justify-center">
+                                            <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                            <div className="h-4 w-24 bg-gray-700 rounded" />
                                         </div>
-                                        <div className="grid grid-cols-1 gap-2 max-h-24 overflow-y-auto transition-all duration-300">
-                                            {[...Array(3)].map((_, j) => (
-                                                <div key={j} className="flex items-center space-x-2 text-xs">
-                                                    <div className="w-4 h-4 bg-gray-600 rounded-sm flex-shrink-0" />
-                                                    <div className="h-3 w-24 bg-gray-700 rounded truncate" />
+                                    </div>
+
+                                    {/* Players Section */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                <div className="h-4 w-16 bg-gray-700 rounded" />
+                                            </div>
+                                            <div className="h-4 w-8 bg-gray-700 rounded" />
+                                        </div>
+                                        
+                                        {/* Player List */}
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[...Array(4)].map((_, j) => (
+                                                <div key={j} className="flex items-center space-x-2 p-2 bg-gray-700/30 rounded-lg">
+                                                    <div className="relative w-10 h-10 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="h-3 w-16 bg-gray-700 rounded mb-1" />
+                                                        <div className="h-3 w-12 bg-gray-700 rounded" />
+                                                    </div>
                                                 </div>
                                             ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Tournament Info */}
+                                    <div className="bg-gray-700/20 rounded-lg p-3 border border-gray-600/30">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center">
+                                                <div className="w-4 h-4 bg-gray-700 rounded mr-2" />
+                                                <div className="h-4 w-20 bg-gray-700 rounded" />
+                                            </div>
+                                            <div className="h-5 w-12 bg-blue-500/20 rounded-lg px-2 py-1" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <div className="h-4 w-32 bg-gray-700 rounded" />
+                                            <div className="h-3 w-24 bg-gray-700 rounded" />
                                         </div>
                                     </div>
                                 </div>

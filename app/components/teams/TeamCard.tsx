@@ -283,7 +283,7 @@ export default function TeamCard({ team }: TeamCardProps) {
                                     {players.length} player{players.length !== 1 ? 's' : ''}
                                 </span>
                             </div>
-                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                            <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                                 {players.map((player, index) => (
                                     <div 
                                         key={player.id || index} 
@@ -291,7 +291,7 @@ export default function TeamCard({ team }: TeamCardProps) {
                                         className="flex items-start space-x-3 p-2 rounded-lg bg-gray-800/50 group-hover:bg-gray-700/50 hover:bg-gray-700/70 transition-colors duration-200 cursor-pointer"
                                     >
                                         {/* Player Image */}
-                                        <div className="relative w-8 h-8 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
+                                        <div className="relative w-10 h-10 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm flex-shrink-0">
                                             <Image
                                                 src={getPlayerImage(player)}
                                                 alt={player.name}
