@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import type { TeamMatch, Match } from '@/types/esports';
 import { formatMatchDateRange, parseLeagueInfo, cleanMatchName } from '@/lib/textUtils';
 
@@ -173,8 +174,27 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                         </div>
                                     )}
                                     <div className="flex-1">
-                                        <div className="text-white font-medium text-sm">
-                                            vs {opponent?.acronym || opponent?.name || 'TBD'}
+                                        <div className="flex items-center space-x-2 text-white font-medium text-sm">
+                                            <span>vs</span>
+                                            {opponent?.image_url && (
+                                                <div className={`relative w-8 h-8 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${
+                                                    // Check if this is a player by looking at opponent type
+                                                    match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded-lg'
+                                                } border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm`}>
+                                                    <Image 
+                                                        src={opponent.image_url} 
+                                                        alt={opponent.name || 'Team/Player'}
+                                                        fill
+                                                        className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement
+                                                            const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
+                                                            target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                            <span>{opponent?.acronym || opponent?.name || 'TBD'}</span>
                                         </div>
                                         {match.name && (
                                             <div className="text-purple-300 text-xs mb-1 font-medium">

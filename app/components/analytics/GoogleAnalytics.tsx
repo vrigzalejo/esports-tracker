@@ -2,8 +2,9 @@
 
 import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, Suspense } from 'react'
+import { useEffect, Suspense, useState } from 'react'
 import { logger } from '@/lib/logger'
+import { isAnalyticsAllowed, hasConsentDecision } from '@/lib/cookieConsent'
 
 declare global {
   interface Window {
@@ -59,18 +60,44 @@ function GoogleAnalyticsWithSearchParams({ measurementId }: GoogleAnalyticsProps
 }
 
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
+  const [consentGiven, setConsentGiven] = useState(false)
+
+  useEffect(() => {
+    // Check consent status on mount and when localStorage changes
+    const checkConsent = () => {
+      setConsentGiven(isAnalyticsAllowed())
+    }
+    
+    checkConsent()
+    
+    // Listen for storage changes (in case consent is given in another tab)
+    window.addEventListener('storage', checkConsent)
+    
+    return () => {
+      window.removeEventListener('storage', checkConsent)
+    }
+  }, [])
+
   if (!measurementId) {
     return null
   }
 
-  // In development, don't load Google Analytics scripts
+  // In development, don't load Google Analytics scripts but still track consent
   if (isDevelopment) {
-    logger.log('📊 [Analytics] Development mode - Google Analytics scripts disabled')
+    logger.log('📊 [Analytics] Development mode - Google Analytics scripts disabled', {
+      consentGiven,
+      hasDecision: hasConsentDecision()
+    })
     return (
       <Suspense fallback={null}>
         <GoogleAnalyticsWithSearchParams measurementId={measurementId} />
       </Suspense>
     )
+  }
+
+  // Only load analytics if consent is given
+  if (!consentGiven) {
+    return null
   }
 
   return (
@@ -118,6 +145,11 @@ export const trackEvent = (
     return
   }
 
+  // Check consent before tracking
+  if (!isAnalyticsAllowed()) {
+    return
+  }
+
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', action, {
       event_category: category,
@@ -134,6 +166,11 @@ export const trackPageView = (url: string, title?: string) => {
       title,
       timestamp: new Date().toISOString()
     })
+    return
+  }
+
+  // Check consent before tracking
+  if (!isAnalyticsAllowed()) {
     return
   }
 
