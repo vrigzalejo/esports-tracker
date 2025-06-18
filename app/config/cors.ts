@@ -16,9 +16,8 @@ export const CORS_CONFIG = {
 
   // Production domains - REPLACE THESE WITH YOUR ACTUAL DOMAINS
   PRODUCTION_DOMAINS: [
-    'https://your-domain.com',
-    'https://www.your-domain.com',
-    // Add your actual production domains here
+    'https://www.esports-tracker.com',
+    'https://esports-tracker.com',
     'https://esports-tracker-three.vercel.app',
     // 'https://esports-tracker-production.vercel.app',
   ],
