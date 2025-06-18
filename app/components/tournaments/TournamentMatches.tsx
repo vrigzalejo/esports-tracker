@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import type { TournamentMatch } from '@/types/esports';
 import { formatMatchDateRange } from '@/lib/textUtils';
 
@@ -16,6 +17,7 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
     const [matches, setMatches] = useState<TournamentMatch[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     // Memoize arrays to prevent unnecessary re-renders
     const teamIdsString = JSON.stringify(teamIds);
@@ -95,15 +97,29 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
         
         if (!teamResult || !opponentResult) return null;
         
-        if (teamResult.score > opponentResult.score) return 'W';
-        if (teamResult.score < opponentResult.score) return 'L';
-        return 'D';
+        const isWinner = teamResult.score > opponentResult.score;
+        const isDraw = teamResult.score === opponentResult.score;
+        
+        return {
+            result: isDraw ? 'D' : (isWinner ? 'W' : 'L'),
+            teamScore: teamResult.score,
+            opponentScore: opponentResult.score,
+            isWinner,
+            isDraw
+        };
     };
 
     const getTeamMatches = (teamId: number) => {
         return matches.filter(match => 
             match.opponents.some(opponent => opponent.opponent.id === teamId)
         ).slice(0, 5); // Limit to 5 matches per team
+    };
+
+    const handleOpponentClick = (opponentId: number, opponentType?: 'Player' | 'Team') => {
+        if (opponentId) {
+            const basePath = opponentType === 'Player' ? '/players' : '/teams';
+            router.push(`${basePath}/${opponentId}`);
+        }
     };
 
     // Don't show anything if no team IDs provided
@@ -175,11 +191,35 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
                                                 {result && (
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                                        result === 'W' ? 'bg-green-500 text-white' : 
-                                                        result === 'L' ? 'bg-red-500 text-white' : 'bg-gray-500 text-white'
-                                                    }`}>
-                                                        {result}
+                                                    <div className="flex items-center space-x-2">
+                                                        {/* Modern W/L/D Badge */}
+                                                        <div className={`relative overflow-hidden rounded-full w-8 h-8 min-w-[2rem] min-h-[2rem] flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                                                            result.isDraw
+                                                                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white'
+                                                                : result.isWinner 
+                                                                ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
+                                                                : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'
+                                                        }`} style={{ aspectRatio: '1 / 1' }}>
+                                                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-full" />
+                                                            <span className="relative z-10 font-extrabold">{result.result}</span>
+                                                        </div>
+                                                        
+                                                        {/* Cool Score Display */}
+                                                        <div className="flex items-center space-x-1 bg-gradient-to-r from-gray-800/80 to-gray-700/80 rounded-lg px-2 py-1 border border-gray-600/30 shadow-lg backdrop-blur-sm">
+                                                            <span className={`text-sm font-bold ${
+                                                                result.isDraw ? 'text-amber-400' : 
+                                                                result.isWinner ? 'text-emerald-400' : 'text-red-400'
+                                                            }`}>
+                                                                {result.teamScore}
+                                                            </span>
+                                                            <span className="text-gray-400 text-xs">-</span>
+                                                            <span className={`text-sm font-bold ${
+                                                                result.isDraw ? 'text-amber-400' : 
+                                                                !result.isWinner ? 'text-emerald-400' : 'text-red-400'
+                                                            }`}>
+                                                                {result.opponentScore}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 )}
                                                 <div className="flex items-center space-x-2">
@@ -187,10 +227,16 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                         vs
                                                     </span>
                                                     {opponent?.image_url && (
-                                                        <div className={`relative w-8 h-8 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${
-                                                            // Check if this is a player by looking at opponent type
-                                                            match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded-lg'
-                                                        } border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm`}>
+                                                        <div 
+                                                            className={`relative w-8 h-8 bg-gradient-to-br from-gray-300 to-gray-400 ${
+                                                                // Check if this is a player by looking at opponent type
+                                                                match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded-lg'
+                                                            } border border-gray-500/50 shadow-lg overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
+                                                            onClick={() => {
+                                                                const opponentType = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type as 'Player' | 'Team' | undefined;
+                                                                handleOpponentClick(opponent.id, opponentType);
+                                                            }}
+                                                        >
                                                             <Image 
                                                                 src={opponent.image_url} 
                                                                 alt={opponent.name || 'Team/Player'}
@@ -204,7 +250,13 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                                             />
                                                         </div>
                                                     )}
-                                                    <span className="text-white text-sm font-medium">
+                                                    <span 
+                                                        className="text-white text-sm font-medium cursor-pointer hover:text-cyan-300 transition-colors duration-200"
+                                                        onClick={() => {
+                                                            const opponentType = match.opponents.find(opp => opp.opponent.id === opponent?.id)?.type as 'Player' | 'Team' | undefined;
+                                                            handleOpponentClick(opponent?.id || 0, opponentType);
+                                                        }}
+                                                    >
                                                         {opponent?.acronym || opponent?.name || 'TBD'}
                                                     </span>
                                                 </div>
@@ -220,23 +272,7 @@ export default function TournamentMatches({ tournamentId, tournamentName, teamId
                                             </div>
                                         </div>
                                         
-                                        {match.status === 'finished' && match.results.length > 0 && (
-                                            <div className="mt-2 pt-2 border-t border-gray-500">
-                                                <div className="flex justify-center space-x-4 text-sm">
-                                                    {match.results.map((result, resultIndex) => {
-                                                        const team = match.opponents.find(opp => opp.opponent.id === result.team_id);
-                                                        const isCurrentTeam = result.team_id === teamId;
-                                                        return (
-                                                            <span key={resultIndex} className={`${
-                                                                isCurrentTeam ? 'text-blue-300 font-medium' : 'text-gray-300'
-                                                            }`}>
-                                                                {team?.opponent.acronym || 'Team'}: {result.score}
-                                                            </span>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
+
                                     </div>
                                 );
                             })}
