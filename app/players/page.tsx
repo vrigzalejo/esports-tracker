@@ -1,5 +1,17 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import PlayersContent from '@/components/players/PlayersContent'
+
+export const metadata: Metadata = {
+  title: 'Professional Esports Players & Profiles - EsportsTracker',
+  description: 'Discover professional esports players, view detailed profiles, track statistics, and follow your favorite gaming athletes across all competitions.',
+  keywords: ['esports players', 'professional gamers', 'player profiles', 'gaming athletes', 'player statistics', 'esports pros'],
+  openGraph: {
+    title: 'Professional Esports Players & Profiles - EsportsTracker',
+    description: 'Discover professional esports players, view detailed profiles, track statistics, and follow your favorite gaming athletes across all competitions.',
+    type: 'website',
+  }
+}
 
 // Loading component for the suspense boundary
 function PlayersLoading() {

@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo, cleanMatchName } from '@/lib/textUtils'
 import { getStatusColor, getStatusText } from '@/lib/utils'
+import { trackPageView, trackTournamentView } from '@/lib/analytics'
 
 interface Match {
     id: number
@@ -325,6 +326,14 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const matchesRef = useRef<HTMLDivElement>(null)
+
+    // Track page view and tournament view on component mount
+    useEffect(() => {
+        trackPageView(`/tournaments/${tournamentId}`, `Tournament Details - ${tournament?.name || 'Loading...'}`)
+        if (tournament) {
+            trackTournamentView(tournamentId, tournament.name)
+        }
+    }, [tournamentId, tournament])
 
     // Memoize the fetch function to prevent unnecessary re-renders
     const fetchTournamentData = useCallback(async () => {

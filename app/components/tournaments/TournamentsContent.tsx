@@ -10,6 +10,7 @@ import TournamentCard from '@/components/tournaments/TournamentCard'
 import { useUpcomingTournaments, useRunningTournaments, usePastTournaments } from '@/hooks/useEsportsData'
 import type { Tournament } from '@/types/esports'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
+import { trackPageView, trackFilter } from '@/lib/analytics'
 
 type TournamentStatus = 'upcoming' | 'running' | 'past'
 
@@ -29,6 +30,11 @@ export default function TournamentsContent() {
         start: searchParams.get('date_start') || '',
         end: searchParams.get('date_end') || ''
     })
+
+    // Track page view on component mount
+    useEffect(() => {
+        trackPageView('/tournaments', 'Tournaments - Esports Tournaments & Championships')
+    }, [])
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {
@@ -63,11 +69,13 @@ export default function TournamentsContent() {
         updateUrlParams(updates)
     }, [searchTerm, selectedStatus, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
-    // Modified filter handlers with local storage
+    // Modified filter handlers with local storage and analytics tracking
     const handleStatusChange = (status: TournamentStatus) => {
         setSelectedStatus(status)
         setCurrentPage(1)
         saveDropdownValue('tournamentStatus', status)
+        // Track filter usage
+        trackFilter('status', status, filteredTournaments.length)
     }
 
     const handleDateFilterChange = (filter: string) => {
@@ -77,6 +85,8 @@ export default function TournamentsContent() {
         if (filter !== 'custom') {
             setCustomDateRange({ start: '', end: '' })
         }
+        // Track filter usage
+        trackFilter('date', filter, filteredTournaments.length)
     }
 
     const handleItemsPerPageChange = (items: number) => {

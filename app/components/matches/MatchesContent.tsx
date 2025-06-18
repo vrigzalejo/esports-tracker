@@ -11,6 +11,7 @@ import { useMatches } from '@/hooks/useEsportsData'
 import type { Match } from '@/types/esports'
 import { useGamesContext } from '@/contexts/GamesContext'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
+import { trackPageView, trackFilter } from '@/lib/analytics'
 
 interface Game {
     id: string | number
@@ -32,6 +33,11 @@ export default function MatchesContent() {
         start: searchParams.get('date_start') || '',
         end: searchParams.get('date_end') || ''
     })
+
+    // Track page view on component mount
+    useEffect(() => {
+        trackPageView('/matches', 'Matches - Live Matches & Esports Results')
+    }, [])
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {
@@ -67,11 +73,13 @@ export default function MatchesContent() {
         updateUrlParams(updates)
     }, [searchTerm, selectedGame, currentPage, itemsPerPage, dateFilter, customDateRange, searchParams, router])
 
-    // Modified filter handlers with local storage
+    // Modified filter handlers with local storage and analytics tracking
     const handleGameChange = (game: string) => {
         setSelectedGame(game)
         setCurrentPage(1) // Reset to first page
         saveDropdownValue('matchGame', game)
+        // Track filter usage
+        trackFilter('game', game, filteredMatches.length)
     }
 
     const handleDateFilterChange = (filter: string) => {
@@ -81,6 +89,8 @@ export default function MatchesContent() {
         if (filter !== 'custom') {
             setCustomDateRange({ start: '', end: '' })
         }
+        // Track filter usage
+        trackFilter('date', filter, filteredMatches.length)
     }
 
     const handleItemsPerPageChange = (items: number) => {

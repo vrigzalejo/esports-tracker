@@ -159,6 +159,10 @@ export const getTournaments = async (filters?: TournamentFilters) => {
     return request('/tournaments', params);
 }
 
+export const getTournament = async (tournamentId: string | number) => {
+    return request(`/tournaments/${tournamentId}`);
+}
+
 export const getTeams = async (filters?: TeamFilters) => {
     const params: Record<string, string> = {};
 

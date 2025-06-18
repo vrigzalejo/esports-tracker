@@ -1,5 +1,17 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import MatchesContent from '@/components/matches/MatchesContent'
+
+export const metadata: Metadata = {
+  title: 'Live Matches & Esports Results - EsportsTracker',
+  description: 'Watch live esports matches, view results, and track your favorite teams across all major gaming tournaments and competitions.',
+  keywords: ['live matches', 'esports results', 'gaming tournaments', 'esports live', 'match results', 'competitive gaming'],
+  openGraph: {
+    title: 'Live Matches & Esports Results - EsportsTracker',
+    description: 'Watch live esports matches, view results, and track your favorite teams across all major gaming tournaments and competitions.',
+    type: 'website',
+  }
+}
 
 // Loading component for the suspense boundary
 function MatchesLoading() {

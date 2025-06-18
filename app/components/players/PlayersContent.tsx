@@ -8,6 +8,7 @@ import Navigation from '@/components/layout/Navigation'
 import { Users, ChevronLeft, ChevronRight, List } from 'lucide-react'
 import { usePlayers } from '@/hooks/useEsportsData'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
+import { trackPageView } from '@/lib/analytics'
 
 // Component that uses useSearchParams and needs Suspense
 function PlayersContentWithSearchParams() {
@@ -18,6 +19,11 @@ function PlayersContentWithSearchParams() {
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('playerItemsPerPage', 20).toString()))
+
+    // Track page view on component mount
+    useEffect(() => {
+        trackPageView('/players', 'Players - Professional Esports Players & Profiles')
+    }, [])
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {

@@ -3,13 +3,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock } from 'lucide-react'
+import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
 import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
 import { getStatusColor, getStatusText } from '@/lib/utils'
 import type { Match } from '@/types/esports'
+
+// Note: Since this is a client component, metadata is handled in layout.tsx
+// The root layout already has comprehensive metadata for the home page
 
 // StatCard component for displaying statistics
 function StatCard({ icon: Icon, title, value, subtitle, trend }: {
@@ -241,6 +244,9 @@ export default function HomePage() {
       case 'teams':
         router.push('/teams')
         break
+      case 'players':
+        router.push('/players')
+        break
     }
   }
 
@@ -316,64 +322,82 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Quick Actions - Mobile Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        {/* Quick Actions - Mobile Responsive - Made Smaller */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 lg:mb-12">
           <button
             onClick={() => handleQuickAction('matches')}
-            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Play className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-blue-100 transition-colors duration-200">Live Matches</h3>
-            <p className="text-blue-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Watch live matches and get real-time updates</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-blue-100 transition-colors duration-200">Live Matches</h3>
+            <p className="text-blue-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Watch live matches</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('tournaments')}
-            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Trophy className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-purple-100 transition-colors duration-200">Tournaments</h3>
-            <p className="text-purple-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Explore upcoming and ongoing tournaments</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-purple-100 transition-colors duration-200">Tournaments</h3>
+            <p className="text-purple-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Explore tournaments</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('teams')}
-            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] sm:col-span-2 lg:col-span-1 transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Users className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-pink-100 transition-colors duration-200">Teams</h3>
-            <p className="text-pink-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Browse teams and player statistics</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-pink-100 transition-colors duration-200">Teams</h3>
+            <p className="text-pink-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Browse teams</p>
+          </button>
+
+          <button
+            onClick={() => handleQuickAction('players')}
+            className="bg-gradient-to-br from-green-600 to-green-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-green-500 hover:to-green-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            </div>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-green-100 transition-colors duration-200">Players</h3>
+            <p className="text-green-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Discover players</p>
           </button>
         </div>
 
-        {/* Latest Activity - Mobile Responsive */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 border border-gray-700/50">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 sm:mb-5 lg:mb-6 flex items-center">
-            <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400 mr-2 sm:mr-3 flex-shrink-0" />
-            <span className="truncate text-sm sm:text-base lg:text-xl">
-              {searchTerm ? (
-                <>
-                  <span className="hidden sm:inline">Search Results for &ldquo;</span>
-                  <span className="sm:hidden">Results for &ldquo;</span>
-                  {searchTerm}&rdquo;
-                </>
-              ) : (
-                'Latest Matches'
-              )}
-            </span>
-          </h2>
+        {/* Latest Activity - Mobile Responsive - Emphasized */}
+        <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border-2 border-blue-500/30 shadow-2xl shadow-blue-500/10">
+          <div className="flex items-center justify-between mb-6 sm:mb-7 lg:mb-8">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-400 mr-3 flex-shrink-0 animate-pulse" />
+              <span className="truncate">
+                {searchTerm ? (
+                  <>
+                    <span className="hidden sm:inline">Search Results for &ldquo;</span>
+                    <span className="sm:hidden">Results for &ldquo;</span>
+                    {searchTerm}&rdquo;
+                  </>
+                ) : (
+                  'Latest Matches'
+                )}
+              </span>
+            </h2>
+            <div className="hidden sm:flex items-center space-x-2 text-xs text-gray-400 bg-gray-800/50 px-3 py-2 rounded-lg border border-gray-700/50">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Live Updates</span>
+            </div>
+          </div>
           
-          {/* Scrollable Match List - Mobile Optimized */}
-          <div className="max-h-64 sm:max-h-80 lg:max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 rounded-lg">
+          {/* Scrollable Match List - Mobile Optimized - Increased Height */}
+          <div className="max-h-80 sm:max-h-96 lg:max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800 rounded-lg">
             <div className="space-y-2 sm:space-y-3 lg:space-y-4 pr-2">
               {matchesLoading ? (
                 [...Array(8)].map((_, i) => (
