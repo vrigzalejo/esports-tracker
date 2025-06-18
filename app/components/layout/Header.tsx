@@ -23,6 +23,11 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
         setIsSearchOpen(false)
     }
 
+    const handleClear = () => {
+        setInputValue('')
+        onSearch('')
+    }
+
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleSearch()
@@ -53,22 +58,36 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                     </Link>
 
                     {/* Desktop Search */}
-                    <div className="flex-1 max-w-lg mx-4 sm:mx-8 flex">
-                        <div className="relative flex w-full">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="block w-full px-4 py-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                                placeholder="Search matches, tournaments, teams, players..."
-                            />
+                    <div className="flex-1 max-w-lg mx-4 sm:mx-8">
+                        <div className="relative flex group">
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    className="w-full pl-4 pr-10 py-3 bg-gray-800/90 backdrop-blur-sm border border-gray-600/50 rounded-l-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:border-blue-400/60 focus:bg-gray-800 hover:bg-gray-750 transition-all duration-300 ease-out shadow-lg focus:shadow-blue-500/20"
+                                    placeholder="Search matches, tournaments, teams, players..."
+                                />
+                                
+                                {/* Cool Clear Button with animations */}
+                                {inputValue && (
+                                    <button
+                                        onClick={handleClear}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                                        aria-label="Clear search"
+                                    >
+                                        <X className="w-4 h-4 hover:rotate-90 transition-transform duration-200" />
+                                    </button>
+                                )}
+                            </div>
+                            
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-500 min-w-[44px] min-h-[44px] flex items-center justify-center animate-gradient-x bg-300% group cursor-pointer"
+                                className="px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-r-xl border border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-400/60 transition-all duration-300 ease-out cursor-pointer hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 group-hover:shadow-xl"
                                 aria-label="Search"
                             >
-                                <Search className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300" />
+                                <Search className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                             </button>
                         </div>
                     </div>
@@ -88,22 +107,36 @@ export default function Header({ searchTerm, onSearch }: HeaderProps) {
                 {/* Mobile Search Bar - Hidden since desktop search is always visible */}
                 {false && isSearchOpen && (
                     <div className="md:hidden pb-4 animate-slide-down">
-                        <div className="relative flex">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="block w-full px-4 py-3 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
-                                placeholder="Search..."
-                                autoFocus
-                            />
+                        <div className="relative flex group">
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    className="w-full pl-4 pr-14 py-4 bg-gray-800/90 backdrop-blur-sm border border-gray-600/50 rounded-l-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:border-blue-400/60 focus:bg-gray-800 hover:bg-gray-750 transition-all duration-300 ease-out shadow-lg focus:shadow-blue-500/20"
+                                    placeholder="Search..."
+                                    autoFocus
+                                />
+                                
+                                {/* Cool Clear Button for Mobile with animations */}
+                                {inputValue && (
+                                    <button
+                                        onClick={handleClear}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                                        aria-label="Clear search"
+                                    >
+                                        <X className="w-5 h-5 hover:rotate-90 transition-transform duration-200" />
+                                    </button>
+                                )}
+                            </div>
+                            
                             <button
                                 onClick={handleSearch}
-                                className="px-4 py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-500 min-w-[44px] flex items-center justify-center animate-gradient-x bg-300% group"
+                                className="px-5 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-r-xl border border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-400/60 transition-all duration-300 ease-out cursor-pointer hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 group-hover:shadow-xl"
                                 aria-label="Search"
                             >
-                                <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                                <Search className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                             </button>
                         </div>
                     </div>
