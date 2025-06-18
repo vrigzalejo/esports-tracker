@@ -536,8 +536,8 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     <div className="h-5 w-64 bg-gray-700 rounded" />
                                                     <div className="h-8 w-56 bg-gray-700 rounded" />
                                                     <div className="flex space-x-4">
-                                                        <div className="h-4 w-24 bg-gray-700 rounded" />
-                                                        <div className="h-4 w-20 bg-gray-700 rounded" />
+                                                        <div className="h-6 w-24 bg-blue-400/20 rounded-lg border border-blue-500/20" />
+                                                        <div className="h-6 w-20 bg-green-400/20 rounded-lg border border-green-500/20" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -729,7 +729,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             </h1>
                             <div className="flex items-center space-x-3 mb-3">
                                 {team.acronym && (
-                                    <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full">
+                                    <div className="inline-flex items-center px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                                         <span className="text-lg font-semibold text-blue-300">{team.acronym}</span>
                                     </div>
                                 )}
@@ -742,7 +742,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                         : null;
                                     
                                     return mostRecentGame && (
-                                        <div className="inline-flex items-center px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
+                                        <div className="inline-flex items-center px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-lg">
                                             <Gamepad2 className="w-4 h-4 mr-2 text-green-400" />
                                             <span className="text-lg font-semibold text-green-300">{mostRecentGame.name}</span>
                                         </div>
@@ -776,7 +776,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-hidden">
-                                    <div className="space-y-6 overflow-y-auto pr-2 tournament-scroll-content">
+                                    <div className="space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2 tournament-scroll-content">
                                         {tournaments.map((tournament) => {
                                             // Find the expected roster for this team from expected_roster array
                                             const teamRoster = tournament.expected_roster?.find((roster: any) => roster.team.id === parseInt(teamId)) // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -786,7 +786,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 <div key={tournament.id} className={`group relative ${isChampion ? 'bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 border-yellow-500/50' : 'bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 border-gray-600/30'} rounded-xl p-6 hover:from-gray-600/40 hover:via-gray-600/50 hover:to-gray-600/40 transition-all duration-300 hover:border-orange-500/30 shadow-lg hover:shadow-xl border`}>
                                                     {/* Champion Badge */}
                                                     {isChampion && (
-                                                        <div className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1 bg-yellow-500/30 border border-yellow-500/50 rounded-full">
+                                                        <div className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 bg-yellow-500/30 border border-yellow-500/50 rounded-lg">
                                                             <Trophy className="w-4 h-4 text-yellow-300" />
                                                             <span className="text-sm font-bold text-yellow-300">Champion</span>
                                                         </div>
@@ -796,7 +796,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
                                                         <div 
-                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
+                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                         >
                                                             <div className="relative w-full h-full">
@@ -854,7 +854,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     {tournament.tier && (() => {
                                                                         const tierInfo = getTierDisplay(tournament.tier)
                                                                         return (
-                                                                            <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
+                                                                            <div className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
                                                                                 <Star className="w-4 h-4" />
                                                                                 <span>{tierInfo.label}</span>
                                                                             </div>
@@ -872,7 +872,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     </div>
                                                                 )}
                                                                 {tournament.prizepool && (
-                                                                    <span className="text-green-400 text-sm font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                                                                    <span className="text-green-400 text-sm font-bold bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20">
                                                                         {formatPrizePool(tournament.prizepool)}
                                                                     </span>
                                                                 )}
@@ -992,7 +992,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                                         
                                                                                         {player.role && (
                                                                                             <div className="flex justify-center">
-                                                                                                <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-500/30">
+                                                                                                <span className="bg-blue-500/20 text-blue-300 px-3 py-1.5 rounded-lg text-sm border border-blue-500/30">
                                                                                                     {player.role}
                                                                                                 </span>
                                                                                             </div>
@@ -1051,13 +1051,13 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                 </div>
                                 
                                 {/* Championship List */}
-                                <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                                                                    <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
                                     {tournaments
                                         .filter(tournament => tournament.winner_id === parseInt(teamId))
                                         .map((tournament) => (
                                             <div key={tournament.id} className="flex items-start space-x-3 p-3 bg-yellow-500/5 rounded-lg border border-yellow-500/10 hover:bg-yellow-500/10 transition-all duration-200 cursor-pointer" onClick={() => router.push(`/tournaments/${tournament.id}`)}>
                                                 {/* League Image */}
-                                                <div className="relative w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-1 ring-yellow-500/30 flex-shrink-0 p-1">
+                                                <div className="relative w-8 h-8 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg overflow-hidden ring-1 ring-yellow-500/30 flex-shrink-0 p-1">
                                                     <div className="relative w-full h-full">
                                                         <Image
                                                             src={getTournamentImage(tournament.league?.image_url || '')}
@@ -1204,7 +1204,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             )}
                             
                             {matches.length > 0 ? (
-                                <div className="space-y-4 overflow-y-auto pr-2 h-[600px]">
+                                <div className="space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2 h-[600px]">
                                     {filteredMatches.map((match) => {
                                         const result = getMatchResult(match, parseInt(teamId))
                                         const opponent = match.opponents.find(opp => opp.opponent.id !== parseInt(teamId))
@@ -1214,7 +1214,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 {/* Match Header */}
                                                 <div className="flex items-start space-x-4 mb-4">
                                                     {/* League Image */}
-                                                    <div className="relative w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-blue-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-1">
+                                                    <div className="relative w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-blue-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-1">
                                                         <div className="relative w-full h-full">
                                                             <Image
                                                                 src={getTournamentImage(match.league?.image_url || '')}
@@ -1302,7 +1302,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     
                                                     {/* Match Result */}
                                                     {result && new Date(match.begin_at) <= new Date() && (
-                                                        <div className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                                        <div className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
                                                             result.isWin 
                                                                 ? 'bg-green-500/20 text-green-400 border border-green-500/20'
                                                                 : 'bg-red-500/20 text-red-400 border border-red-500/20'
@@ -1313,8 +1313,9 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                     
                                                     {/* Upcoming Match Indicator */}
                                                     {new Date(match.begin_at) > new Date() && (
-                                                        <div className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/20">
-                                                            Upcoming
+                                                        <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
+                                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                                            <span className="text-xs font-medium text-gray-200">Upcoming</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1323,7 +1324,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                 <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center space-x-3">
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
+                                                            <div className="relative w-6 h-6 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm">
                                                                 <Image
                                                                     src={getTeamImage(team.image_url)}
                                                                     alt={team.name}
@@ -1343,7 +1344,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                 }
                                                             }}
                                                         >
-                                                            <div className={`relative w-6 h-6 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${opponent?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm`}>
+                                                            <div className={`relative w-6 h-6 bg-gradient-to-br from-gray-600/80 to-gray-700/80 ${opponent?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden backdrop-blur-sm`}>
                                                                 <Image
                                                                     src={opponent?.type === 'Player' ? getPlayerImage(opponent?.opponent.image_url || '') : getTeamImage(opponent?.opponent.image_url || '')}
                                                                     alt={opponent?.opponent.name || 'TBD'}

@@ -53,7 +53,7 @@ export default function TeamDisplay({
         <div className="flex flex-col items-center space-y-2">
             <div className="relative">
                 <div 
-                    className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gray-800/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 cursor-pointer overflow-hidden"
+                    className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 cursor-pointer overflow-hidden"
                     onClick={handleTeamClick}
                 >
                     <Image

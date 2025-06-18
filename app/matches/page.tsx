@@ -27,7 +27,7 @@ function MatchesLoading() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         {/* Status badge */}
-                                        <div className={`h-6 px-3 rounded-full border ${
+                                        <div className={`h-6 px-3 rounded-lg border ${
                                             i % 3 === 0 ? 'bg-red-500/20 border-red-500/30' :
                                             i % 3 === 1 ? 'bg-blue-500/20 border-blue-500/30' : 'bg-yellow-500/20 border-yellow-500/30'
                                         }`}>
@@ -37,7 +37,9 @@ function MatchesLoading() {
                                             }`} />
                                         </div>
                                         {/* Game badge */}
-                                        <div className="h-6 w-20 bg-purple-500/20 rounded-full border border-purple-500/30" />
+                                        <div className="h-6 w-20 bg-purple-500/20 rounded-lg border border-purple-500/30" />
+                                        {/* BO badge */}
+                                        <div className="h-6 w-12 bg-purple-500/20 rounded-lg border border-purple-500/30" />
                                     </div>
                                     {/* Action buttons */}
                                     <div className="flex items-center gap-2">
@@ -80,17 +82,17 @@ function MatchesLoading() {
 
                                 {/* Date and Time */}
                                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-6">
-                                    <div className="flex items-center bg-gray-900/30 px-3 py-1 rounded-full">
+                                    <div className="flex items-center bg-gray-900/30 px-3 py-1 rounded-lg">
                                         <div className="w-4 h-4 bg-gray-500/50 rounded mr-2" />
                                         <div className="h-4 w-20 bg-gray-400/30 rounded" />
                                     </div>
-                                    <div className="flex items-center bg-gray-900/30 px-3 py-1 rounded-full">
+                                    <div className="flex items-center bg-gray-900/30 px-3 py-1 rounded-lg">
                                         <div className="w-4 h-4 bg-gray-500/50 rounded mr-2" />
                                         <div className="h-4 w-24 bg-gray-400/30 rounded" />
                                     </div>
                                     {/* Countdown placeholder */}
                                     {i % 3 !== 1 && (
-                                        <div className="flex items-center px-3 py-1 rounded-full bg-green-500/20 border border-green-500/20">
+                                        <div className="flex items-center px-3 py-1 rounded-lg bg-green-500/20 border border-green-500/20">
                                             <div className="w-4 h-4 bg-green-400/50 rounded mr-2" />
                                             <div className="h-4 w-16 bg-green-400/30 rounded" />
                                         </div>
@@ -101,9 +103,14 @@ function MatchesLoading() {
                                 <div className="space-y-3">
                                     {/* Tournament stage and format */}
                                     <div className="flex items-center justify-center gap-3 flex-wrap">
-                                        <div className="h-5 w-24 bg-orange-400/20 rounded-full" />
-                                        <div className="h-5 w-12 bg-blue-400/20 rounded-full" />
-                                        <div className="h-5 w-16 bg-yellow-400/20 rounded-full" />
+                                        <div className="h-6 w-24 bg-orange-400/20 rounded-lg px-3 py-1.5 border border-orange-400/30" />
+                                        <div className="h-6 w-12 bg-blue-400/20 rounded-lg px-3 py-1.5 border border-blue-400/30" />
+                                        <div className="h-6 w-16 bg-yellow-400/20 rounded-lg px-3 py-1.5 border border-yellow-400/30" />
+                                    </div>
+                                    
+                                    {/* AI Predictions Button */}
+                                    <div className="flex justify-center">
+                                        <div className="h-7 w-32 bg-indigo-500/10 rounded-lg border border-indigo-500/20" />
                                     </div>
                                     
                                     {/* League info */}

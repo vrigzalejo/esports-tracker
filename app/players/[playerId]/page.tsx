@@ -43,36 +43,107 @@ function PlayerDetailsLoading() {
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="animate-pulse">
-                    {/* Header */}
-                    <div className="flex items-center space-x-6 mb-8">
-                        <div className="w-24 h-24 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full ring-2 ring-gray-600/30">
-                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20 rounded-full" />
-                        </div>
-                        <div className="flex-1">
-                            <div className="h-8 w-64 bg-gray-700 rounded mb-2" />
-                            <div className="h-4 w-32 bg-gray-700 rounded mb-2" />
-                            <div className="h-4 w-48 bg-gray-700 rounded" />
-                        </div>
-                    </div>
-
-                    {/* Content sections */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
-                                <div className="h-6 w-32 bg-gray-700 rounded mb-4" />
-                                <div className="space-y-3">
-                                    {[...Array(5)].map((_, i) => (
-                                        <div key={i} className="h-16 bg-gray-700/50 rounded" />
+                    {/* Back button skeleton */}
+                    <div className="h-6 w-16 bg-gray-700 rounded mb-6" />
+                    
+                    {/* Player Header */}
+                    <div className="relative bg-gradient-to-br from-gray-800/90 via-gray-800 to-gray-900 rounded-2xl p-8 mb-8 border border-gray-700/50">
+                        <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+                            {/* Player Image */}
+                            <div className="relative w-32 h-32 bg-gradient-to-br from-gray-600 to-gray-700 rounded-2xl border-2 border-gray-600/40" />
+                            
+                            {/* Player Info */}
+                            <div className="flex-1 text-center md:text-left">
+                                <div className="h-10 w-64 bg-gray-700 rounded mb-3" />
+                                <div className="h-6 w-48 bg-gray-700 rounded mb-4" />
+                                
+                                {/* Player Stats Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="bg-gray-700/30 rounded-lg p-3">
+                                            <div className="h-3 w-12 bg-gray-700 rounded mb-2" />
+                                            <div className="h-5 w-16 bg-gray-700 rounded" />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Content Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Left Column - Tournaments */}
+                        <div className="lg:col-span-2">
+                            <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="h-7 w-32 bg-gray-700 rounded" />
+                                    <div className="h-6 w-8 bg-gray-700 rounded" />
+                                </div>
+                                
+                                {/* Tournament Cards */}
+                                <div className="space-y-4">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-12 h-12 bg-gray-600/60 rounded-lg" />
+                                                    <div>
+                                                        <div className="h-5 w-40 bg-gray-700 rounded mb-2" />
+                                                        <div className="h-4 w-32 bg-gray-700 rounded" />
+                                                    </div>
+                                                </div>
+                                                <div className="h-6 w-16 bg-blue-500/20 rounded-lg px-3 py-1.5 border border-blue-500/30" />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <div className="h-6 w-20 bg-orange-500/20 rounded-lg px-3 py-1.5 border border-orange-500/30" />
+                                                <div className="h-6 w-16 bg-yellow-500/20 rounded-lg px-3 py-1.5 border border-yellow-500/30" />
+                                                <div className="h-6 w-24 bg-green-500/20 rounded-lg px-3 py-1.5 border border-green-500/30" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Right Column - Sidebar */}
                         <div className="space-y-6">
+                            {/* Current Team */}
                             <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
                                 <div className="h-6 w-24 bg-gray-700 rounded mb-4" />
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-16 h-16 bg-gray-600/60 rounded-lg" />
+                                    <div>
+                                        <div className="h-5 w-32 bg-gray-700 rounded mb-2" />
+                                        <div className="h-4 w-24 bg-gray-700 rounded" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Player Details */}
+                            <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
+                                <div className="h-6 w-20 bg-gray-700 rounded mb-4" />
+                                <div className="space-y-3">
+                                    {[...Array(6)].map((_, i) => (
+                                        <div key={i} className="flex items-center justify-between">
+                                            <div className="h-4 w-16 bg-gray-700 rounded" />
+                                            <div className="h-4 w-20 bg-gray-700 rounded" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Recent Activity */}
+                            <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
+                                <div className="h-6 w-28 bg-gray-700 rounded mb-4" />
                                 <div className="space-y-3">
                                     {[...Array(3)].map((_, i) => (
-                                        <div key={i} className="h-12 bg-gray-700/50 rounded" />
+                                        <div key={i} className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 bg-gray-600/60 rounded-lg" />
+                                            <div className="flex-1">
+                                                <div className="h-4 w-24 bg-gray-700 rounded mb-1" />
+                                                <div className="h-3 w-16 bg-gray-700 rounded" />
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>

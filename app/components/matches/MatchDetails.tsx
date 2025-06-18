@@ -155,7 +155,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             {scoreInfo[0]?.image && (
                                 <div 
                                     onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
-                                    className={`relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${scoreInfo[0]?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
+                                    className={`relative w-12 h-12 bg-gradient-to-br from-gray-600/80 to-gray-700/80 ${scoreInfo[0]?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
                                 >
                                     <Image 
                                         src={scoreInfo[0].image} 
@@ -205,7 +205,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             {scoreInfo[1]?.image && (
                                 <div 
                                     onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
-                                    className={`relative w-12 h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 ${scoreInfo[1]?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
+                                    className={`relative w-12 h-12 bg-gradient-to-br from-gray-600/80 to-gray-700/80 ${scoreInfo[1]?.type === 'Player' ? 'rounded-full' : 'rounded-lg'} border border-gray-600/40 shadow-lg overflow-hidden cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
                                 >
                                     <Image 
                                         src={scoreInfo[1].image} 
@@ -249,7 +249,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         {scoreInfo[0]?.image && (
                             <div 
                                 onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
-                                className="relative w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
+                                className="relative w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <Image 
                                     src={scoreInfo[0].image} 
@@ -290,7 +290,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         {scoreInfo[1]?.image && (
                             <div 
                                 onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
-                                className="relative w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
+                                className="relative w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-xl border border-gray-600/40 shadow-xl overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
                             >
                                 <Image 
                                     src={scoreInfo[1].image} 
@@ -418,8 +418,8 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 
                                 {/* Countdown for upcoming matches */}
                                 {match.status === 'not_started' && countdown && (
-                                    <div className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/30 text-xs font-medium">
-                                        <Clock className="w-3 h-3 mr-1 text-green-400" size={12} />
+                                    <div className="flex items-center text-xs px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20">
+                                        <Clock className="w-3 h-3 mr-2" />
                                         <span>{countdown}</span>
                                     </div>
                                 )}
@@ -429,7 +429,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="overflow-y-auto max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-140px)]">
+                                    <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-140px)]">
                     <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
                         {/* Match Score Card */}
                         {getScoreCard()}

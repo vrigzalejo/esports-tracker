@@ -126,7 +126,7 @@ export default function MatchHeader({
 
                         {/* Video Streams Dropdown */}
                         {showStreams && streamsEnabled && (
-                            <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[200] max-h-[300px] overflow-y-auto">
+                            <div className="absolute right-0 top-full mt-2 min-w-[200px] max-w-[300px] w-max bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700 shadow-xl z-[200] max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                                 <div className="sticky top-0 p-3 border-b border-gray-700 bg-gray-800/95 backdrop-blur-sm">
                                     <div className="flex items-center justify-between">
                                         <h4 className="text-white text-sm font-medium flex items-center">
@@ -147,7 +147,7 @@ export default function MatchHeader({
                                         </button>
                                     </div>
                                 </div>
-                                <div className="overflow-y-auto">
+                                <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                                     {videoStreams.map((stream, index) => (
                                         <button
                                             key={index}

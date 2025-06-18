@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
 
@@ -148,25 +148,20 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                 <div className="flex flex-col">
                     {/* Tournament Image - Top */}
                     <div className="flex justify-center mb-3">
-                        <div className="relative w-28 h-28">
-                            <div className="absolute inset-0 bg-white/5 rounded-2xl backdrop-blur-sm shadow-2xl" />
-                            <div className="relative w-full h-full bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-3 border border-white/20 backdrop-blur-md">
-                                <div className="relative w-full h-full rounded-xl overflow-hidden bg-white/5">
-                                    <Image
-                                        src={getLeagueImage()}
-                                        alt={tournament.league.name}
-                                        fill
-                                        className="object-contain object-center filter drop-shadow-lg"
-                                        priority={false}
-                                        sizes="84px"
-                                        quality={100}
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = '/images/placeholder-tournament.svg';
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                        <div className="relative w-32 h-32 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden cursor-pointer">
+                            <Image
+                                src={getLeagueImage()}
+                                alt={tournament.league.name}
+                                fill
+                                className="object-contain rounded-xl p-2"
+                                priority={false}
+                                sizes="128px"
+                                quality={100}
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/placeholder-tournament.svg';
+                                }}
+                            />
                         </div>
                     </div>
                     
@@ -216,10 +211,16 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                             {(() => {
                                 const statusInfo = getTournamentStatus(tournament);
                                 return (
-                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} flex items-center gap-1 backdrop-blur-sm`}>
-                                        <Clock className="w-3 h-3" />
-                                        {statusInfo.status.toUpperCase()}
-                                    </span>
+                                    <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
+                                        {statusInfo.status === 'ongoing' ? (
+                                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                                        ) : statusInfo.status === 'upcoming' ? (
+                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                        ) : (
+                                            <div className="w-1.5 h-1.5 bg-gray-500 rounded-full" />
+                                        )}
+                                        <span className="text-xs font-medium text-gray-200">{statusInfo.status.toUpperCase()}</span>
+                                    </div>
                                 );
                             })()}
                             {tournamentType && (
@@ -274,29 +275,29 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                     </div>
                     
                     {tournament.teams && tournament.teams.length > 0 ? (
-                        <div className={`grid grid-cols-2 gap-2 ${showAllTeams ? 'max-h-32' : 'max-h-20'} overflow-y-auto transition-all duration-300`}>
+                        <div className={`grid grid-cols-2 gap-2 ${showAllTeams ? 'max-h-32' : 'max-h-20'} overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 transition-all duration-300`}>
                             {(showAllTeams ? tournament.teams : tournament.teams.slice(0, 6)).map((team) => (
                                 <div key={team.id} className="flex items-center space-x-2 text-xs">
                                     {team.image_url ? (
-                                        <div className="relative w-4 h-4 bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex-shrink-0 overflow-hidden shadow-sm ring-1 ring-gray-600/20">
+                                        <div className="relative w-6 h-6 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden flex-shrink-0">
                                             <Image
                                                 src={team.image_url}
                                                 alt={team.name}
                                                 fill
-                                                className="rounded-md object-cover object-center"
-                                                sizes="16px"
+                                                className="object-contain rounded-xl p-0.5"
+                                                sizes="24px"
                                                 quality={85}
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     const parent = target.parentElement;
                                                     if (parent) {
-                                                        parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex items-center justify-center"><span class="text-gray-400 text-xs font-medium">' + team.name.charAt(0).toUpperCase() + '</span></div>';
+                                                        parent.innerHTML = '<div class="w-full h-full bg-gray-600/60 rounded-xl flex items-center justify-center"><span class="text-gray-400 text-xs font-medium">' + team.name.charAt(0).toUpperCase() + '</span></div>';
                                                     }
                                                 }}
                                             />
                                         </div>
                                     ) : (
-                                        <div className="w-4 h-4 bg-gradient-to-br from-gray-600 to-gray-700 rounded-md flex-shrink-0 flex items-center justify-center shadow-sm ring-1 ring-gray-600/20">
+                                        <div className="w-6 h-6 bg-gray-600/60 rounded-xl border border-gray-700/40 flex-shrink-0 flex items-center justify-center">
                                             <span className="text-gray-400 text-xs font-medium">{team.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                     )}

@@ -4,8 +4,30 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { User, MapPin, Calendar, Gamepad2, Trophy, Award, Clock, Star, ArrowLeft } from 'lucide-react'
+import Header from '@/components/layout/Header'
+import Navigation from '@/components/layout/Navigation'
 import type { Player } from '@/types/roster'
-import { parseLeagueInfo } from '@/lib/textUtils'
+import { parseLeagueInfo, capitalizeWords } from '@/lib/textUtils'
+
+// Helper function to properly capitalize tournament names with group identifiers
+const capitalizeTournamentName = (text: string): string => {
+    if (!text) return text;
+    
+    // First apply the standard capitalizeWords function
+    let result = capitalizeWords(text);
+    
+    // Then handle specific cases like "Group a" -> "Group A"
+    result = result.replace(/\bGroup\s+([a-z])\b/gi, (match, letter) => {
+        return `Group ${letter.toUpperCase()}`;
+    });
+    
+    // Handle other similar patterns if needed
+    result = result.replace(/\bStage\s+([a-z])\b/gi, (match, letter) => {
+        return `Stage ${letter.toUpperCase()}`;
+    });
+    
+    return result;
+};
 
 interface PlayerDetailsContentProps {
     playerId: string
@@ -117,6 +139,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     const [tournaments, setTournaments] = useState<Tournament[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [searchTerm, setSearchTerm] = useState('')
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
@@ -267,6 +290,8 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
+                <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
+                <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="animate-pulse">
                         {/* Back button skeleton */}
@@ -313,14 +338,14 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                         <div className="flex items-center space-x-2">
                                                             <div className="w-4 h-4 bg-orange-400/50 rounded" />
                                                             <div className="h-6 w-56 bg-gray-700 rounded" />
-                                                            <div className="h-6 w-16 bg-gray-700 rounded-full" />
+                                                            <div className="h-6 w-16 bg-yellow-500/20 rounded-lg border border-yellow-500/20" />
                                                         </div>
                                                         <div className="flex items-center space-x-4 mt-3">
                                                             <div className="flex items-center space-x-2">
                                                                 <div className="w-4 h-4 bg-green-400/50 rounded" />
                                                                 <div className="h-4 w-24 bg-gray-700 rounded" />
                                                             </div>
-                                                            <div className="h-6 w-20 bg-green-500/20 rounded-full" />
+                                                            <div className="h-6 w-20 bg-green-500/20 rounded-lg border border-green-500/20" />
                                                         </div>
                                                         <div className="flex items-center space-x-4 text-sm">
                                                             <div className="flex items-center space-x-1">
@@ -398,6 +423,8 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     if (error || !player) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
+                <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
+                <Navigation />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="text-center py-12">
                         <div className="text-red-400 text-lg mb-2">Error loading player</div>
@@ -410,6 +437,8 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
+            <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
+            <Navigation />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Back button */}
                 <button
@@ -443,7 +472,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                 </div>
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <div className="space-y-6 overflow-y-auto pr-2 tournament-scroll-content">
+                                <div className="space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2 tournament-scroll-content">
                                     {tournaments.length > 0 ? (
                                         tournaments.map((tournament) => {
                                             const isChampion = tournament.winner_id === parseInt(playerId)
@@ -452,7 +481,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                 <div key={tournament.id} className={`group relative ${isChampion ? 'bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 border-yellow-500/50' : 'bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 border-gray-600/30'} rounded-xl p-6 hover:from-gray-600/40 hover:via-gray-600/50 hover:to-gray-600/40 transition-all duration-300 hover:border-orange-500/30 shadow-lg hover:shadow-xl border`}>
                                                     {/* Champion Badge */}
                                                     {isChampion && (
-                                                        <div className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1 bg-yellow-500/30 border border-yellow-500/50 rounded-full">
+                                                        <div className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 bg-yellow-500/30 border border-yellow-500/50 rounded-lg">
                                                             <Trophy className="w-4 h-4 text-yellow-300" />
                                                             <span className="text-sm font-bold text-yellow-300">Champion</span>
                                                         </div>
@@ -462,7 +491,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
                                                         <div 
-                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
+                                                            className="relative w-20 h-20 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl overflow-hidden ring-2 ring-gray-600/50 group-hover:ring-orange-500/60 transition-all duration-300 shadow-lg flex-shrink-0 p-2 cursor-pointer hover:scale-105"
                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                         >
                                                             <div className="relative w-full h-full">
@@ -490,7 +519,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                             className="text-lg font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
                                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                         >
-                                                                            {tournament.league.name}
+                                                                            {capitalizeTournamentName(tournament.league.name)}
                                                                         </span>
                                                                     </div>
                                                                 )}
@@ -503,7 +532,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                             className="text-md font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
                                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                         >
-                                                                            {parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}
+                                                                            {capitalizeTournamentName(parseLeagueInfo(tournament.serie.full_name || tournament.serie.name))}
                                                                         </span>
                                                                     </div>
                                                                 )}
@@ -515,12 +544,12 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                         className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
                                                                         onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                     >
-                                                                        {parseLeagueInfo(tournament.name)}
+                                                                        {capitalizeTournamentName(parseLeagueInfo(tournament.name))}
                                                                     </span>
                                                                     {tournament.tier && (() => {
                                                                         const tierInfo = getTierDisplay(tournament.tier)
                                                                         return (
-                                                                            <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
+                                                                            <div className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
                                                                                 <Star className="w-4 h-4" />
                                                                                 <span>{tierInfo.label}</span>
                                                                             </div>
@@ -538,7 +567,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                     </div>
                                                                 )}
                                                                 {tournament.prizepool && (
-                                                                    <span className="text-green-400 text-sm font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                                                                    <span className="text-green-400 text-sm font-bold bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20">
                                                                         {formatPrizePool(tournament.prizepool)}
                                                                     </span>
                                                                 )}

@@ -40,7 +40,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             className="group bg-gray-800/60 backdrop-blur-sm rounded-2xl border border-gray-700/30 hover:border-gray-600/50 transition-all duration-300 cursor-pointer hover:bg-gray-800/80 overflow-hidden"
         >
             {/* Player Image */}
-            <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden">
+            <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-600 to-gray-700 overflow-hidden">
                 <Image 
                     src={player.image_url || '/images/placeholder-player.svg'} 
                     alt={player.name}

@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
 import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
+import { getStatusColor, getStatusText } from '@/lib/utils'
 import type { Match } from '@/types/esports'
 
 // StatCard component for displaying statistics
@@ -129,17 +130,17 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
           <div className="flex items-center space-x-2 mb-2 flex-wrap">
             {match.opponents?.slice(0, 2).map((opponent, index) => (
               <div key={opponent.opponent.id || index} className="flex items-center space-x-2 min-w-0">
-                <div className="relative w-5 h-5 sm:w-6 sm:h-6 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
-                  <Image
-                    src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
-                    alt={opponent.opponent.name}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = '/images/placeholder-team.svg'
-                    }}
-                  />
+                <div className="relative w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/60 rounded-xl border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden flex-shrink-0">
+                                      <Image
+                      src={opponent.opponent.image_url || '/images/placeholder-team.svg'}
+                      alt={opponent.opponent.name}
+                      fill
+                      className="object-contain rounded-xl p-0.5"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.src = '/images/placeholder-team.svg'
+                      }}
+                    />
                 </div>
                 <span className="text-sm sm:text-base text-gray-300 font-medium truncate max-w-[120px] sm:max-w-none group-hover:text-white transition-colors duration-200">
                   {opponent.opponent.name}
@@ -151,24 +152,24 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
             ))}
           </div>
           
-          {/* League, Serie, Tournament Info - Mobile Responsive */}
-          <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
-            {match.league?.name && (
-              <span className="text-xs sm:text-sm text-blue-400 font-medium bg-blue-400/10 px-2 py-1 rounded-full truncate max-w-[100px] sm:max-w-none">
-                {match.league.name}
-              </span>
-            )}
-            {match.serie?.full_name && (
-              <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded-full truncate max-w-[120px] sm:max-w-none">
-                {capitalizeWords(match.serie.full_name)}
-              </span>
-            )}
-            {match.tournament?.name && (
-              <span className="text-xs sm:text-sm text-yellow-400 font-medium bg-yellow-400/10 px-2 py-1 rounded-full truncate max-w-[100px] sm:max-w-none">
-                {match.tournament.name}
-              </span>
-            )}
-          </div>
+                     {/* League, Serie, Tournament Info - Mobile Responsive */}
+           <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
+             {match.league?.name && (
+               <span className="text-xs sm:text-sm text-blue-400 font-medium bg-blue-400/10 px-3 py-1.5 rounded-lg border border-blue-500/20 truncate max-w-[100px] sm:max-w-none">
+                 {match.league.name}
+               </span>
+             )}
+             {match.serie?.full_name && (
+               <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-3 py-1.5 rounded-lg border border-green-500/20 truncate max-w-[120px] sm:max-w-none">
+                 {capitalizeWords(match.serie.full_name)}
+               </span>
+             )}
+             {match.tournament?.name && (
+               <span className="text-xs sm:text-sm text-yellow-400 font-medium bg-yellow-400/10 px-3 py-1.5 rounded-lg border border-yellow-500/20 truncate max-w-[100px] sm:max-w-none">
+                 {match.tournament.name}
+               </span>
+             )}
+           </div>
           
           {/* Game and Date Info - Mobile Layout */}
           <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -183,28 +184,23 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
       
       {/* Status and Countdown - Mobile Responsive */}
       <div className="flex items-center justify-between sm:justify-end space-x-2 mt-3 sm:mt-0 sm:ml-4 flex-shrink-0">
-        {/* Countdown Timer - Mobile Optimized */}
-        {!isPast && countdown && !isLive && match.status === 'not_started' && (
-          <div className="flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 backdrop-blur-sm">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-400 flex-shrink-0" />
-            <span className="font-medium">{countdown}</span>
+                 {/* Countdown Timer - MatchCard Style */}
+         {!isPast && countdown && !isLive && match.status === 'not_started' && (
+           <div className="flex items-center text-xs px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20">
+             <Clock className="w-3 h-3 mr-2" />
+             <span>{countdown}</span>
+           </div>
+         )}
+         
+                   {/* Status Badge - MatchCard Style */}
+          <div className="flex items-center space-x-2 bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-700/40">
+            {match.status === 'running' ? (
+              <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+            ) : (
+              <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor(match.status)}`} />
+            )}
+            <span className="text-xs font-medium text-gray-200">{getStatusText(match.status)}</span>
           </div>
-        )}
-        
-        {/* Status Badge - Enhanced */}
-        <div className="flex items-center space-x-2 bg-gray-900/60 backdrop-blur-sm rounded-full pl-2 sm:pl-3 pr-3 sm:pr-4 py-1 sm:py-2 border border-gray-700/50 group-hover:border-gray-600/50 transition-all duration-200">
-          {match.status === 'running' ? (
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-400 rounded-full animate-pulse" />
-          ) : match.status === 'finished' ? (
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-gray-500 rounded-full" />
-          ) : (
-            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full" />
-          )}
-          <span className="text-xs sm:text-sm font-medium text-white">
-            {match.status === 'running' ? 'LIVE' : 
-             match.status === 'finished' ? 'FINISHED' : 'UPCOMING'}
-          </span>
-        </div>
       </div>
     </button>
   )
@@ -398,20 +394,20 @@ export default function HomePage() {
                         {/* Team Images and Names */}
                         <div className="flex items-center space-x-2 mb-2 flex-wrap">
                           <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-700/50 rounded-full flex-shrink-0" />
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/50 rounded-xl border border-gray-700/40 flex-shrink-0" />
                             <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-300/30 rounded" />
                             <span className="text-xs sm:text-sm text-gray-500 mx-1 flex-shrink-0">vs</span>
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-700/50 rounded-full flex-shrink-0" />
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-600/50 rounded-xl border border-gray-700/40 flex-shrink-0" />
                             <div className="h-3 sm:h-4 w-10 sm:w-14 bg-gray-300/30 rounded" />
                           </div>
                         </div>
                         
-                        {/* League, Serie, Tournament Info */}
-                        <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
-                          <div className="h-3 sm:h-4 w-16 sm:w-20 bg-blue-400/20 rounded-full" />
-                          <div className="h-3 sm:h-4 w-18 sm:w-24 bg-green-400/20 rounded-full" />
-                          <div className="h-3 sm:h-4 w-14 sm:w-18 bg-yellow-400/20 rounded-full" />
-                        </div>
+                                                 {/* League, Serie, Tournament Info */}
+                         <div className="flex items-center space-x-2 mb-2 flex-wrap gap-1">
+                           <div className="h-6 w-16 sm:w-20 bg-blue-400/20 rounded-lg border border-blue-500/20" />
+                           <div className="h-6 w-18 sm:w-24 bg-green-400/20 rounded-lg border border-green-500/20" />
+                           <div className="h-6 w-14 sm:w-18 bg-yellow-400/20 rounded-lg border border-yellow-500/20" />
+                         </div>
                         
                         {/* Game and date info */}
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
