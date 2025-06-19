@@ -155,10 +155,10 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
 
                 <div className="p-6">
                     {/* Match Info */}
-                    <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
+                    <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 mb-6">
                         <div className="flex items-center">
                             <div 
-                                className="flex-1 flex items-center justify-start gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200"
+                                className="flex-1 flex items-center justify-start gap-2 sm:gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200 min-w-0"
                                 onClick={() => {
                                     if (team1?.id) {
                                         if (match.opponents?.[0]?.type === 'Player') {
@@ -170,7 +170,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                 }}
                             >
                                 {team1?.image_url && (
-                                    <div className={`relative w-12 h-12 ${
+                                    <div className={`relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 ${
                                         match.opponents?.[0]?.type === 'Player' 
                                             ? 'bg-gray-600/60 rounded-full' 
                                             : 'bg-gray-600/60 rounded-lg'
@@ -179,7 +179,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                             src={team1.image_url} 
                                             alt={team1.name} 
                                             fill
-                                            className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain p-1'}
+                                            className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain p-0.5 sm:p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[0]?.type === 'Player') {
@@ -191,15 +191,15 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         />
                                     </div>
                                 )}
-                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate">{team1?.name || 'TBD'}</span>
+                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate text-sm sm:text-base">{team1?.name || 'TBD'}</span>
                             </div>
                             
-                            <div className="flex items-center justify-center px-6 py-2">
-                                <span className="text-gray-400 font-medium text-sm whitespace-nowrap">VS</span>
+                            <div className="flex items-center justify-center px-2 sm:px-4 md:px-6 py-2 flex-shrink-0">
+                                <span className="text-gray-400 font-medium text-xs sm:text-sm whitespace-nowrap">VS</span>
                             </div>
                             
                             <div 
-                                className="flex-1 flex items-center justify-end gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200"
+                                className="flex-1 flex items-center justify-end gap-2 sm:gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200 min-w-0"
                                 onClick={() => {
                                     if (team2?.id) {
                                         if (match.opponents?.[1]?.type === 'Player') {
@@ -210,9 +210,9 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                     }
                                 }}
                             >
-                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate">{team2?.name || 'TBD'}</span>
+                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate text-sm sm:text-base">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
-                                    <div className={`relative w-12 h-12 ${
+                                    <div className={`relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 ${
                                         match.opponents?.[1]?.type === 'Player' 
                                             ? 'bg-gray-600/60 rounded-full' 
                                             : 'bg-gray-600/60 rounded-lg'
@@ -221,7 +221,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                             src={team2.image_url} 
                                             alt={team2.name} 
                                             fill
-                                            className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain p-1'}
+                                            className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain p-0.5 sm:p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[1]?.type === 'Player') {
@@ -312,21 +312,25 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                     {analysis && (
                         <div className="space-y-6">
                             {/* Odds Display */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
-                                    <h3 className="font-semibold text-white mb-2">{team1?.name || 'Team 1'}</h3>
-                                    <div className="text-3xl font-bold text-blue-400">{analysis.team1Odds.toFixed(1)}%</div>
-                                    <div className="w-full bg-gray-700 rounded-full h-2 mt-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <div className="bg-gray-800/50 rounded-xl p-4 sm:p-5">
+                                    <div className="text-center">
+                                        <h3 className="font-semibold text-white mb-2 text-sm sm:text-base leading-tight min-h-[2.5rem] flex items-center justify-center">{team1?.name || 'Team 1'}</h3>
+                                        <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-3">{analysis.team1Odds.toFixed(1)}%</div>
+                                    </div>
+                                    <div className="w-full bg-gray-700 rounded-full h-2">
                                         <div 
                                             className="bg-blue-500 h-2 rounded-full transition-all duration-1000"
                                             style={{ width: `${analysis.team1Odds}%` }}
                                         ></div>
                                     </div>
                                 </div>
-                                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
-                                    <h3 className="font-semibold text-white mb-2">{team2?.name || 'Team 2'}</h3>
-                                    <div className="text-3xl font-bold text-purple-400">{analysis.team2Odds.toFixed(1)}%</div>
-                                    <div className="w-full bg-gray-700 rounded-full h-2 mt-3">
+                                <div className="bg-gray-800/50 rounded-xl p-4 sm:p-5">
+                                    <div className="text-center">
+                                        <h3 className="font-semibold text-white mb-2 text-sm sm:text-base leading-tight min-h-[2.5rem] flex items-center justify-center">{team2?.name || 'Team 2'}</h3>
+                                        <div className="text-2xl sm:text-3xl font-bold text-purple-400 mb-3">{analysis.team2Odds.toFixed(1)}%</div>
+                                    </div>
+                                    <div className="w-full bg-gray-700 rounded-full h-2">
                                         <div 
                                             className="bg-purple-500 h-2 rounded-full transition-all duration-1000"
                                             style={{ width: `${analysis.team2Odds}%` }}
