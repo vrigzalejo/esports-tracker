@@ -8,6 +8,7 @@ import TeamMatches from './TeamMatches';
 import TournamentStandings from '../tournaments/TournamentStandings';
 import TournamentMatches from '../tournaments/TournamentMatches';
 import { formatMatchDateRange, parseLeagueInfo, cleanMatchName } from '@/lib/textUtils';
+import { useCurrentTimezone } from '@/contexts/TimezoneContext';
 
 interface MatchDetailsProps {
     match: Match;
@@ -16,6 +17,7 @@ interface MatchDetailsProps {
 
 export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
     const router = useRouter();
+    const currentTimezone = useCurrentTimezone();
     const [countdown, setCountdown] = useState<string>('');
 
     // Real-time countdown for upcoming matches
@@ -413,7 +415,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                             
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                 <div className="text-xs text-gray-300">
-                                    {formatMatchDateRange(match, { includeWeekday: true, includeYear: true })}
+                                    {formatMatchDateRange(match, currentTimezone, { includeWeekday: true, includeYear: true })}
                                 </div>
                                 
                                 {/* Countdown for upcoming matches */}
