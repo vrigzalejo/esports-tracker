@@ -14,30 +14,7 @@ import type { Match } from '@/types/esports'
 // Note: Since this is a client component, metadata is handled in layout.tsx
 // The root layout already has comprehensive metadata for the home page
 
-// StatCard component for displaying statistics
-function StatCard({ icon: Icon, title, value, subtitle, trend }: {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  value: string
-  subtitle: string
-  trend?: string
-}) {
-  return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 group">
-      <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
-        {trend && (
-          <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded-full">
-            {trend}
-          </span>
-        )}
-      </div>
-      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-purple-100 transition-colors duration-300">{value}</h3>
-      <p className="text-gray-400 text-xs sm:text-sm leading-tight font-medium">{title}</p>
-      <p className="text-gray-500 text-xs leading-tight hidden sm:block mt-1">{subtitle}</p>
-    </div>
-  )
-}
+
 
 // Custom hook for countdown functionality
 function useCountdown(match: Match) {
@@ -222,15 +199,48 @@ export default function HomePage() {
   const { data: tournaments, loading: tournamentsLoading } = useTournaments({ per_page: 50 })
   const { data: teams, loading: teamsLoading } = useTeams({ per_page: 50 })
 
-  // Calculate statistics
+  // Calculate realistic statistics based on limited sample data
   const stats = {
     liveMatches: matches?.filter(match => match.status === 'running').length || 0,
+    upcomingMatches: matches?.filter(match => match.status === 'not_started').length || 0,
+    totalActiveMatches: (matches?.filter(match => match.status === 'running' || match.status === 'not_started').length || 0),
     activeTournaments: tournaments?.filter(tournament => tournament.status !== 'finished').length || 0,
-    totalTeams: teams?.length || 0,
-    totalPrizePool: tournaments?.reduce((total, tournament) => {
-      const prizepool = tournament.prizepool ? parseFloat(tournament.prizepool.replace(/[^0-9.]/g, '')) : 0
-      return total + prizepool
+    featuredTeams: teams?.length || 0,
+    samplePrizePool: tournaments?.reduce((total, tournament) => {
+      if (!tournament.prizepool) return total
+      
+      // Handle different currency formats and extract numeric value
+      let prizepool = tournament.prizepool.toLowerCase()
+      let multiplier = 1
+      
+      // Check for K/M suffixes
+      if (prizepool.includes('k') && !prizepool.includes('m')) {
+        multiplier = 1000
+        prizepool = prizepool.replace(/k/g, '')
+      } else if (prizepool.includes('m')) {
+        multiplier = 1000000
+        prizepool = prizepool.replace(/m/g, '')
+      }
+      
+      // Extract numeric value (remove currency symbols and text)
+      const numericValue = parseFloat(prizepool.replace(/[^0-9.]/g, ''))
+      
+      if (isNaN(numericValue)) return total
+      
+      return total + (numericValue * multiplier)
     }, 0) || 0
+  }
+
+  // Format prize pool display
+  const formatPrizePool = (amount: number): string => {
+    if (amount === 0) return 'TBD'
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`
+    } else if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`
+    } else {
+      return `$${amount.toLocaleString()}`
+    }
   }
 
   const handleQuickAction = (action: string) => {
@@ -268,31 +278,40 @@ export default function HomePage() {
 
         {/* Statistics Overview - Fully Responsive Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-          {matchesLoading ? (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
-              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
+          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-blue-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-blue-300 font-medium">Live & Upcoming</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.totalActiveMatches}</p>
+              </div>
+              <div className="bg-blue-500/20 p-1.5 sm:p-2 rounded-lg">
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+              </div>
             </div>
-          ) : (
-            <StatCard
-              icon={Play}
-              title="Live Matches"
-              value={stats.liveMatches.toString()}
-              subtitle="Across all games"
-              trend={stats.liveMatches > 0 ? `+${stats.liveMatches}` : undefined}
-            />
-          )}
+            <p className="text-xs text-blue-300/70 mt-1">
+              {stats.liveMatches > 0 ? `${stats.liveMatches} live now` : 'Ready to start'}
+            </p>
+          </div>
 
           {tournamentsLoading ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={Trophy}
-              title="Active Tournaments"
-              value={stats.activeTournaments.toString()}
-              subtitle="Currently running"
-            />
+            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-purple-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-purple-300 font-medium">Active Events</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.activeTournaments}</p>
+                </div>
+                <div className="bg-purple-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                </div>
+              </div>
+              <p className="text-xs text-purple-300/70 mt-1">
+                {stats.activeTournaments > 5 ? `${stats.activeTournaments} active` : 'Running tournaments'}
+              </p>
+            </div>
           )}
 
           {teamsLoading ? (
@@ -300,12 +319,20 @@ export default function HomePage() {
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={Users}
-              title="Top Teams"
-              value={stats.totalTeams.toString()}
-              subtitle="Tracked globally"
-            />
+            <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-green-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-green-300 font-medium">Featured Teams</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.featuredTeams}</p>
+                </div>
+                <div className="bg-green-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                </div>
+              </div>
+              <p className="text-xs text-green-300/70 mt-1">
+                {stats.featuredTeams >= 50 ? '50+ teams' : 'Top performers'}
+              </p>
+            </div>
           )}
 
           {tournamentsLoading ? (
@@ -313,12 +340,20 @@ export default function HomePage() {
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={TrendingUp}
-              title="Total Prize Pool"
-              value={`$${(stats.totalPrizePool / 1000000).toFixed(1)}M`}
-              subtitle="Active tournaments"
-            />
+            <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-orange-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-orange-300 font-medium">Prize Pool</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{formatPrizePool(stats.samplePrizePool)}</p>
+                </div>
+                <div className="bg-orange-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
+                </div>
+              </div>
+              <p className="text-xs text-orange-300/70 mt-1">
+                {stats.samplePrizePool > 1000000 ? "Multi-million" : stats.samplePrizePool > 0 ? "Active" : "Current events"}
+              </p>
+            </div>
           )}
         </div>
 
