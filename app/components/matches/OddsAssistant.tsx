@@ -41,6 +41,23 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                 body: JSON.stringify({ match }),
             })
 
+            if (!response.ok) {
+                let errorBody = null
+                try {
+                    errorBody = await response.json()
+                    
+                    // Check for SECURITY_ERROR and let it be handled by the global handler
+                    if (errorBody?.error === 'SECURITY_ERROR') {
+                        // The clientApi will handle the notification
+                        throw new Error(errorBody.message || 'Security error occurred')
+                    }
+                } catch {
+                    // Ignore JSON parse error
+                }
+                
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+            }
+
             const data = await response.json()
             
             if (!data.success) {

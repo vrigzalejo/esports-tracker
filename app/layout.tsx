@@ -4,9 +4,12 @@ import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import AlphaBanner from "@/components/ui/AlphaBanner";
 import CookieNotification from "@/components/ui/CookieNotification";
+import SecurityWrapper from "@/components/layout/SecurityWrapper";
 import { GamesProvider } from "@/contexts/GamesContext";
 import { DataProvider } from "@/contexts/DataContext";
+import { SecurityProvider } from "@/contexts/SecurityContext";
 import CacheStatus from "@/components/debug/CacheStatus";
+
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const geistSans = Geist({
@@ -77,17 +80,20 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         )}
-        <DataProvider>
-          <GamesProvider>
-            <AlphaBanner />
-            <div className="flex-1 flex flex-col">
-              {children}
-            </div>
-            <Footer />
-            <CookieNotification />
-            {process.env.NODE_ENV === 'development' && <CacheStatus />}
-          </GamesProvider>
-        </DataProvider>
+        <SecurityProvider>
+          <DataProvider>
+            <GamesProvider>
+              <SecurityWrapper />
+              <AlphaBanner />
+              <div className="flex-1 flex flex-col">
+                {children}
+              </div>
+              <Footer />
+              <CookieNotification />
+              {process.env.NODE_ENV === 'development' && <CacheStatus />}
+            </GamesProvider>
+          </DataProvider>
+        </SecurityProvider>
       </body>
     </html>
   );
