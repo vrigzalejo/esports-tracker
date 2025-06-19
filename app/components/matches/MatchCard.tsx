@@ -156,7 +156,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                                     e.stopPropagation()
                                     setShowOddsAssistant(true)
                                 }}
-                                className="group/ai flex items-center space-x-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-all duration-200 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 hover:border-indigo-400/40 hover:shadow-sm cursor-pointer"
+                                className="group flex items-center space-x-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-all duration-200 bg-indigo-500/10 hover:bg-indigo-500/15 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 hover:border-indigo-400/30 cursor-pointer"
                                 title="AI Match Analysis & Predictions"
                             >
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
