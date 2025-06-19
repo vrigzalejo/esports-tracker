@@ -9,8 +9,8 @@ import { serverLogger } from './logger'
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // Maximum requests per window
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  maxRequests: 1000, // Maximum requests per window
   message: 'Too many requests from this IP, please try again later.',
 } as const
 
