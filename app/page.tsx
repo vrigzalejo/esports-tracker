@@ -268,7 +268,7 @@ export default function HomePage() {
       <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 main-content">
         {/* Hero Section - Mobile Responsive */}
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-3 sm:mb-4 px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-3 sm:mb-4 px-2 animate-gradient-x bg-300% hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 transition-all duration-500 hover:animate-neon-glow animate-glitch cursor-default">
             EsportsTracker
           </h1>
           <p className="text-sm sm:text-base lg:text-xl text-gray-300 max-w-2xl mx-auto px-3 sm:px-4 leading-relaxed">

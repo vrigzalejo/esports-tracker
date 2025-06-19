@@ -182,4 +182,49 @@ export const trackGameEngagement = (gameName: string, action: string) => {
       value: 1,
     })
   }
+}
+
+/**
+ * Track when a user clicks on the "Buy me a coffee" button
+ */
+export const trackCoffeeClick = (source: string = 'footer') => {
+  if (!isAnalyticsAllowed()) return
+  
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'coffee_support', {
+      event_category: 'support',
+      event_label: `Buy me a coffee clicked from ${source}`,
+      value: 1,
+    })
+  }
+}
+
+/**
+ * Track when a user clicks on the developer's personal website link
+ */
+export const trackDeveloperClick = (source: string = 'footer') => {
+  if (!isAnalyticsAllowed()) return
+  
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'developer_link', {
+      event_category: 'external',
+      event_label: `Brigido Alejo website clicked from ${source}`,
+      value: 1,
+    })
+  }
+}
+
+/**
+ * Track footer link interactions
+ */
+export const trackFooterLink = (linkName: string, destination: string) => {
+  if (!isAnalyticsAllowed()) return
+  
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'footer_link', {
+      event_category: 'navigation',
+      event_label: `${linkName} → ${destination}`,
+      value: 1,
+    })
+  }
 } 

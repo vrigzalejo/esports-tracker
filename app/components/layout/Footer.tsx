@@ -1,4 +1,6 @@
+'use client'
 
+import { trackCoffeeClick, trackDeveloperClick, trackFooterLink } from '@/lib/analytics'
 
 export default function Footer() {
     return (
@@ -19,6 +21,7 @@ export default function Footer() {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                onClick={() => trackDeveloperClick('footer-mobile')}
                             >
                                 Brigido Alejo
                             </a>
@@ -27,6 +30,7 @@ export default function Footer() {
                             <a 
                                 href="/privacy" 
                                 className="text-gray-500 hover:text-gray-400 transition-colors duration-200"
+                                onClick={() => trackFooterLink('Privacy', '/privacy')}
                             >
                                 Privacy
                             </a>
@@ -36,9 +40,11 @@ export default function Footer() {
                                 href="https://coff.ee/brigsalejoq" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded-full transition-colors duration-200 text-xs shadow-sm hover:shadow-md"
+                                className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 group animate-pulse-glow"
+                                title="Buy me a coffee ☕"
+                                onClick={() => trackCoffeeClick('footer-mobile')}
                             >
-                                ☕ Buy me a coffee
+                                <span className="text-2xl group-hover:animate-bounce">☕</span>
                             </a>
                         </div>
                     </div>
@@ -52,6 +58,7 @@ export default function Footer() {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                onClick={() => trackDeveloperClick('footer-desktop')}
                             >
                                 Brigido Alejo
                             </a>
@@ -59,6 +66,7 @@ export default function Footer() {
                             <a 
                                 href="/privacy" 
                                 className="text-gray-500 hover:text-gray-400 transition-colors duration-200"
+                                onClick={() => trackFooterLink('Privacy', '/privacy')}
                             >
                                 Privacy
                             </a>
@@ -68,9 +76,11 @@ export default function Footer() {
                             href="https://coff.ee/brigsalejoq" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-3 py-1.5 rounded-full transition-colors duration-200 text-xs shadow-sm hover:shadow-md"
+                            className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 group animate-pulse-glow"
+                            title="Buy me a coffee ☕"
+                            onClick={() => trackCoffeeClick('footer-desktop')}
                         >
-                            ☕ Buy me a coffee
+                            <span className="text-2xl group-hover:animate-bounce">☕</span>
                         </a>
                     </div>
                 </div>
