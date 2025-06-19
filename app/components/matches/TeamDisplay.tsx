@@ -53,7 +53,7 @@ export default function TeamDisplay({
         <div className="flex flex-col items-center space-y-2">
             <div className="relative">
                 <div 
-                    className={`relative w-12 h-12 sm:w-14 sm:h-14 ${
+                    className={`relative w-16 h-16 md:w-14 md:h-14 sm:w-12 sm:h-12 ${
                         opponent?.type === 'Player' 
                             ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
                             : 'bg-gray-600/60 rounded-xl'
@@ -78,19 +78,19 @@ export default function TeamDisplay({
                 </div>
                 {isWinner && (
                     <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 shadow-sm">
-                        <Crown className="w-2.5 h-2.5 text-white" />
+                        <Crown className="w-3 h-3 md:w-2.5 md:h-2.5" />
                     </div>
                 )}
             </div>
             <div className="flex flex-col items-center space-y-1">
                 <span 
                     onClick={handleTeamClick}
-                    className={`font-medium text-center text-xs cursor-pointer hover:text-gray-300 transition-colors duration-200 ${isWinner ? 'text-yellow-400' : 'text-gray-200'}`}
+                    className={`font-medium text-center text-sm md:text-xs cursor-pointer hover:text-gray-300 transition-colors duration-200 ${isWinner ? 'text-yellow-400' : 'text-gray-200'}`}
                 >
                     {getTeamName(opponent)}
                 </span>
                 {showScore && score !== undefined && (
-                    <span className={`text-sm font-semibold px-2 py-0.5 rounded ${
+                    <span className={`text-base md:text-sm font-semibold px-3 py-1 md:px-2 md:py-0.5 rounded ${
                         isLive
                             ? 'bg-blue-500/20 text-blue-400'
                             : isWinner

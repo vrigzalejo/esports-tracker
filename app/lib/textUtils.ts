@@ -12,9 +12,10 @@ export function capitalizeWords(text: string): string {
         'east', 'west', 'central', 'latin', 'valorant', 'changers', 'ace'
     ]);
 
-    // Region acronyms that should be fully capitalized
+    // Region acronyms and other terms that should be fully capitalized
     const regionAcronyms = new Set([
-        'emea', 'apac', 'mena', 'latam', 'na', 'eu', 'kr', 'cn', 'jp', 'sea'
+        'emea', 'apac', 'mena', 'latam', 'na', 'eu', 'kr', 'cn', 'jp', 'sea',
+        'vct', 'fps', 'moba', 'rts', 'rpg', 'mmo', 'br', 'usa', 'uk'
     ]);
     
     // Words that should remain lowercase unless at the beginning
@@ -23,7 +24,8 @@ export function capitalizeWords(text: string): string {
         'in', 'on', 'at', 'by', 'to', 'of', 'vs', 'v'
     ]);
     
-    return text.split(' ').map((word, index) => {
+    const words = text.split(' ');
+    const result = words.map((word, index) => {
         if (!word) return word;
         
         const lowerWord = word.toLowerCase();
@@ -55,7 +57,35 @@ export function capitalizeWords(text: string): string {
         
         // Default: capitalize first letter
         return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    }).join(' ');
+    });
+    
+    // Post-process to handle specific patterns like "Group a" -> "Group A"
+    const joinedResult = result.join(' ');
+    
+    // Handle "Group [letter]" patterns
+    const groupPattern = joinedResult.replace(/\bGroup\s+([a-z])\b/gi, (match, letter) => {
+        return `Group ${letter.toUpperCase()}`;
+    });
+    
+    // Handle "Stage [letter]" patterns
+    const stagePattern = groupPattern.replace(/\bStage\s+([a-z])\b/gi, (match, letter) => {
+        return `Stage ${letter.toUpperCase()}`;
+    });
+    
+    // Handle "Round [letter]" patterns
+    const roundPattern = stagePattern.replace(/\bRound\s+([a-z])\b/gi, (match, letter) => {
+        return `Round ${letter.toUpperCase()}`;
+    });
+    
+    // Handle words after bullet points (•) - capitalize words that would normally be lowercase
+    const bulletPattern = roundPattern.replace(/•\s+([a-z])/g, (match, firstLetter) => {
+        return `• ${firstLetter.toUpperCase()}`;
+    });
+    
+    // Fix specific patterns like "Play • in" -> "Play • In"
+    const playInPattern = bulletPattern.replace(/•\s+in\b/gi, '• In');
+    
+    return playInPattern;
 }
 
 // Helper function to parse and format dates consistently

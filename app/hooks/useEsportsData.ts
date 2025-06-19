@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getMatches, getTournaments, getTeams, getPlayers, getMatchDetails, getUpcomingTournaments, getRunningTournaments, getPastTournaments } from '@/lib/api'
+import { getMatches, getTournaments, getTeams, getPlayers, getMatchDetails, getUpcomingTournaments, getRunningTournaments, getPastTournaments } from '@/lib/clientApi'
 import type { Match, Tournament, Team } from '@/types/esports'
 import type { Player } from '@/types/roster'
 

@@ -9,9 +9,9 @@ import { serverLogger } from './logger'
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // Maximum requests per window
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 3 * 60 * 1000, // 3 minutes
+  maxRequests: 100, // Maximum requests per window (reduced for testing)
+  message: 'Too many requests from this IP, please try again later after',
 } as const
 
 // In-memory rate limit store (use Redis in production)
@@ -94,7 +94,7 @@ export function validateOriginHeader(request: NextRequest): { valid: boolean; er
  * Simple rate limiting implementation
  * For production, consider using a proper rate limiting service or Redis
  */
-export function checkRateLimit(request: NextRequest): { allowed: boolean; error?: string } {
+export function checkRateLimit(request: NextRequest): { allowed: boolean; error?: string; resetTime?: number } {
   const ip = getClientIP(request)
   const now = Date.now()
   
@@ -120,7 +120,8 @@ export function checkRateLimit(request: NextRequest): { allowed: boolean; error?
   if (current.count > RATE_LIMIT_CONFIG.maxRequests) {
     return {
       allowed: false,
-      error: RATE_LIMIT_CONFIG.message
+      error: RATE_LIMIT_CONFIG.message,
+      resetTime: current.resetTime
     }
   }
   
@@ -238,7 +239,8 @@ export function detectSuspiciousActivity(request: NextRequest): { suspicious: bo
 export function performSecurityCheck(request: NextRequest): { 
   allowed: boolean; 
   error?: string; 
-  details?: Record<string, unknown> 
+  details?: Record<string, unknown>;
+  resetTime?: number;
 } {
   // 1. Validate origin header
   const originCheck = validateOriginHeader(request)
@@ -263,12 +265,14 @@ export function performSecurityCheck(request: NextRequest): {
     logSecurityEvent('RATE_LIMIT_EXCEEDED', {
       ip: getClientIP(request),
       url: request.url,
-      error: rateLimitCheck.error
+      error: rateLimitCheck.error,
+      resetTime: rateLimitCheck.resetTime
     })
     return {
       allowed: false,
       error: rateLimitCheck.error,
-      details: { check: 'rate_limit' }
+      details: { check: 'rate_limit' },
+      resetTime: rateLimitCheck.resetTime
     }
   }
   
@@ -323,13 +327,19 @@ export function logSecurityEvent(event: string, details: Record<string, unknown>
 /**
  * Generate a standardized error response for security violations
  */
-export function createSecurityErrorResponse(error: string, status: number = 403): Response {
+export function createSecurityErrorResponse(error: string, status: number = 403, resetTime?: number): Response {
+  const responseBody: Record<string, unknown> = {
+    error: 'SECURITY_ERROR',
+    message: error,
+    timestamp: new Date().toISOString()
+  }
+  
+  if (resetTime) {
+    responseBody.resetTime = resetTime
+  }
+  
   return new Response(
-    JSON.stringify({
-      error: 'SECURITY_ERROR',
-      message: error,
-      timestamp: new Date().toISOString()
-    }),
+    JSON.stringify(responseBody),
     {
       status,
       headers: {

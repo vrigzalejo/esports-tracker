@@ -150,7 +150,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {/* Mobile Layout */}
                 <div className="block sm:hidden space-y-4">
                     {/* Team 1 */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[0]?.isWinner ? 'bg-green-500/20 border border-green-500/20' : 'bg-red-500/20 border border-red-500/20'}`}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[0]?.isWinner ? 'bg-blue-500/15 border border-blue-500/25' : 'bg-gray-600/20 border border-gray-500/25'}`}>
                         <div className="flex items-center space-x-3">
                             {scoreInfo[0]?.image && (
                                 <div 
@@ -173,13 +173,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                                 className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                             >
-                                <div className={`text-sm font-bold ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className={`text-sm font-bold ${scoreInfo[0]?.isWinner ? 'text-blue-300' : 'text-gray-300'}`}>
                                     {scoreInfo[0]?.name}
                                 </div>
                                 <div className="text-xs text-gray-400">{scoreInfo[0]?.acronym}</div>
                             </div>
                         </div>
-                        <div className={`text-2xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-2xl font-black ${scoreInfo[0]?.isWinner ? 'text-blue-400' : 'text-gray-400'}`}>
                             {scoreInfo[0]?.score}
                         </div>
                     </div>
@@ -187,7 +187,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     {/* VS Separator */}
                     <div className="flex items-center justify-center">
                         <div className="flex items-center space-x-3 bg-gray-700/30 rounded-full px-4 py-2 border border-gray-600/30">
-                            <div className={`text-xs font-medium ${match.status === 'running' ? 'text-red-400 animate-pulse' : 'text-gray-400'}`}>
+                            <div className={`text-xs font-medium ${match.status === 'running' ? 'text-orange-400 animate-pulse' : 'text-gray-400'}`}>
                                 {getStatusText(match.status)}
                             </div>
                             <div className="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
@@ -200,7 +200,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     </div>
 
                     {/* Team 2 */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[1]?.isWinner ? 'bg-green-500/20 border border-green-500/20' : 'bg-red-500/20 border border-red-500/20'}`}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${scoreInfo[1]?.isWinner ? 'bg-blue-500/15 border border-blue-500/25' : 'bg-gray-600/20 border border-gray-500/25'}`}>
                         <div className="flex items-center space-x-3">
                             {scoreInfo[1]?.image && (
                                 <div 
@@ -223,13 +223,13 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 onClick={() => handleTeamClick(scoreInfo[1]?.id, scoreInfo[1]?.type)}
                                 className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
                             >
-                                <div className={`text-sm font-bold ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className={`text-sm font-bold ${scoreInfo[1]?.isWinner ? 'text-blue-300' : 'text-gray-300'}`}>
                                     {scoreInfo[1]?.name}
                                 </div>
                                 <div className="text-xs text-gray-400">{scoreInfo[1]?.acronym}</div>
                             </div>
                         </div>
-                        <div className={`text-2xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-2xl font-black ${scoreInfo[1]?.isWinner ? 'text-blue-400' : 'text-gray-400'}`}>
                             {scoreInfo[1]?.score}
                         </div>
                     </div>
@@ -238,7 +238,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {/* Desktop Layout */}
                 <div className="hidden sm:grid grid-cols-3 items-center gap-4 lg:gap-6">
                     {/* Team 1 */}
-                    <div className={`flex items-center justify-end space-x-3 lg:space-x-4 ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`flex items-center justify-end space-x-3 lg:space-x-4 ${scoreInfo[0]?.isWinner ? 'text-blue-300' : 'text-gray-300'}`}>
                         <div 
                             onClick={() => handleTeamClick(scoreInfo[0]?.id, scoreInfo[0]?.type)}
                             className="text-right cursor-pointer hover:text-cyan-300 transition-colors duration-200"
@@ -264,14 +264,14 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                             </div>
                         )}
-                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[0]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[0]?.isWinner ? 'text-blue-400' : 'text-gray-400'}`}>
                             {scoreInfo[0]?.score}
                         </div>
                     </div>
 
                     {/* VS Separator */}
                     <div className="flex flex-col items-center space-y-2">
-                        <div className={`text-sm font-medium ${match.status === 'running' ? 'text-red-400 animate-pulse' : 'text-gray-400'}`}>
+                        <div className={`text-sm font-medium ${match.status === 'running' ? 'text-orange-400 animate-pulse' : 'text-gray-400'}`}>
                             {getStatusText(match.status)}
                         </div>
                         <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
@@ -283,8 +283,8 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                     </div>
 
                     {/* Team 2 */}
-                    <div className={`flex items-center justify-start space-x-3 lg:space-x-4 ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
-                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[1]?.isWinner ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`flex items-center justify-start space-x-3 lg:space-x-4 ${scoreInfo[1]?.isWinner ? 'text-blue-300' : 'text-gray-300'}`}>
+                        <div className={`text-3xl lg:text-4xl font-black ${scoreInfo[1]?.isWinner ? 'text-blue-400' : 'text-gray-400'}`}>
                             {scoreInfo[1]?.score}
                         </div>
                         {scoreInfo[1]?.image && (
@@ -319,15 +319,15 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                 {isLive && streams.length > 0 && (
                     <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-500/50">
                         <div className="flex items-center justify-center space-x-2 mb-3 sm:mb-4">
-                            <Tv className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
-                            <span className="text-red-400 text-sm font-bold">Live Streams Available</span>
+                            <Tv className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+                            <span className="text-orange-400 text-sm font-bold">Live Streams Available</span>
                         </div>
                         <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                             {streams.map((stream, index) => (
                                 <button
                                     key={index}
                                     onClick={(e) => handleStreamClick(stream.url, e)}
-                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 hover:border-red-500/50 text-sm rounded-lg font-medium transition-all duration-200 cursor-pointer group min-h-[44px] sm:min-h-auto"
+                                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 border border-orange-500/25 hover:border-orange-500/40 text-sm rounded-lg font-medium transition-all duration-200 cursor-pointer group min-h-[44px] sm:min-h-auto"
                                 >
                                     <Play className="w-4 h-4 group-hover:animate-pulse" />
                                     <span>{stream.platform}</span>

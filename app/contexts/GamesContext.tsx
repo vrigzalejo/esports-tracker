@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { getGames } from '@/lib/api'
+import { getGames } from '@/lib/clientApi'
 import { cacheManager } from '@/lib/cache'
 
 interface Game {

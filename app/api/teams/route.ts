@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
         if (!securityCheck.allowed) {
             return createSecurityErrorResponse(
                 securityCheck.error || 'Access denied',
-                403
+                403,
+                securityCheck.resetTime
             );
         }
 

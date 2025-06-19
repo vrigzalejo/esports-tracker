@@ -68,18 +68,20 @@ export default function MatchInfo({
             {(cleanedLeagueInfo || cleanedMatchName) && (
                 <div className="flex items-center justify-center text-xs">
                     <div 
-                        className="flex items-center text-gray-400 bg-gray-800/40 px-3 py-1.5 rounded-lg border border-gray-700/30 max-w-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200"
+                        className="group flex items-center text-gray-300 bg-gray-800/60 hover:bg-gray-800/70 px-3 py-1.5 rounded-xl border border-gray-700/40 hover:border-gray-600/50 max-w-full cursor-pointer transition-all duration-300 hover:shadow-md hover:shadow-gray-500/5"
                         onClick={handleTournamentClick}
                     >
-                        <Users className="w-3 h-3 mr-2 flex-shrink-0" />
-                        <span className="text-center break-words hover:text-gray-300 transition-colors duration-200">
-                            {cleanedLeagueInfo}
-                            {cleanedLeagueInfo && cleanedMatchName && ' • '}
+                        <Users className="w-3 h-3 mr-2 flex-shrink-0 text-blue-400 group-hover:text-blue-300 transition-colors duration-300" />
+                        <span className="text-center break-words font-light group-hover:text-white transition-colors duration-300">
+                            <span className="text-gray-200 font-normal text-xs">
+                                {cleanedLeagueInfo}
+                            </span>
+                            {cleanedLeagueInfo && cleanedMatchName && <span className="text-gray-500 mx-2">•</span>}
                             {cleanedMatchName && (
-                                <span className="text-blue-300 font-medium">
+                                <span className="text-blue-300 group-hover:text-blue-200 font-normal text-xs">
                                     {cleanedMatchName}
                                     {gamesFormat && (
-                                        <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
+                                        <span className="ml-2 px-2 py-0.5 bg-purple-500/25 hover:bg-purple-500/30 text-purple-200 rounded-lg text-xs font-normal border border-purple-500/30 transition-all duration-300">
                                             {gamesFormat}
                                         </span>
                                     )}
