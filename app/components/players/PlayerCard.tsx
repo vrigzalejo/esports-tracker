@@ -118,7 +118,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                     {/* Current Team */}
                     {player.current_team && (
                         <div 
-                            className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg hover:bg-gray-700/60 transition-colors cursor-pointer"
+                            className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg hover:bg-gray-700/60 transition-colors cursor-pointer group"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (player.current_team?.id) {
@@ -146,24 +146,40 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Team</p>
-                                <p className="text-sm text-white font-semibold truncate">
+                                <p className="text-sm text-white font-semibold truncate group-hover:text-blue-200 transition-colors">
                                     {player.current_team.name}
                                 </p>
+                            </div>
+                            <div className="text-blue-400/60 group-hover:text-blue-400 transition-colors">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
                             </div>
                         </div>
                     )}
 
                     {/* Current Game */}
                     {player.current_videogame && (
-                        <div className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg">
-                            <div className="p-1.5 bg-purple-500/20 rounded-md">
-                                <Gamepad2 className="w-3 h-3 text-purple-400" />
+                        <div 
+                            className="flex items-center space-x-3 p-3 bg-gray-700/40 rounded-lg hover:bg-gray-700/60 transition-colors cursor-pointer group"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/matches?game=${encodeURIComponent(player.current_videogame!.slug)}`);
+                            }}
+                        >
+                            <div className="p-1.5 bg-purple-500/20 rounded-md group-hover:bg-purple-500/30 transition-colors">
+                                <Gamepad2 className="w-3 h-3 text-purple-400 group-hover:text-purple-300 transition-colors" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Game</p>
-                                <p className="text-sm text-white font-semibold truncate">
+                                <p className="text-sm text-white font-semibold truncate group-hover:text-purple-200 transition-colors">
                                     {player.current_videogame.name}
                                 </p>
+                            </div>
+                            <div className="text-purple-400/60 group-hover:text-purple-400 transition-colors">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
                             </div>
                         </div>
                     )}

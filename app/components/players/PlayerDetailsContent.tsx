@@ -281,69 +281,71 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
             <div className="min-h-screen bg-gray-900 text-white">
                 <Header searchTerm={searchTerm} onSearch={setSearchTerm} />
                 <Navigation />
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
                     <div className="animate-pulse">
                         {/* Back button skeleton */}
-                        <div className="flex items-center space-x-2 mb-6">
+                        <div className="flex items-center space-x-2 mb-4 sm:mb-6">
                             <div className="w-4 h-4 bg-gray-700 rounded" />
                             <div className="h-4 w-12 bg-gray-700 rounded" />
                         </div>
 
                         {/* Content Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                             {/* Tournaments Section Skeleton */}
                             <div className="lg:col-span-2">
-                                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl p-6 border border-gray-700/50">
+                                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-700/50">
                                     {/* Tournament Header */}
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-9 h-9 bg-orange-500/20 rounded-xl" />
-                                            <div className="h-8 w-32 bg-gray-700 rounded" />
+                                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                                        <div className="flex items-center space-x-2 sm:space-x-3">
+                                            <div className="w-7 h-7 sm:w-9 sm:h-9 bg-orange-500/20 rounded-lg sm:rounded-xl" />
+                                            <div className="h-6 sm:h-8 w-24 sm:w-32 bg-gray-700 rounded" />
                                         </div>
-                                        <div className="bg-orange-500/20 rounded-xl px-4 py-2 border border-orange-500/20">
-                                            <div className="h-6 w-8 bg-gray-700 rounded mb-1" />
-                                            <div className="h-3 w-10 bg-gray-700 rounded" />
+                                        <div className="bg-orange-500/20 rounded-lg sm:rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 border border-orange-500/20">
+                                            <div className="h-5 sm:h-6 w-6 sm:w-8 bg-gray-700 rounded mb-1" />
+                                            <div className="h-2.5 sm:h-3 w-8 sm:w-10 bg-gray-700 rounded" />
                                         </div>
                                     </div>
                                     
                                     {/* Tournament Cards */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-4 sm:space-y-6">
                                         {[...Array(3)].map((_, i) => (
-                                            <div key={i} className="bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 rounded-xl p-6 border border-gray-600/30">
-                                                <div className="flex items-start space-x-4">
+                                            <div key={i} className="bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-gray-600/30">
+                                                <div className="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4">
                                                     {/* Tournament Image */}
-                                                    <div className="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl flex-shrink-0" />
+                                                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg sm:rounded-xl flex-shrink-0" />
                                                     
                                                     {/* Tournament Info */}
-                                                    <div className="flex-1 space-y-3">
+                                                    <div className="flex-1 space-y-2 sm:space-y-3 w-full min-w-0">
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="w-4 h-4 bg-yellow-400/50 rounded" />
-                                                            <div className="h-5 w-48 bg-gray-700 rounded" />
+                                                            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-yellow-400/50 rounded" />
+                                                            <div className="h-4 sm:h-5 w-32 sm:w-48 bg-gray-700 rounded" />
                                                         </div>
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="w-4 h-4 bg-blue-400/50 rounded" />
-                                                            <div className="h-4 w-40 bg-gray-700 rounded" />
+                                                            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-blue-400/50 rounded" />
+                                                            <div className="h-3.5 sm:h-4 w-28 sm:w-40 bg-gray-700 rounded" />
                                                         </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            <div className="w-4 h-4 bg-orange-400/50 rounded" />
-                                                            <div className="h-6 w-56 bg-gray-700 rounded" />
-                                                            <div className="h-6 w-16 bg-yellow-500/20 rounded-lg border border-yellow-500/20" />
-                                                        </div>
-                                                        <div className="flex items-center space-x-4 mt-3">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                                             <div className="flex items-center space-x-2">
-                                                                <div className="w-4 h-4 bg-green-400/50 rounded" />
-                                                                <div className="h-4 w-24 bg-gray-700 rounded" />
+                                                                <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-orange-400/50 rounded" />
+                                                                <div className="h-5 sm:h-6 w-40 sm:w-56 bg-gray-700 rounded" />
                                                             </div>
-                                                            <div className="h-6 w-20 bg-green-500/20 rounded-lg border border-green-500/20" />
+                                                            <div className="h-5 sm:h-6 w-12 sm:w-16 bg-yellow-500/20 rounded-lg border border-yellow-500/20" />
                                                         </div>
-                                                        <div className="flex items-center space-x-4 text-sm">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-2 sm:mt-3">
+                                                            <div className="flex items-center space-x-2">
+                                                                <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-green-400/50 rounded" />
+                                                                <div className="h-3.5 sm:h-4 w-20 sm:w-24 bg-gray-700 rounded" />
+                                                            </div>
+                                                            <div className="h-5 sm:h-6 w-16 sm:w-20 bg-green-500/20 rounded-lg border border-green-500/20" />
+                                                        </div>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm">
                                                             <div className="flex items-center space-x-1">
                                                                 <div className="w-3 h-3 bg-gray-600 rounded" />
-                                                                <div className="h-3 w-32 bg-gray-700 rounded" />
+                                                                <div className="h-3 w-24 sm:w-32 bg-gray-700 rounded" />
                                                             </div>
                                                             <div className="flex items-center space-x-1">
                                                                 <div className="w-3 h-3 bg-gray-600 rounded" />
-                                                                <div className="h-3 w-28 bg-gray-700 rounded" />
+                                                                <div className="h-3 w-20 sm:w-28 bg-gray-700 rounded" />
                                                             </div>
                                                         </div>
                                                     </div>
@@ -355,47 +357,47 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                             </div>
 
                             {/* Sidebar Skeleton */}
-                            <div className="space-y-6">
-                                <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700/50">
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 rounded-xl p-4 sm:p-6 border border-gray-700/50">
                                     {/* Player Info Header */}
-                                    <div className="flex items-center mb-6">
-                                        <div className="w-5 h-5 bg-purple-400/50 rounded mr-2" />
-                                        <div className="h-6 w-24 bg-gray-700 rounded" />
+                                    <div className="flex items-center mb-4 sm:mb-6">
+                                        <div className="w-4 h-4 sm:w-5 sm:h-5 bg-purple-400/50 rounded mr-2" />
+                                        <div className="h-5 sm:h-6 w-20 sm:w-24 bg-gray-700 rounded" />
                                     </div>
                                     
                                     {/* Player Image */}
-                                    <div className="relative w-full h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl mb-6 ring-4 ring-purple-500/30">
+                                    <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg sm:rounded-xl mb-4 sm:mb-6 ring-2 sm:ring-4 ring-purple-500/30">
                                         {/* Status indicator */}
-                                        <div className="absolute top-4 right-4 w-6 h-6 bg-gray-600 rounded-full ring-2 ring-gray-900" />
+                                        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 bg-gray-600 rounded-full ring-1 sm:ring-2 ring-gray-900" />
                                         
                                         {/* Name overlay */}
-                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                                            <div className="h-8 w-48 bg-gray-700 rounded mb-2" />
-                                            <div className="h-4 w-32 bg-gray-700 rounded" />
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 sm:p-6">
+                                            <div className="h-6 sm:h-8 w-32 sm:w-48 bg-gray-700 rounded mb-1 sm:mb-2" />
+                                            <div className="h-3 sm:h-4 w-24 sm:w-32 bg-gray-700 rounded" />
                                         </div>
                                     </div>
 
                                     {/* Info Cards */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-3 sm:space-y-6">
                                         {/* Current Team */}
-                                        <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/30">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl border border-gray-600/50" />
-                                            <div className="flex-1">
-                                                <div className="h-3 w-20 bg-gray-700 rounded mb-2" />
-                                                <div className="h-5 w-32 bg-gray-700 rounded" />
+                                        <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg sm:rounded-xl border border-blue-500/30">
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-lg sm:rounded-xl border border-gray-600/50 flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="h-3 w-16 sm:w-20 bg-gray-700 rounded mb-1.5 sm:mb-2" />
+                                                <div className="h-4 sm:h-5 w-24 sm:w-32 bg-gray-700 rounded" />
                                             </div>
-                                            <div className="w-5 h-5 bg-gray-700 rounded" />
+                                            <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gray-700 rounded flex-shrink-0" />
                                         </div>
 
                                         {/* Other Info Cards */}
                                         {[...Array(4)].map((_, i) => (
-                                            <div key={i} className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-700/30 to-gray-700/20 rounded-xl border border-gray-600/30">
-                                                <div className="p-3 bg-gray-500/20 rounded-xl">
-                                                    <div className="w-5 h-5 bg-gray-600 rounded" />
+                                            <div key={i} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gradient-to-r from-gray-700/30 to-gray-700/20 rounded-lg sm:rounded-xl border border-gray-600/30">
+                                                <div className="p-2 sm:p-3 bg-gray-500/20 rounded-lg sm:rounded-xl flex-shrink-0">
+                                                    <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gray-600 rounded" />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <div className="h-3 w-16 bg-gray-700 rounded mb-2" />
-                                                    <div className="h-5 w-24 bg-gray-700 rounded" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="h-3 w-12 sm:w-16 bg-gray-700 rounded mb-1.5 sm:mb-2" />
+                                                    <div className="h-4 sm:h-5 w-20 sm:w-24 bg-gray-700 rounded" />
                                                 </div>
                                             </div>
                                         ))}
@@ -735,13 +737,21 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
 
                                 {/* Current Game */}
                                 {player.current_videogame && (
-                                    <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-700/30 to-gray-700/20 rounded-xl border border-gray-600/30">
-                                        <div className="p-3 bg-orange-500/20 rounded-xl">
-                                            <Gamepad2 className="w-5 h-5 text-orange-400" />
+                                    <div 
+                                        className="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-700/30 to-gray-700/20 rounded-xl border border-gray-600/30 hover:border-orange-400/50 transition-all duration-300 cursor-pointer group"
+                                        onClick={() => router.push(`/matches?game=${encodeURIComponent(player.current_videogame!.slug)}`)}
+                                    >
+                                        <div className="p-3 bg-orange-500/20 rounded-xl group-hover:bg-orange-500/30 transition-colors duration-300">
+                                            <Gamepad2 className="w-5 h-5 text-orange-400 group-hover:text-orange-300 transition-colors duration-300" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="text-sm text-gray-400 font-medium mb-1">Current Game</div>
-                                            <div className="text-orange-400 font-bold text-lg">{player.current_videogame.name}</div>
+                                            <div className="text-orange-400 font-bold text-lg group-hover:text-orange-300 transition-colors duration-300">{player.current_videogame.name}</div>
+                                        </div>
+                                        <div className="text-orange-400/60 group-hover:text-orange-400 transition-colors duration-300">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
                                         </div>
                                     </div>
                                 )}

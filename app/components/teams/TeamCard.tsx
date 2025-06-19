@@ -197,12 +197,23 @@ export default function TeamCard({ team }: TeamCardProps) {
                 <div className="space-y-4">
                     {/* Current Videogame */}
                     {team.current_videogame && (
-                        <div className="bg-gray-700/30 rounded-lg py-2 px-3">
+                        <div 
+                            className="bg-gray-700/30 rounded-lg py-2 px-3 hover:bg-gray-700/50 transition-colors cursor-pointer group/videogame"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/matches?game=${encodeURIComponent(team.current_videogame!.slug)}`);
+                            }}
+                        >
                             <div className="flex items-center justify-center text-sm">
-                                <Gamepad2 className="w-4 h-4 mr-2 flex-shrink-0 text-purple-400" />
-                                <span className="text-gray-300 group-hover:text-gray-200 transition-colors duration-200">
+                                <Gamepad2 className="w-4 h-4 mr-2 flex-shrink-0 text-purple-400 group-hover/videogame:text-purple-300 transition-colors duration-200" />
+                                <span className="text-gray-300 group-hover:text-gray-200 group-hover/videogame:text-purple-200 transition-colors duration-200 flex-1">
                                     {team.current_videogame.name}
                                 </span>
+                                <div className="text-purple-400/60 group-hover/videogame:text-purple-400 transition-colors duration-200 ml-2">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     )}

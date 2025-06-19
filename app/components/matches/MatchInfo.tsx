@@ -72,7 +72,7 @@ export default function MatchInfo({
                         onClick={handleTournamentClick}
                     >
                         <Users className="w-3 h-3 mr-2 flex-shrink-0 text-blue-400 group-hover:text-blue-300 transition-colors duration-300" />
-                        <span className="text-center break-words font-light group-hover:text-white transition-colors duration-300">
+                        <span className="text-center break-words font-light group-hover:text-white transition-colors duration-300 flex-1">
                             <span className="text-gray-200 font-normal text-xs">
                                 {cleanedLeagueInfo}
                             </span>
@@ -88,6 +88,11 @@ export default function MatchInfo({
                                 </span>
                             )}
                         </span>
+                        <div className="text-blue-400/60 group-hover:text-blue-400 transition-colors duration-300 ml-2 flex-shrink-0">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             )}
