@@ -1,5 +1,17 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import TournamentsContent from '@/components/tournaments/TournamentsContent'
+
+export const metadata: Metadata = {
+  title: 'Esports Tournaments & Championships - EsportsTracker',
+  description: 'Discover upcoming and ongoing esports tournaments, championships, and competitions. Track prize pools, standings, and tournament brackets.',
+  keywords: ['esports tournaments', 'gaming championships', 'tournament brackets', 'esports competitions', 'prize pools', 'tournament standings'],
+  openGraph: {
+    title: 'Esports Tournaments & Championships - EsportsTracker',
+    description: 'Discover upcoming and ongoing esports tournaments, championships, and competitions. Track prize pools, standings, and tournament brackets.',
+    type: 'website',
+  }
+}
 
 // Loading component for the suspense boundary
 function TournamentsLoading() {

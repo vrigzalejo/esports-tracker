@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo } from '@/lib/textUtils'
+import { trackPageView, trackTeamView } from '@/lib/analytics'
 
 interface Player {
     id: number
@@ -260,6 +261,14 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
+
+    // Track page view and team view on component mount
+    useEffect(() => {
+        trackPageView(`/teams/${teamId}`, `Team Details - ${team?.name || 'Loading...'}`)
+        if (team) {
+            trackTeamView(teamId, team.name)
+        }
+    }, [teamId, team])
 
     // Memoize the fetch function to prevent unnecessary re-renders
     const fetchTeamData = useCallback(async () => {

@@ -1,5 +1,17 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import TeamsContent from '@/components/teams/TeamsContent'
+
+export const metadata: Metadata = {
+  title: 'Esports Teams & Organizations - EsportsTracker',
+  description: 'Browse professional esports teams, view rosters, track performance, and discover team statistics across all major gaming competitions.',
+  keywords: ['esports teams', 'gaming organizations', 'team rosters', 'professional gaming', 'team statistics', 'esports organizations'],
+  openGraph: {
+    title: 'Esports Teams & Organizations - EsportsTracker',
+    description: 'Browse professional esports teams, view rosters, track performance, and discover team statistics across all major gaming competitions.',
+    type: 'website',
+  }
+}
 
 // Loading component for the suspense boundary
 function TeamsLoading() {

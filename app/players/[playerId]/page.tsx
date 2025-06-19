@@ -1,5 +1,48 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import PlayerDetailsContent from '../../components/players/PlayerDetailsContent'
+
+interface PlayerDetailsPageProps {
+    params: Promise<{
+        playerId: string
+    }>
+}
+
+export async function generateMetadata({ params }: PlayerDetailsPageProps): Promise<Metadata> {
+    const { playerId } = await params
+    
+    try {
+        // Fetch player data from our API route
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/players/${playerId}`)
+        if (!response.ok) throw new Error('Failed to fetch player')
+        
+        const player = await response.json()
+        
+        const playerName = player.name || `Player ${playerId}`
+        const teamInfo = player.current_team?.name ? ` - ${player.current_team.name}` : ''
+        const gameInfo = player.current_videogame?.name ? ` | ${player.current_videogame.name}` : ''
+        
+        return {
+            title: `${playerName}${teamInfo} - Player Profile | EsportsTracker`,
+            description: `Follow ${playerName} esports player profile - view statistics, match history, tournaments, and team information.${teamInfo}${gameInfo}`,
+            keywords: ['player', playerName, player.current_team?.name, player.current_videogame?.name, 'esports', 'statistics', 'matches', 'tournaments'].filter(Boolean),
+            openGraph: {
+                title: `${playerName} - Player Profile`,
+                description: `Follow ${playerName} esports player profile - view statistics, match history, tournaments, and team information.`,
+                type: 'website',
+                images: player.image_url ? [{ url: player.image_url, alt: playerName }] : undefined,
+            }
+        }
+    } catch (error) {
+        console.error('Error generating player metadata:', error)
+        // Fallback metadata if player fetch fails
+        return {
+            title: 'Player Profile - EsportsTracker',
+            description: 'View player profile, statistics, match history, and tournament performance on EsportsTracker.',
+            keywords: ['player', 'esports', 'statistics', 'matches', 'tournaments'],
+        }
+    }
+}
 
 // Loading component for the suspense boundary
 function PlayerDetailsLoading() {
@@ -153,12 +196,6 @@ function PlayerDetailsLoading() {
             </main>
         </div>
     )
-}
-
-interface PlayerDetailsPageProps {
-    params: Promise<{
-        playerId: string
-    }>
 }
 
 export default async function PlayerDetailsPage({ params }: PlayerDetailsPageProps) {

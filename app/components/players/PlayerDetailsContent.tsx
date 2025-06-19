@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import type { Player } from '@/types/roster'
 import { parseLeagueInfo, capitalizeWords } from '@/lib/textUtils'
+import { trackPageView, trackPlayerView } from '@/lib/analytics'
 
 // Helper function to properly capitalize tournament names with group identifiers
 const capitalizeTournamentName = (text: string): string => {
@@ -143,6 +144,14 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const tournamentRef = useRef<HTMLDivElement>(null)
+
+    // Track page view and player view on component mount
+    useEffect(() => {
+        trackPageView(`/players/${playerId}`, `Player Details - ${player?.name || 'Loading...'}`)
+        if (player) {
+            trackPlayerView(playerId, player.name)
+        }
+    }, [playerId, player])
 
     // Memoize the fetch function to prevent unnecessary re-renders
     const fetchPlayerData = useCallback(async () => {

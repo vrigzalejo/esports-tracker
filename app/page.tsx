@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock } from 'lucide-react'
+import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
@@ -11,30 +11,10 @@ import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
 import { getStatusColor, getStatusText } from '@/lib/utils'
 import type { Match } from '@/types/esports'
 
-// StatCard component for displaying statistics
-function StatCard({ icon: Icon, title, value, subtitle, trend }: {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  value: string
-  subtitle: string
-  trend?: string
-}) {
-  return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 group">
-      <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
-        {trend && (
-          <span className="text-xs sm:text-sm text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded-full">
-            {trend}
-          </span>
-        )}
-      </div>
-      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1 group-hover:text-purple-100 transition-colors duration-300">{value}</h3>
-      <p className="text-gray-400 text-xs sm:text-sm leading-tight font-medium">{title}</p>
-      <p className="text-gray-500 text-xs leading-tight hidden sm:block mt-1">{subtitle}</p>
-    </div>
-  )
-}
+// Note: Since this is a client component, metadata is handled in layout.tsx
+// The root layout already has comprehensive metadata for the home page
+
+
 
 // Custom hook for countdown functionality
 function useCountdown(match: Match) {
@@ -219,15 +199,48 @@ export default function HomePage() {
   const { data: tournaments, loading: tournamentsLoading } = useTournaments({ per_page: 50 })
   const { data: teams, loading: teamsLoading } = useTeams({ per_page: 50 })
 
-  // Calculate statistics
+  // Calculate realistic statistics based on limited sample data
   const stats = {
     liveMatches: matches?.filter(match => match.status === 'running').length || 0,
+    upcomingMatches: matches?.filter(match => match.status === 'not_started').length || 0,
+    totalActiveMatches: (matches?.filter(match => match.status === 'running' || match.status === 'not_started').length || 0),
     activeTournaments: tournaments?.filter(tournament => tournament.status !== 'finished').length || 0,
-    totalTeams: teams?.length || 0,
-    totalPrizePool: tournaments?.reduce((total, tournament) => {
-      const prizepool = tournament.prizepool ? parseFloat(tournament.prizepool.replace(/[^0-9.]/g, '')) : 0
-      return total + prizepool
+    featuredTeams: teams?.length || 0,
+    samplePrizePool: tournaments?.reduce((total, tournament) => {
+      if (!tournament.prizepool) return total
+      
+      // Handle different currency formats and extract numeric value
+      let prizepool = tournament.prizepool.toLowerCase()
+      let multiplier = 1
+      
+      // Check for K/M suffixes
+      if (prizepool.includes('k') && !prizepool.includes('m')) {
+        multiplier = 1000
+        prizepool = prizepool.replace(/k/g, '')
+      } else if (prizepool.includes('m')) {
+        multiplier = 1000000
+        prizepool = prizepool.replace(/m/g, '')
+      }
+      
+      // Extract numeric value (remove currency symbols and text)
+      const numericValue = parseFloat(prizepool.replace(/[^0-9.]/g, ''))
+      
+      if (isNaN(numericValue)) return total
+      
+      return total + (numericValue * multiplier)
     }, 0) || 0
+  }
+
+  // Format prize pool display
+  const formatPrizePool = (amount: number): string => {
+    if (amount === 0) return 'TBD'
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`
+    } else if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`
+    } else {
+      return `$${amount.toLocaleString()}`
+    }
   }
 
   const handleQuickAction = (action: string) => {
@@ -241,6 +254,9 @@ export default function HomePage() {
       case 'teams':
         router.push('/teams')
         break
+      case 'players':
+        router.push('/players')
+        break
     }
   }
 
@@ -252,7 +268,7 @@ export default function HomePage() {
       <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 main-content">
         {/* Hero Section - Mobile Responsive */}
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-3 sm:mb-4 px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-3 sm:mb-4 px-2 animate-gradient-x bg-300% hover:from-pink-500 hover:via-purple-500 hover:to-blue-400 transition-all duration-500 hover:animate-neon-glow animate-glitch cursor-default">
             EsportsTracker
           </h1>
           <p className="text-sm sm:text-base lg:text-xl text-gray-300 max-w-2xl mx-auto px-3 sm:px-4 leading-relaxed">
@@ -262,31 +278,40 @@ export default function HomePage() {
 
         {/* Statistics Overview - Fully Responsive Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-          {matchesLoading ? (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
-              <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
+          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-blue-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-blue-300 font-medium">Live & Upcoming</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.totalActiveMatches}</p>
+              </div>
+              <div className="bg-blue-500/20 p-1.5 sm:p-2 rounded-lg">
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+              </div>
             </div>
-          ) : (
-            <StatCard
-              icon={Play}
-              title="Live Matches"
-              value={stats.liveMatches.toString()}
-              subtitle="Across all games"
-              trend={stats.liveMatches > 0 ? `+${stats.liveMatches}` : undefined}
-            />
-          )}
+            <p className="text-xs text-blue-300/70 mt-1">
+              {stats.liveMatches > 0 ? `${stats.liveMatches} live now` : 'Ready to start'}
+            </p>
+          </div>
 
           {tournamentsLoading ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700/50 animate-pulse">
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={Trophy}
-              title="Active Tournaments"
-              value={stats.activeTournaments.toString()}
-              subtitle="Currently running"
-            />
+            <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-purple-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-purple-300 font-medium">Active Events</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.activeTournaments}</p>
+                </div>
+                <div className="bg-purple-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                </div>
+              </div>
+              <p className="text-xs text-purple-300/70 mt-1">
+                {stats.activeTournaments > 5 ? `${stats.activeTournaments} active` : 'Running tournaments'}
+              </p>
+            </div>
           )}
 
           {teamsLoading ? (
@@ -294,12 +319,20 @@ export default function HomePage() {
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={Users}
-              title="Top Teams"
-              value={stats.totalTeams.toString()}
-              subtitle="Tracked globally"
-            />
+            <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-green-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-green-300 font-medium">Featured Teams</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{stats.featuredTeams}</p>
+                </div>
+                <div className="bg-green-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                </div>
+              </div>
+              <p className="text-xs text-green-300/70 mt-1">
+                {stats.featuredTeams >= 50 ? '50+ teams' : 'Top performers'}
+              </p>
+            </div>
           )}
 
           {tournamentsLoading ? (
@@ -307,73 +340,99 @@ export default function HomePage() {
               <div className="h-12 sm:h-16 lg:h-20 bg-gray-700/50 rounded-lg" />
             </div>
           ) : (
-            <StatCard
-              icon={TrendingUp}
-              title="Total Prize Pool"
-              value={`$${(stats.totalPrizePool / 1000000).toFixed(1)}M`}
-              subtitle="Active tournaments"
-            />
+            <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-orange-500/20 min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-orange-300 font-medium">Prize Pool</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{formatPrizePool(stats.samplePrizePool)}</p>
+                </div>
+                <div className="bg-orange-500/20 p-1.5 sm:p-2 rounded-lg">
+                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
+                </div>
+              </div>
+              <p className="text-xs text-orange-300/70 mt-1">
+                {stats.samplePrizePool > 1000000 ? "Multi-million" : stats.samplePrizePool > 0 ? "Active" : "Current events"}
+              </p>
+            </div>
           )}
         </div>
 
-        {/* Quick Actions - Mobile Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        {/* Quick Actions - Mobile Responsive - Made Smaller */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 lg:mb-12">
           <button
             onClick={() => handleQuickAction('matches')}
-            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-blue-500 hover:to-blue-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Play className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-blue-100 transition-colors duration-200">Live Matches</h3>
-            <p className="text-blue-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Watch live matches and get real-time updates</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-blue-100 transition-colors duration-200">Live Matches</h3>
+            <p className="text-blue-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Watch live matches</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('tournaments')}
-            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-purple-500 hover:to-purple-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Trophy className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-purple-100 transition-colors duration-200">Tournaments</h3>
-            <p className="text-purple-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Explore upcoming and ongoing tournaments</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-purple-100 transition-colors duration-200">Tournaments</h3>
+            <p className="text-purple-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Explore tournaments</p>
           </button>
 
           <button
             onClick={() => handleQuickAction('teams')}
-            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer min-h-[100px] sm:min-h-[120px] lg:min-h-[140px] sm:col-span-2 lg:col-span-1 transform hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-gradient-to-br from-pink-600 to-pink-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-pink-500 hover:to-pink-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
-              <Users className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white group-hover:scale-110 transition-transform duration-200" />
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <div className="flex items-center justify-between mb-2">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2 group-hover:text-pink-100 transition-colors duration-200">Teams</h3>
-            <p className="text-pink-100 text-sm sm:text-base leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Browse teams and player statistics</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-pink-100 transition-colors duration-200">Teams</h3>
+            <p className="text-pink-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Browse teams</p>
+          </button>
+
+          <button
+            onClick={() => handleQuickAction('players')}
+            className="bg-gradient-to-br from-green-600 to-green-800 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:from-green-500 hover:to-green-700 transition-all duration-200 text-left group cursor-pointer min-h-[80px] sm:min-h-[90px] lg:min-h-[100px] transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-white/0 group-hover:text-white/100 transition-all duration-200 transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            </div>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-green-100 transition-colors duration-200">Players</h3>
+            <p className="text-green-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Discover players</p>
           </button>
         </div>
 
-        {/* Latest Activity - Mobile Responsive */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 border border-gray-700/50">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 sm:mb-5 lg:mb-6 flex items-center">
-            <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400 mr-2 sm:mr-3 flex-shrink-0" />
-            <span className="truncate text-sm sm:text-base lg:text-xl">
-              {searchTerm ? (
-                <>
-                  <span className="hidden sm:inline">Search Results for &ldquo;</span>
-                  <span className="sm:hidden">Results for &ldquo;</span>
-                  {searchTerm}&rdquo;
-                </>
-              ) : (
-                'Latest Matches'
-              )}
-            </span>
-          </h2>
+        {/* Latest Activity - Mobile Responsive - Emphasized */}
+        <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border-2 border-blue-500/30 shadow-2xl shadow-blue-500/10">
+          <div className="flex items-center justify-between mb-6 sm:mb-7 lg:mb-8">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-400 mr-3 flex-shrink-0 animate-pulse" />
+              <span className="truncate">
+                {searchTerm ? (
+                  <>
+                    <span className="hidden sm:inline">Search Results for &ldquo;</span>
+                    <span className="sm:hidden">Results for &ldquo;</span>
+                    {searchTerm}&rdquo;
+                  </>
+                ) : (
+                  'Latest Matches'
+                )}
+              </span>
+            </h2>
+            <div className="hidden sm:flex items-center space-x-2 text-xs text-gray-400 bg-gray-800/50 px-3 py-2 rounded-lg border border-gray-700/50">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Live Updates</span>
+            </div>
+          </div>
           
-          {/* Scrollable Match List - Mobile Optimized */}
-          <div className="max-h-64 sm:max-h-80 lg:max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 rounded-lg">
+          {/* Scrollable Match List - Mobile Optimized - Increased Height */}
+          <div className="max-h-80 sm:max-h-96 lg:max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800 rounded-lg">
             <div className="space-y-2 sm:space-y-3 lg:space-y-4 pr-2">
               {matchesLoading ? (
                 [...Array(8)].map((_, i) => (

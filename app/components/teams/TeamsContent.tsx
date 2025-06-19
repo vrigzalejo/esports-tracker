@@ -10,6 +10,7 @@ import TeamCard from '@/components/teams/TeamCard'
 import { useTeams } from '@/hooks/useEsportsData'
 import type { Team } from '@/types/esports'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
+import { trackPageView } from '@/lib/analytics'
 
 // Component that uses useSearchParams and needs Suspense
 function TeamsContentWithSearchParams() {
@@ -20,6 +21,11 @@ function TeamsContentWithSearchParams() {
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'))
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('per_page') || getDropdownValue('teamItemsPerPage', 20).toString()))
+
+    // Track page view on component mount
+    useEffect(() => {
+        trackPageView('/teams', 'Teams - Esports Teams & Organizations')
+    }, [])
 
     // Function to update URL parameters
     const updateUrlParams = (updates: Record<string, string | null>) => {
