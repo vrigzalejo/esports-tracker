@@ -6,9 +6,11 @@ import Image from 'next/image'
 import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
+
 import { useMatches, useTournaments, useTeams } from '@/hooks/useEsportsData'
 import { cleanMatchName, capitalizeWords } from '@/lib/textUtils'
-import { getStatusColor, getStatusText } from '@/lib/utils'
+import { getStatusColor, getStatusText, formatMatchDateSmart } from '@/lib/utils'
+import { useCurrentTimezone } from '@/contexts/TimezoneContext'
 import type { Match } from '@/types/esports'
 
 // Note: Since this is a client component, metadata is handled in layout.tsx
@@ -78,6 +80,7 @@ function useCountdown(match: Match) {
 // Component for individual match row with countdown - Mobile Responsive
 function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof useRouter> }) {
   const { countdown, isLive, isPast } = useCountdown(match)
+  const currentTimezone = useCurrentTimezone()
 
   return (
     <button
@@ -160,7 +163,7 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
             <span className="text-xs sm:text-sm text-gray-500 font-medium">{match.videogame.name}</span>
             <span className="text-xs sm:text-sm text-gray-500 hidden sm:block">•</span>
             <span className="text-xs sm:text-sm text-gray-500">
-              {formatMatchDateRange(match, { includeYear: true })}
+              {formatMatchDateSmart(match.scheduled_at || match.begin_at, currentTimezone, { includeYear: true })}
             </span>
           </div>
         </div>
@@ -587,47 +590,4 @@ export default function HomePage() {
   )
 }
 
-// Helper function to format match date range
-function formatMatchDateRange(match: Match, options?: { includeYear?: boolean }): string {
-  const beginDate = new Date(match.begin_at)
-  const now = new Date()
-  
-  // Check if the match is today
-  const isToday = beginDate.toDateString() === now.toDateString()
-  
-  if (isToday) {
-    return `Today ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-  }
-  
-  // Check if the match is tomorrow
-  const tomorrow = new Date(now)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const isTomorrow = beginDate.toDateString() === tomorrow.toDateString()
-  
-  if (isTomorrow) {
-    return `Tomorrow ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-  }
-  
-  // Check if the match is within this week
-  const weekFromNow = new Date(now)
-  weekFromNow.setDate(weekFromNow.getDate() + 7)
-  
-  if (beginDate < weekFromNow && beginDate > now) {
-    const dayName = beginDate.toLocaleDateString([], { weekday: 'short' })
-    return `${dayName} ${beginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-  }
-  
-  // For dates further out, show the full date
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }
-  
-  if (options?.includeYear || beginDate.getFullYear() !== now.getFullYear()) {
-    dateOptions.year = 'numeric'
-  }
-  
-  return beginDate.toLocaleDateString([], dateOptions)
-}
+

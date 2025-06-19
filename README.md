@@ -50,10 +50,12 @@ A modern, full-featured esports tracking application built with Next.js 15, Tail
 - **Tournament Participation**: View all tournaments a team has participated in with detailed roster information
 
 ### Timezone & Date Handling
-- **User Timezone Conversion**: All dates and times displayed in user's current timezone
+- **Automatic Timezone Detection**: All dates and times automatically displayed in user's current system timezone
+- **Smart Date Formatting**: Intelligent date display (Today, Tomorrow, weekday, or full date)
 - **Comprehensive Date Display**: Start and end dates with times and timezone abbreviations
 - **Tournament Scheduling**: Complete tournament timeline with proper timezone handling
 - **Match Timing**: Accurate match scheduling with timezone-aware displays
+- **No Configuration Required**: Zero-setup timezone handling with graceful UTC fallback
 
 ### Technical Highlights
 - **Next.js 15**: Latest features including Turbopack and improved performance
@@ -193,19 +195,25 @@ app/
 │   │   └── TeamDisplay.tsx # Enhanced team display with navigation
 │   ├── ui/            # UI components
 │   │   ├── StatCard.tsx # Statistics display cards
+│   │   ├── TimezoneAwareDate.tsx # Automatic timezone-aware date formatting
 │   │   └── AlphaBanner.tsx # Alpha version banner
 │   └── debug/         # Debug components
 │       └── CacheStatus.tsx # Cache status indicator
 ├── hooks/             # Custom React hooks
 │   ├── useEsportsData.tsx # Data fetching hooks
-│   └── useMatchData.tsx # Match-specific data hooks with timezone handling
+│   └── useMatchData.tsx # Match-specific data hooks with automatic timezone handling
 ├── lib/               # Utilities and API
 │   ├── analytics.ts   # Comprehensive analytics utilities for tracking user interactions
 │   ├── logger.ts      # Dual logging system for client/server-side logging
 │   ├── textUtils.ts   # Text formatting, capitalization, and region acronym utilities
 │   ├── tournamentUtils.ts # Tournament-specific utilities
-│   ├── timezoneUtils.ts # Timezone handling and date formatting
+│   ├── utils.ts       # Automatic timezone detection and date formatting utilities
 │   └── pandaScore.ts  # PandaScore API wrapper
+├── contexts/           # React contexts
+│   ├── DataContext.tsx # Data management context
+│   ├── GamesContext.tsx # Games data context
+│   ├── TimezoneContext.tsx # Automatic timezone detection context
+│   └── SecurityContext.tsx # Security context
 ├── types/             # TypeScript definitions
 │   └── esports.ts     # Esports data type definitions
 └── globals.css       # Global styles with custom animations
@@ -318,9 +326,11 @@ const { analysis } = await response.json()
 - **Tournament Participation**: Complete tournament history with roster information
 
 ### Timezone & Date Features
-- **User Timezone Display**: All dates and times shown in user's current timezone
+- **Automatic Timezone Detection**: All dates and times automatically shown in user's current system timezone
+- **Smart Date Formatting**: Intelligent formatting (Today 3:00 PM EST, Tomorrow 8:00 AM PST, Wed 2:00 PM JST)
 - **Comprehensive Date Information**: Start and end dates with times and timezone abbreviations
 - **Tournament Scheduling**: Complete timeline information with proper timezone handling
+- **Zero Configuration**: No user input required - automatic timezone detection with UTC fallback
 
 ### Accessibility
 - **Keyboard Navigation**: Full keyboard support for modals and interactions with Escape key handling
@@ -348,6 +358,33 @@ RUN npm run build
 EXPOSE 3000
 CMD ["npm", "start"]
 ```
+
+## 🌍 Automatic Timezone System
+
+### Zero-Configuration Timezone Handling
+- **Automatic Detection**: Automatically detects and uses the user's current system timezone
+- **No User Input Required**: No timezone selectors or configuration needed
+- **Smart Date Formatting**: Intelligent date display based on context:
+  - "Today 3:00 PM EST" for same-day events
+  - "Tomorrow 8:00 AM PST" for next-day events
+  - "Wed 2:00 PM JST" for current week events
+  - "Dec 25, 2024 6:00 PM UTC" for future dates
+- **Graceful Fallback**: Automatically falls back to UTC if timezone detection fails
+- **Global Context**: Consistent timezone handling across all components and pages
+
+### Timezone Features
+- **Real-time Updates**: All dates and times automatically update based on user's current timezone
+- **Comprehensive Coverage**: Applies to matches, tournaments, team schedules, and all date displays
+- **Performance Optimized**: Efficient timezone detection with minimal overhead
+- **Cross-Platform Support**: Works across all browsers and devices
+- **Tooltip Information**: Hover tooltips show complete date/time information with timezone abbreviations
+
+### Technical Implementation
+- **React Context**: Global timezone state management with `TimezoneContext`
+- **Custom Hooks**: `useCurrentTimezone()` and `useTimezoneAwareDate()` for component integration
+- **Timezone-Aware Components**: `TimezoneAwareDate` component for consistent date formatting
+- **Utility Functions**: Comprehensive date formatting utilities with timezone support
+- **TypeScript Support**: Full type safety for all timezone-related functions
 
 ## 🤖 AI Analysis System
 

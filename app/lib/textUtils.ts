@@ -88,8 +88,8 @@ export function capitalizeWords(text: string): string {
     return playInPattern;
 }
 
-// Helper function to parse and format dates consistently
-export function parseDateTime(dateString: string, options?: {
+// Helper function to parse and format dates consistently with timezone support
+export function parseDateTime(dateString: string, timezone?: string, options?: {
     includeDate?: boolean;
     includeTime?: boolean;
     timeOnly?: boolean;
@@ -100,14 +100,17 @@ export function parseDateTime(dateString: string, options?: {
     const date = new Date(dateString);
     const { includeDate = true, includeTime = true, timeOnly = false, includeYear = true } = options || {};
     
-    if (timeOnly) {
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    const formatOptions: Intl.DateTimeFormatOptions = {};
+    
+    if (timezone) {
+        formatOptions.timeZone = timezone;
     }
     
-    const formatOptions: Intl.DateTimeFormatOptions = {};
+    if (timeOnly) {
+        formatOptions.hour = '2-digit';
+        formatOptions.minute = '2-digit';
+        return date.toLocaleTimeString('en-US', formatOptions);
+    }
     
     if (includeDate) {
         formatOptions.month = 'short';
@@ -130,13 +133,13 @@ export function getMatchDateTime(match: { scheduled_at?: string; begin_at: strin
     return match.scheduled_at || match.begin_at;
 }
 
-// Helper function to format date ranges for matches with clean formatting
+// Helper function to format date ranges for matches with clean formatting and timezone support
 export function formatMatchDateRange(match: {
     scheduled_at?: string;
     begin_at: string;
     end_at?: string;
     status: string;
-}, options?: {
+}, timezone?: string, options?: {
     includeWeekday?: boolean;
     includeYear?: boolean;
 }): string {
@@ -152,25 +155,32 @@ export function formatMatchDateRange(match: {
             day: 'numeric'
         };
         
+        if (timezone) dateOptions.timeZone = timezone;
         if (includeWeekday) dateOptions.weekday = 'short';
         if (includeYear) dateOptions.year = 'numeric';
         
         const dateStr = startDate.toLocaleDateString('en-US', dateOptions);
         
         // Format start time
-        const startTime = startDate.toLocaleTimeString('en-US', {
+        const startTimeOptions: Intl.DateTimeFormatOptions = {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-        });
+        };
+        if (timezone) startTimeOptions.timeZone = timezone;
+        
+        const startTime = startDate.toLocaleTimeString('en-US', startTimeOptions);
         
         // Format end time with timezone
-        const endTime = endDate.toLocaleTimeString('en-US', {
+        const endTimeOptions: Intl.DateTimeFormatOptions = {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true,
             timeZoneName: 'short'
-        });
+        };
+        if (timezone) endTimeOptions.timeZone = timezone;
+        
+        const endTime = endDate.toLocaleTimeString('en-US', endTimeOptions);
         
         return `${dateStr}, ${startTime} - ${endTime}`;
     } else {
@@ -184,6 +194,7 @@ export function formatMatchDateRange(match: {
             timeZoneName: 'short'
         };
         
+        if (timezone) dateTimeOptions.timeZone = timezone;
         if (includeWeekday) dateTimeOptions.weekday = 'short';
         if (includeYear) dateTimeOptions.year = 'numeric';
         
