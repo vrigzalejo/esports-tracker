@@ -10,26 +10,6 @@ import type { Player } from '@/types/roster'
 import { parseLeagueInfo, capitalizeWords } from '@/lib/textUtils'
 import { trackPageView, trackPlayerView } from '@/lib/analytics'
 
-// Helper function to properly capitalize tournament names with group identifiers
-const capitalizeTournamentName = (text: string): string => {
-    if (!text) return text;
-    
-    // First apply the standard capitalizeWords function
-    let result = capitalizeWords(text);
-    
-    // Then handle specific cases like "Group a" -> "Group A"
-    result = result.replace(/\bGroup\s+([a-z])\b/gi, (match, letter) => {
-        return `Group ${letter.toUpperCase()}`;
-    });
-    
-    // Handle other similar patterns if needed
-    result = result.replace(/\bStage\s+([a-z])\b/gi, (match, letter) => {
-        return `Stage ${letter.toUpperCase()}`;
-    });
-    
-    return result;
-};
-
 interface PlayerDetailsContentProps {
     playerId: string
 }
@@ -528,7 +508,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                             className="text-lg font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
                                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                         >
-                                                                            {capitalizeTournamentName(tournament.league.name)}
+                                                                            {capitalizeWords(tournament.league.name)}
                                                                         </span>
                                                                     </div>
                                                                 )}
@@ -541,7 +521,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                             className="text-md font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
                                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                         >
-                                                                            {capitalizeTournamentName(parseLeagueInfo(tournament.serie.full_name || tournament.serie.name))}
+                                                                            {capitalizeWords(parseLeagueInfo(tournament.serie.full_name || tournament.serie.name))}
                                                                         </span>
                                                                     </div>
                                                                 )}
@@ -553,7 +533,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                         className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
                                                                         onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                                     >
-                                                                        {capitalizeTournamentName(parseLeagueInfo(tournament.name))}
+                                                                        {capitalizeWords(parseLeagueInfo(tournament.name))}
                                                                     </span>
                                                                     {tournament.tier && (() => {
                                                                         const tierInfo = getTierDisplay(tournament.tier)
