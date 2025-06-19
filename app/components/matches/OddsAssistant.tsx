@@ -156,9 +156,9 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                 <div className="p-6">
                     {/* Match Info */}
                     <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center">
                             <div 
-                                className="flex items-center gap-3 cursor-pointer hover:text-blue-300 transition-colors"
+                                className="flex-1 flex items-center justify-start gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200"
                                 onClick={() => {
                                     if (team1?.id) {
                                         if (match.opponents?.[0]?.type === 'Player') {
@@ -170,16 +170,16 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                 }}
                             >
                                 {team1?.image_url && (
-                                    <div className={`relative w-12 h-12 sm:w-14 sm:h-14 ${
+                                    <div className={`relative w-12 h-12 ${
                                         match.opponents?.[0]?.type === 'Player' 
-                                            ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
-                                            : 'bg-gray-600/60 rounded-xl'
+                                            ? 'bg-gray-600/60 rounded-full' 
+                                            : 'bg-gray-600/60 rounded-lg'
                                     } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden`}>
                                         <Image 
                                             src={team1.image_url} 
                                             alt={team1.name} 
                                             fill
-                                            className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-1'}
+                                            className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[0]?.type === 'Player') {
@@ -191,11 +191,15 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                         />
                                     </div>
                                 )}
-                                <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team1?.name || 'TBD'}</span>
+                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate">{team1?.name || 'TBD'}</span>
                             </div>
-                            <span className="text-gray-400 font-medium">VS</span>
+                            
+                            <div className="flex items-center justify-center px-6 py-2">
+                                <span className="text-gray-400 font-medium text-sm whitespace-nowrap">VS</span>
+                            </div>
+                            
                             <div 
-                                className="flex items-center gap-3 cursor-pointer hover:text-blue-300 transition-colors"
+                                className="flex-1 flex items-center justify-end gap-3 cursor-pointer hover:text-blue-300 transition-colors duration-200"
                                 onClick={() => {
                                     if (team2?.id) {
                                         if (match.opponents?.[1]?.type === 'Player') {
@@ -206,18 +210,18 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                     }
                                 }}
                             >
-                                <span className="font-semibold text-white hover:text-blue-300 transition-colors">{team2?.name || 'TBD'}</span>
+                                <span className="font-medium text-white hover:text-blue-300 transition-colors duration-200 truncate">{team2?.name || 'TBD'}</span>
                                 {team2?.image_url && (
-                                    <div className={`relative w-12 h-12 sm:w-14 sm:h-14 ${
+                                    <div className={`relative w-12 h-12 ${
                                         match.opponents?.[1]?.type === 'Player' 
-                                            ? 'bg-gradient-to-br from-gray-600/80 to-gray-700/80 rounded-lg' 
-                                            : 'bg-gray-600/60 rounded-xl'
+                                            ? 'bg-gray-600/60 rounded-full' 
+                                            : 'bg-gray-600/60 rounded-lg'
                                     } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden`}>
                                         <Image 
                                             src={team2.image_url} 
                                             alt={team2.name} 
                                             fill
-                                            className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-1'}
+                                            className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
                                                 if (match.opponents?.[1]?.type === 'Player') {

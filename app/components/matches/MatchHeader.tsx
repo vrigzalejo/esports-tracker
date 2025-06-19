@@ -78,13 +78,13 @@ export default function MatchHeader({
                         }
                     }}
                     disabled={detailsDisabled}
-                    className={`group flex items-center justify-center space-x-1 px-2.5 py-1.5 text-xs rounded-lg font-medium transition-all duration-200 ${
+                    className={`group flex items-center justify-center space-x-1 px-3 py-2 md:px-2.5 md:py-1.5 text-xs rounded-lg font-medium transition-all duration-200 min-w-[80px] md:min-w-auto ${
                         detailsDisabled
                             ? 'bg-gray-700/30 text-gray-500 border border-gray-700/30 cursor-not-allowed'
-                            : 'bg-blue-500/10 hover:bg-blue-500/15 text-blue-400 hover:text-blue-300 border border-blue-500/20 hover:border-blue-400/30 cursor-pointer'
+                            : 'bg-blue-500/15 hover:bg-blue-500/20 md:bg-blue-500/10 md:hover:bg-blue-500/15 text-blue-300 md:text-blue-400 hover:text-blue-200 md:hover:text-blue-300 border border-blue-500/25 md:border-blue-500/20 hover:border-blue-400/35 md:hover:border-blue-400/30 cursor-pointer'
                     }`}
                 >
-                    <UserCheck className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                    <UserCheck className="w-4 h-4 md:w-3.5 md:h-3.5 sm:w-3 sm:h-3" />
                     <span className="hidden sm:inline text-xs">Details</span>
                 </button>
 
@@ -143,7 +143,7 @@ export default function MatchHeader({
                                                 e.stopPropagation()
                                                 setShowStreams(false)
                                             }}
-                                            className="text-gray-400 hover:text-gray-300 cursor-pointer"
+                                            className="text-gray-400 hover:text-gray-300 cursor-pointer p-1.5 md:p-1 hover:bg-gray-700/50 rounded-md transition-colors duration-200 flex items-center justify-center min-w-[32px] min-h-[32px] md:min-w-[28px] md:min-h-[28px]"
                                             aria-label="Close streams menu"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
