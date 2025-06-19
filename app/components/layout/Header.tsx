@@ -10,7 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({ searchTerm, onSearch }: HeaderProps) {
-
     return (
         <header className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-[98] overflow-visible">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">

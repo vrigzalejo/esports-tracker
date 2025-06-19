@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Tournament } from '@/types/esports'
+import TimezoneAwareDate from '@/components/ui/TimezoneAwareDate'
 import { parseRegion, parseCountry, parseTournamentType } from '@/lib/tournamentUtils'
 
 interface TournamentCardProps {
@@ -13,26 +14,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
     const [showAllTeams, setShowAllTeams] = useState(false)
     const router = useRouter()
 
-    // Get user's timezone
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-    // Format date in user's current timezone
-    const formatDateInUserTimezone = (dateString: string) => {
-        if (!dateString) return 'TBD'
-
-        const date = new Date(dateString)
-        const options: Intl.DateTimeFormatOptions = {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: userTimezone,
-            timeZoneName: 'short'
-        }
-
-        return date.toLocaleDateString('en-US', options)
-    }
+    // Timezone-aware date formatting is now handled by TimezoneAwareDate component
 
     const getLeagueImage = () => {
         const imageUrl = tournament.league.image_url;
@@ -183,10 +165,18 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                                 <Calendar className="w-4 h-4 text-purple-400" />
                                 <div className="text-center">
                                     <div className="text-gray-200 font-medium">
-                                        {formatDateInUserTimezone(tournament.begin_at)}
+                                        <TimezoneAwareDate 
+                                            dateString={tournament.begin_at} 
+                                            format="full" 
+                                            includeYear={true}
+                                        />
                                     </div>
                                     <div className="text-gray-400 text-xs">
-                                        to {formatDateInUserTimezone(tournament.end_at)}
+                                        to <TimezoneAwareDate 
+                                            dateString={tournament.end_at} 
+                                            format="full" 
+                                            includeYear={true}
+                                        />
                                     </div>
                                 </div>
                             </div>

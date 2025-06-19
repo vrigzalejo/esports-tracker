@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Match } from '@/types/esports'
 import { parseLeagueInfo } from '@/lib/textUtils'
+import { useTimezoneAwareDate } from '@/components/ui/TimezoneAwareDate'
 
 interface MatchResults {
     team1Score: number
@@ -16,8 +17,8 @@ export function useMatchData(match: Match) {
     const [isPast, setIsPast] = useState(false)
     const countdownInterval = useRef<NodeJS.Timeout | undefined>(undefined)
 
-    // Get user's timezone
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    // Get timezone-aware date formatting
+    const { formatDate } = useTimezoneAwareDate()
 
     // Calculate countdown
     const calculateCountdown = (matchData: Match) => {
@@ -70,27 +71,21 @@ export function useMatchData(match: Match) {
         }
     }, [match])
 
-    // Format date and time in user's current timezone
+    // Format date and time in selected timezone
     const formatDateTime = (dateString: string) => {
         if (!dateString) return { date: 'TBD', time: 'TBD' }
 
-        // Always use user's current timezone
-        const date = new Date(dateString)
-        const dateOptions: Intl.DateTimeFormatOptions = {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            timeZone: userTimezone
-        }
-        const timeOptions: Intl.DateTimeFormatOptions = {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: userTimezone,
-            timeZoneName: 'short'
-        }
-
-        const formattedDate = date.toLocaleDateString('en-US', dateOptions)
-        const formattedTime = date.toLocaleTimeString('en-US', timeOptions)
+        const formattedDate = formatDate(dateString, {
+            includeDate: true,
+            includeTime: false,
+            includeYear: true
+        })
+        
+        const formattedTime = formatDate(dateString, {
+            includeDate: false,
+            includeTime: true,
+            includeTimezone: true
+        })
 
         return { date: formattedDate, time: formattedTime }
     }

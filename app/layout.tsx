@@ -8,6 +8,7 @@ import SecurityWrapper from "@/components/layout/SecurityWrapper";
 import { GamesProvider } from "@/contexts/GamesContext";
 import { DataProvider } from "@/contexts/DataContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
+import { TimezoneProvider } from "@/contexts/TimezoneContext";
 import CacheStatus from "@/components/debug/CacheStatus";
 
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
@@ -83,14 +84,16 @@ export default function RootLayout({
         <SecurityProvider>
           <DataProvider>
             <GamesProvider>
-              <SecurityWrapper />
-              <AlphaBanner />
-              <div className="flex-1 flex flex-col">
-                {children}
-              </div>
-              <Footer />
-              <CookieNotification />
-              {process.env.NODE_ENV === 'development' && <CacheStatus />}
+              <TimezoneProvider>
+                <SecurityWrapper />
+                <AlphaBanner />
+                <div className="flex-1 flex flex-col">
+                  {children}
+                </div>
+                <Footer />
+                <CookieNotification />
+                {process.env.NODE_ENV === 'development' && <CacheStatus />}
+              </TimezoneProvider>
             </GamesProvider>
           </DataProvider>
         </SecurityProvider>

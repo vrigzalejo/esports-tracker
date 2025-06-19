@@ -163,3 +163,168 @@ export function logApiError(endpoint: string, error: unknown, context?: Record<s
     timestamp: new Date().toISOString()
   })
 }
+
+// Timezone utilities for automatic timezone detection
+
+// Get user's current timezone
+export const getUserTimezone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone
+  } catch {
+    return 'UTC'
+  }
+}
+
+// Format date with timezone support for matches
+export const formatMatchDateTime = (
+  dateString: string, 
+  timezone?: string,
+  options?: {
+    includeDate?: boolean
+    includeTime?: boolean
+    includeTimezone?: boolean
+    includeWeekday?: boolean
+    includeYear?: boolean
+    compact?: boolean
+  }
+): string => {
+  if (!dateString) return 'TBD'
+  
+  const {
+    includeDate = true,
+    includeTime = true,
+    includeTimezone = true,
+    includeWeekday = false,
+    includeYear = false,
+    compact = false
+  } = options || {}
+  
+  const date = new Date(dateString)
+  const targetTimezone = timezone || getUserTimezone()
+  
+  try {
+    const formatOptions: Intl.DateTimeFormatOptions = {
+      timeZone: targetTimezone
+    }
+    
+    if (includeDate) {
+      if (compact) {
+        formatOptions.month = 'numeric'
+        formatOptions.day = 'numeric'
+      } else {
+        formatOptions.month = 'short'
+        formatOptions.day = 'numeric'
+      }
+      if (includeYear) {
+        formatOptions.year = includeYear ? 'numeric' : undefined
+      }
+      if (includeWeekday) {
+        formatOptions.weekday = compact ? 'short' : 'short'
+      }
+    }
+    
+    if (includeTime) {
+      formatOptions.hour = '2-digit'
+      formatOptions.minute = '2-digit'
+      if (includeTimezone) {
+        formatOptions.timeZoneName = compact ? 'short' : 'short'
+      }
+    }
+    
+    return date.toLocaleString('en-US', formatOptions)
+  } catch {
+    // Fallback to UTC if timezone is invalid
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC',
+      timeZoneName: 'short'
+    })
+  }
+}
+
+// Smart date formatting for match display
+export const formatMatchDateSmart = (
+  dateString: string,
+  timezone?: string,
+  options?: { includeYear?: boolean }
+): string => {
+  if (!dateString) return 'TBD'
+  
+  const targetTimezone = timezone || getUserTimezone()
+  const matchDate = new Date(dateString)
+  const now = new Date()
+  
+  // Convert both dates to the target timezone for comparison
+  const matchInTimezone = new Date(matchDate.toLocaleString('en-US', { timeZone: targetTimezone }))
+  const nowInTimezone = new Date(now.toLocaleString('en-US', { timeZone: targetTimezone }))
+  
+  // Check if match is today in target timezone
+  const isToday = matchInTimezone.toDateString() === nowInTimezone.toDateString()
+  
+  if (isToday) {
+    const timeStr = formatMatchDateTime(dateString, targetTimezone, {
+      includeDate: false,
+      includeTime: true,
+      includeTimezone: true,
+      compact: true
+    })
+    return `Today ${timeStr}`
+  }
+  
+  // Check if match is tomorrow in target timezone
+  const tomorrow = new Date(nowInTimezone)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const isTomorrow = matchInTimezone.toDateString() === tomorrow.toDateString()
+  
+  if (isTomorrow) {
+    const timeStr = formatMatchDateTime(dateString, targetTimezone, {
+      includeDate: false,
+      includeTime: true,
+      includeTimezone: true,
+      compact: true
+    })
+    return `Tomorrow ${timeStr}`
+  }
+  
+  // Check if match is within this week in target timezone
+  const weekFromNow = new Date(nowInTimezone)
+  weekFromNow.setDate(weekFromNow.getDate() + 7)
+  
+  if (matchInTimezone < weekFromNow && matchInTimezone > nowInTimezone) {
+    return formatMatchDateTime(dateString, targetTimezone, {
+      includeDate: true,
+      includeTime: true,
+      includeTimezone: true,
+      includeWeekday: true,
+      compact: true
+    })
+  }
+  
+  // For dates further out, show the full date
+  return formatMatchDateTime(dateString, targetTimezone, {
+    includeDate: true,
+    includeTime: true,
+    includeTimezone: true,
+    includeYear: options?.includeYear || matchDate.getFullYear() !== now.getFullYear(),
+    compact: false
+  })
+}
+
+// Get timezone abbreviation
+export const getTimezoneAbbreviation = (timezone: string): string => {
+  try {
+    const date = new Date()
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'short'
+    })
+    const parts = formatter.formatToParts(date)
+    const timeZoneName = parts.find(part => part.type === 'timeZoneName')
+    return timeZoneName?.value || timezone
+  } catch {
+    return timezone
+  }
+}

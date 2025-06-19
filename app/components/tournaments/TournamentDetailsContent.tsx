@@ -9,6 +9,7 @@ import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo, cleanMatchName } from '@/lib/textUtils'
 import { getStatusColor, getStatusText } from '@/lib/utils'
 import { trackPageView, trackTournamentView } from '@/lib/analytics'
+import TimezoneAwareDate, { useTimezoneAwareDate } from '@/components/ui/TimezoneAwareDate'
 
 interface Match {
     id: number
@@ -326,6 +327,9 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
     const matchesRef = useRef<HTMLDivElement>(null)
+    
+    // Get timezone-aware date formatting
+    const { formatDate } = useTimezoneAwareDate()
 
     // Track page view and tournament view on component mount
     useEffect(() => {
@@ -447,29 +451,25 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
     }
 
     const formatDateTime = (dateString: string) => {
-        const date = new Date(dateString)
+        if (!dateString) return { date: 'TBD', time: 'TBD', full: 'TBD' }
+        
         return {
-            date: date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
+            date: formatDate(dateString, {
+                includeDate: true,
+                includeTime: false,
+                includeYear: true
             }),
-            time: date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-                timeZoneName: 'short'
+            time: formatDate(dateString, {
+                includeDate: false,
+                includeTime: true,
+                includeTimezone: true
             }),
-            full: date.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }) + ' ' + date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-                timeZoneName: 'short'
+            full: formatDate(dateString, {
+                includeDate: true,
+                includeTime: true,
+                includeTimezone: true,
+                includeWeekday: true,
+                includeYear: true
             })
         }
     }
@@ -1253,24 +1253,42 @@ export default function TournamentDetailsContent({ tournamentId }: TournamentDet
                                         <div className="flex items-center space-x-2 text-sm">
                                             <Calendar className="w-4 h-4 text-blue-400" />
                                             <span className="text-gray-300">Start Date:</span>
-                                            <span className="text-white font-medium">{formatDateTime(tournament.begin_at).date}</span>
+                                            <TimezoneAwareDate 
+                                                dateString={tournament.begin_at} 
+                                                format="date" 
+                                                includeYear={true}
+                                                className="text-white font-medium"
+                                            />
                                         </div>
                                         <div className="flex items-center space-x-2 text-sm ml-6">
                                             <Clock className="w-4 h-4 text-blue-300" />
                                             <span className="text-gray-400">Time:</span>
-                                            <span className="text-gray-200">{formatDateTime(tournament.begin_at).time}</span>
+                                            <TimezoneAwareDate 
+                                                dateString={tournament.begin_at} 
+                                                format="time" 
+                                                className="text-gray-200"
+                                            />
                                         </div>
                                     </div>
                                     <div className="space-y-1">
                                         <div className="flex items-center space-x-2 text-sm">
                                             <Calendar className="w-4 h-4 text-red-400" />
                                             <span className="text-gray-300">End Date:</span>
-                                            <span className="text-white font-medium">{formatDateTime(tournament.end_at).date}</span>
+                                            <TimezoneAwareDate 
+                                                dateString={tournament.end_at} 
+                                                format="date" 
+                                                includeYear={true}
+                                                className="text-white font-medium"
+                                            />
                                         </div>
                                         <div className="flex items-center space-x-2 text-sm ml-6">
                                             <Clock className="w-4 h-4 text-red-300" />
                                             <span className="text-gray-400">Time:</span>
-                                            <span className="text-gray-200">{formatDateTime(tournament.end_at).time}</span>
+                                            <TimezoneAwareDate 
+                                                dateString={tournament.end_at} 
+                                                format="time" 
+                                                className="text-gray-200"
+                                            />
                                         </div>
                                     </div>
                                 </div>
