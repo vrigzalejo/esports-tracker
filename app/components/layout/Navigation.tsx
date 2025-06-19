@@ -16,7 +16,7 @@ export default function Navigation() {
     ]
 
     return (
-        <nav className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 sticky top-16 z-[100] shadow-sm">
+        <nav className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 sticky top-16 z-[99] shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex">
