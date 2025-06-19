@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Search, X, Trophy, Users, User, ChevronRight } from 'lucide-react'
-
+import { logger } from '@/lib/logger'
 
 import { Tournament, Team } from '@/types/esports'
 import { Player } from '@/types/roster'
@@ -29,6 +29,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
   const RESULTS_PER_CATEGORY = 12
   const MAX_TOTAL_RESULTS = 12
   const API_PER_PAGE = 12 // Fetch more from API than we display for better filtering
+  const API_PER_PAGE_TOURNAMENTS = 100
   
   const [inputValue, setInputValue] = useState(searchTerm)
   const [isOpen, setIsOpen] = useState(false)
@@ -109,7 +110,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
         const searchResults = await performSearch(query)
         setResults(searchResults)
       } catch (error) {
-        console.error('Search error:', error)
+        logger.error('Search error:', error)
         setResults([])
       } finally {
         setLoading(false)
@@ -133,35 +134,27 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
     return allResults.slice(0, MAX_TOTAL_RESULTS)
   }
 
-
-
-  // Search tournaments
+  // Search tournaments (running only)
   const searchTournaments = async (query: string): Promise<SearchResult[]> => {
     try {
-      const response = await fetch(`/api/tournaments?per_page=${API_PER_PAGE}`)
-      const rawData = await response.json()
+        const response = await fetch(`/api/tournaments/running?per_page=${API_PER_PAGE_TOURNAMENTS}`)
+      const tournaments = await response.json()
       
-      console.log('Tournament search - Query:', query)
-      console.log('Tournament search - Raw response type:', typeof rawData)
-      console.log('Tournament search - Raw response:', rawData)
+      logger.debug('Tournament search - Query:', query)
+      logger.debug('Tournament search - Running tournaments:', tournaments?.length || 0)
       
-      // Handle different response formats
-      let tournaments: Tournament[]
-      if (Array.isArray(rawData)) {
-        tournaments = rawData
-      } else if (rawData.data && Array.isArray(rawData.data)) {
-        tournaments = rawData.data
-      } else {
-        console.error('Unexpected tournament API response format:', rawData)
+      // Ensure we have an array of tournaments
+      if (!Array.isArray(tournaments)) {
+        logger.error('Unexpected running tournaments API response format:', tournaments)
         return []
       }
       
-      console.log('Tournament search - Tournaments array length:', tournaments.length)
-      console.log('Tournament search - First tournament:', tournaments[0])
+      logger.debug('Tournament search - Tournaments array length:', tournaments.length)
+      logger.debug('Tournament search - First tournament:', tournaments[0])
       
       const filteredTournaments = tournaments.filter(tournament => {
         if (!tournament || !tournament.name) {
-          console.log('Tournament missing name:', tournament)
+          logger.debug('Tournament missing name:', tournament)
           return false
         }
         
@@ -174,7 +167,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
         const matches = nameMatch || leagueMatch || serieMatch || serieFullMatch || gameMatch
         
         if (matches) {
-          console.log('Tournament match found:', {
+          logger.debug('Tournament match found:', {
             name: tournament.name,
             league: tournament.league?.name,
             serie: tournament.serie?.name,
@@ -187,21 +180,46 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
         return matches
       })
       
-      console.log('Tournament search - Filtered count:', filteredTournaments.length)
+      logger.debug('Tournament search - Filtered count:', filteredTournaments.length)
       
       return filteredTournaments
         .slice(0, RESULTS_PER_CATEGORY)
-        .map(tournament => ({
-          id: `tournament-${tournament.id}`,
-          type: 'tournament' as const,
-          title: tournament.name,
-          subtitle: `${tournament.videogame?.name || 'Multi-Game'} • ${tournament.league?.name || 'Unknown League'}`,
-          image: tournament.league?.image_url,
-          url: `/tournaments/${tournament.id}`,
-          data: tournament
-        }))
+        .map(tournament => {
+          const parts = []
+          
+          // Add game name
+          if (tournament.videogame?.name) {
+            parts.push(tournament.videogame.name)
+          } else {
+            parts.push('Multi-Game')
+          }
+          
+          // Add serie name (full_name preferred, fallback to name)
+          if (tournament.serie?.full_name) {
+            parts.push(tournament.serie.full_name)
+          } else if (tournament.serie?.name) {
+            parts.push(tournament.serie.name)
+          }
+          
+          // Add league name
+          if (tournament.league?.name) {
+            parts.push(tournament.league.name)
+          } else {
+            parts.push('Unknown League')
+          }
+          
+          return {
+            id: `tournament-${tournament.id}`,
+            type: 'tournament' as const,
+            title: tournament.name,
+            subtitle: parts.join(' • '),
+            image: tournament.league?.image_url,
+            url: `/tournaments/${tournament.id}`,
+            data: tournament
+          }
+        })
     } catch (error) {
-      console.error('Error searching tournaments:', error)
+      logger.error('Error searching tournaments:', error)
       return []
     }
   }
@@ -228,7 +246,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
           data: team
         }))
     } catch (error) {
-      console.error('Error searching teams:', error)
+      logger.error('Error searching teams:', error)
       return []
     }
   }
@@ -256,7 +274,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
           data: player
         }))
     } catch (error) {
-      console.error('Error searching players:', error)
+      logger.error('Error searching players:', error)
       return []
     }
   }
@@ -322,10 +340,10 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
 
   // Handle result click
   const handleResultClick = (result: SearchResult) => {
-    console.log('Clicking result:', result.title, 'URL:', result.url)
+    logger.debug('Clicking result:', result.title, 'URL:', result.url)
     
     // Use direct navigation for more reliable results
-    console.log('Navigating to:', result.url)
+    logger.debug('Navigating to:', result.url)
     window.location.href = result.url
   }
 
@@ -348,8 +366,6 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
       default: return Search
     }
   }
-
-
 
   // Group results by type
   const groupedResults = results.reduce((acc, result) => {
@@ -402,7 +418,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
         </button>
       </div>
 
-            {/* Dropdown Results - Rendered as Portal */}
+      {/* Dropdown Results - Rendered as Portal */}
       {isOpen && typeof window !== 'undefined' && createPortal(
         <div 
           data-search-dropdown="true"
