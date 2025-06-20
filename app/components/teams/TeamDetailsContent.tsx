@@ -793,14 +793,6 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                             
                                             return (
                                                 <div key={tournament.id} className={`group relative ${isChampion ? 'bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 border-yellow-500/50' : 'bg-gradient-to-r from-gray-700/30 via-gray-700/40 to-gray-700/30 border-gray-600/30'} rounded-xl p-6 hover:from-gray-600/40 hover:via-gray-600/50 hover:to-gray-600/40 transition-all duration-300 hover:border-orange-500/30 shadow-lg hover:shadow-xl border`}>
-                                                    {/* Champion Badge */}
-                                                    {isChampion && (
-                                                        <div className="absolute top-4 right-4 flex items-center space-x-1 px-3 py-1.5 bg-yellow-500/30 border border-yellow-500/50 rounded-lg">
-                                                            <Trophy className="w-4 h-4 text-yellow-300" />
-                                                            <span className="text-sm font-bold text-yellow-300">Champion</span>
-                                                        </div>
-                                                    )}
-                                                    
                                                     {/* Tournament Header */}
                                                     <div className="flex items-start space-x-4 mb-6">
                                                         {/* League Image */}
@@ -823,53 +815,65 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                         </div>
                                                         
                                                         {/* Tournament Info */}
-                                                        <div className="flex-1">
+                                                        <div className="flex-1 min-w-0">
+                                                            {/* Champion Badge - Moved to top of tournament info */}
+                                                            {isChampion && (
+                                                                <div className="flex items-center space-x-1 px-3 py-1.5 bg-yellow-500/30 border border-yellow-500/50 rounded-lg mb-3 w-fit">
+                                                                    <Trophy className="w-4 h-4 text-yellow-300" />
+                                                                    <span className="text-sm font-bold text-yellow-300">Champion</span>
+                                                                </div>
+                                                            )}
+                                                            
                                                             <div className="flex flex-col space-y-2">
-                                                                                                                {/* League Name */}
-                                                {tournament.league && (
-                                                    <div className="flex items-center space-x-2">
-                                                        <Trophy className="w-4 h-4 text-yellow-400" />
-                                                        <span 
-                                                            className="text-lg font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
-                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
-                                                        >
-                                                            {tournament.league.name}
-                                                        </span>
-                                                    </div>
-                                                )}
+                                                                {/* League Name */}
+                                                                {tournament.league && (
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <Trophy className="w-4 h-4 text-yellow-400" />
+                                                                        <span 
+                                                                            className="text-lg font-bold text-yellow-300 cursor-pointer hover:text-yellow-200 transition-colors"
+                                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                                        >
+                                                                            {tournament.league.name}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                                 
-                                                                                                                {/* Serie Name and Year */}
-                                                {tournament.serie && (
-                                                    <div className="flex items-center space-x-2">
-                                                        <Calendar className="w-4 h-4 text-blue-400" />
-                                                        <span 
-                                                            className="text-md font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
-                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
-                                                        >
-                                                            {parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                
-                                                {/* Tournament Name and Tier */}
-                                                <div className="flex items-center space-x-2 flex-wrap">
-                                                    <Award className="w-4 h-4 text-orange-400" />
-                                                    <span 
-                                                        className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
-                                                        onClick={() => router.push(`/tournaments/${tournament.id}`)}
-                                                    >
-                                                        {parseLeagueInfo(tournament.name)}
-                                                    </span>
-                                                                    {tournament.tier && (() => {
-                                                                        const tierInfo = getTierDisplay(tournament.tier)
-                                                                        return (
-                                                                            <div className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
-                                                                                <Star className="w-4 h-4" />
+                                                                {/* Serie Name and Year */}
+                                                                {tournament.serie && (
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <Calendar className="w-4 h-4 text-blue-400" />
+                                                                        <span 
+                                                                            className="text-md font-semibold text-blue-300 cursor-pointer hover:text-blue-200 transition-colors"
+                                                                            onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                                        >
+                                                                            {parseLeagueInfo(tournament.serie.full_name || tournament.serie.name)}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {/* Tournament Name */}
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Award className="w-4 h-4 text-orange-400" />
+                                                                    <span 
+                                                                        className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
+                                                                        onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                                                                    >
+                                                                        {parseLeagueInfo(tournament.name)}
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                {/* Tier Badge */}
+                                                                {tournament.tier && (() => {
+                                                                    const tierInfo = getTierDisplay(tournament.tier)
+                                                                    return (
+                                                                        <div className="flex items-center mt-1">
+                                                                            <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-semibold ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
+                                                                                <Star className="w-3 h-3" />
                                                                                 <span>{tierInfo.label}</span>
                                                                             </div>
-                                                                        )
-                                                                    })()}
-                                                                </div>
+                                                                        </div>
+                                                                    )
+                                                                })()}
                                                             </div>
                                                             
                                                             {/* Tournament Details */}
