@@ -163,6 +163,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                         src={scoreInfo[0].image} 
                                         alt={scoreInfo[0].name}
                                         fill
+                                        unoptimized
                                         className={scoreInfo[0]?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement
@@ -213,6 +214,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                         src={scoreInfo[1].image} 
                                         alt={scoreInfo[1].name}
                                         fill
+                                        unoptimized
                                         className={scoreInfo[1]?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement
@@ -257,6 +259,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     src={scoreInfo[0].image} 
                                     alt={scoreInfo[0].name}
                                     fill
+                                    unoptimized
                                     className={scoreInfo[0]?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement
@@ -298,6 +301,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                                     src={scoreInfo[1].image} 
                                     alt={scoreInfo[1].name}
                                     fill
+                                    unoptimized
                                     className={scoreInfo[1]?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement

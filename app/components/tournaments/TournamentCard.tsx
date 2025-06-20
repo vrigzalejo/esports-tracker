@@ -126,6 +126,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                                 src={getLeagueImage()}
                                 alt={tournament.league.name}
                                 fill
+                                unoptimized
                                 className="object-contain rounded-xl p-2"
                                 priority={false}
                                 sizes="128px"
@@ -269,6 +270,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
                                                 src={team.image_url}
                                                 alt={team.name}
                                                 fill
+                                                unoptimized
                                                 className="object-contain rounded-xl p-0.5"
                                                 sizes="24px"
                                                 quality={85}

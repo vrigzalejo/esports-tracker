@@ -122,6 +122,7 @@ function MatchRow({ match, router }: { match: Match; router: ReturnType<typeof u
                     src={opponent.opponent.image_url || (opponent.type === 'Player' ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg')}
                     alt={opponent.opponent.name}
                     fill
+                    unoptimized
                     className={opponent.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-0.5'}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement

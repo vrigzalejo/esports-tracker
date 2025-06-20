@@ -64,6 +64,7 @@ export default function TeamDisplay({
                         src={getTeamImage(opponent)}
                         alt={getTeamName(opponent)}
                         fill
+                        unoptimized
                         className={opponent?.type === 'Player' ? 'object-cover' : 'object-contain rounded-xl p-1.5'}
                         priority={false}
                         onError={(e) => {
