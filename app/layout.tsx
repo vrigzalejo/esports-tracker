@@ -10,6 +10,7 @@ import { DataProvider } from "@/contexts/DataContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import { TimezoneProvider } from "@/contexts/TimezoneContext";
 import CacheStatus from "@/components/debug/CacheStatus";
+import RedisCacheStatus from "@/components/debug/RedisCacheStatus";
 
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
@@ -92,7 +93,8 @@ export default function RootLayout({
                 </div>
                 <Footer />
                 <CookieNotification />
-                {process.env.NODE_ENV === 'development' && <CacheStatus />}
+                                  {process.env.NODE_ENV === 'development' && <CacheStatus />}
+                  {process.env.NODE_ENV === 'development' && <RedisCacheStatus />}
               </TimezoneProvider>
             </GamesProvider>
           </DataProvider>
