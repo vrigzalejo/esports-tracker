@@ -1253,7 +1253,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                 </div>
                                                             )}
                                                             
-                                                            {/* League Name and Tier */}
+                                                            {/* League Name */}
                                                             {match.league && (
                                                                 <div className="flex items-center space-x-2">
                                                                     <Trophy className="w-3 h-3 text-yellow-400" />
@@ -1263,16 +1263,21 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     >
                                                                         {match.league.name}
                                                                     </span>
-                                                                    {match.tournament?.tier && (() => {
-                                                                        const tierInfo = getTierDisplay(match.tournament.tier)
-                                                                        return (
-                                                                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${tierInfo.color}`}>
-                                                                                {tierInfo.label}
-                                                                            </span>
-                                                                        )
-                                                                    })()}
                                                                 </div>
                                                             )}
+                                                            
+                                                            {/* Tier Badge */}
+                                                            {match.tournament?.tier && (() => {
+                                                                const tierInfo = getTierDisplay(match.tournament.tier)
+                                                                return (
+                                                                    <div className="flex items-center ml-5">
+                                                                        <div className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs font-semibold ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
+                                                                            <Star className="w-3 h-3" />
+                                                                            <span>{tierInfo.label}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })()}
                                                             
                                                             {/* Serie Name */}
                                                             {match.serie && (
