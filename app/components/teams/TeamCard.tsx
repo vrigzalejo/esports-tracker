@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Users, Trophy, User, Calendar, Clock, Globe, Star, Gamepad2 } from 'lucide-react'
 import type { Team } from '@/types/esports'
+import { getTierDisplay } from '@/lib/tierUtils'
 
 interface TeamCardProps {
     team: Team
@@ -132,16 +133,7 @@ export default function TeamCard({ team }: TeamCardProps) {
         }
     }
 
-    const getTierColor = (tier: string) => {
-        const tierColors: { [key: string]: string } = {
-            's': 'text-yellow-400',
-            'a': 'text-orange-400',
-            'b': 'text-blue-400',
-            'c': 'text-green-400',
-            'd': 'text-gray-400'
-        };
-        return tierColors[tier?.toLowerCase()] || 'text-gray-400';
-    }
+
 
     const calculateAge = (birthday: string) => {
         if (!birthday) return null;
@@ -259,15 +251,18 @@ export default function TeamCard({ team }: TeamCardProps) {
                                 
                                 {/* Tier and Region */}
                                 <div className="flex items-center space-x-4">
-                                    {tournamentInfo.tier && (
-                                        <div className="flex items-center space-x-1">
-                                            <Star className="w-3 h-3 text-gray-500" />
-                                            <span className="text-gray-400">Tier:</span>
-                                            <span className={`font-medium ${getTierColor(tournamentInfo.tier)}`}>
-                                                {tournamentInfo.tier.toUpperCase()}
-                                            </span>
-                                        </div>
-                                    )}
+                                    {tournamentInfo.tier && (() => {
+                                        const tierInfo = getTierDisplay(tournamentInfo.tier)
+                                        return (
+                                            <div className="flex items-center space-x-1">
+                                                <Star className="w-3 h-3 text-gray-500" />
+                                                <span className="text-gray-400">Tier:</span>
+                                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${tierInfo.bgColor} ${tierInfo.color} ${tierInfo.borderColor} border`}>
+                                                    {tierInfo.label}
+                                                </span>
+                                            </div>
+                                        )
+                                    })()}
                                     
                                     {(tournamentInfo.region || tournamentInfo.league?.region) && (
                                         <div className="flex items-center space-x-1">

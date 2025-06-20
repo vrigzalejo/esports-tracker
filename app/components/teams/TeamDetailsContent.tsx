@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { parseLeagueInfo } from '@/lib/textUtils'
 import { trackPageView, trackTeamView } from '@/lib/analytics'
+import { getTierDisplay } from '@/lib/tierUtils'
 
 interface Player {
     id: number
@@ -428,21 +429,6 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                 timeZoneName: 'short'
             })
         }
-    }
-
-    const getTierDisplay = (tier: string) => {
-        const tierMap: { [key: string]: { label: string; color: string; bgColor: string; borderColor: string } } = {
-            'S': { label: 'S-Tier', color: 'text-yellow-300', bgColor: 'bg-yellow-500/20', borderColor: 'border-yellow-500/40' },
-            'A': { label: 'A-Tier', color: 'text-orange-300', bgColor: 'bg-orange-500/20', borderColor: 'border-orange-500/40' },
-            'B': { label: 'B-Tier', color: 'text-blue-300', bgColor: 'bg-blue-500/20', borderColor: 'border-blue-500/40' },
-            'C': { label: 'C-Tier', color: 'text-green-300', bgColor: 'bg-green-500/20', borderColor: 'border-green-500/40' },
-            'D': { label: 'D-Tier', color: 'text-gray-300', bgColor: 'bg-gray-500/20', borderColor: 'border-gray-500/40' },
-        }
-        
-        const tierKey = tier?.toUpperCase()
-        const tierInfo = tierMap[tierKey] || { label: tier, color: 'text-purple-300', bgColor: 'bg-purple-500/20', borderColor: 'border-purple-500/40' }
-        
-        return tierInfo
     }
 
     const getMatchResult = (match: Match, teamId: number) => {
@@ -1064,7 +1050,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                 </div>
                                 
                                 {/* Championship List */}
-                                                                    <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
+                                <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
                                     {tournaments
                                         .filter(tournament => tournament.winner_id === parseInt(teamId))
                                         .map((tournament) => (
@@ -1140,9 +1126,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                             </div>
                         )}
 
-
-
-                                                {/* Recent Matches */}
+                        {/* Recent Matches */}
                         <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl h-[800px]">
                             <div className="flex items-center space-x-3 mb-6">
                                 <div className="p-2 bg-blue-500/20 rounded-xl">
