@@ -400,8 +400,12 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                             <div className="text-xs text-gray-400 flex flex-wrap items-center gap-2">
-                                <span>{cleanMatchName(match.name)}</span>
-                                <span>•</span>
+                                {cleanMatchName(match.name) && (
+                                    <>
+                                        <span>{cleanMatchName(match.name)}</span>
+                                        <span>•</span>
+                                    </>
+                                )}
                                 <span>{match.videogame?.name}</span>
                                 {match.number_of_games && (
                                     <>

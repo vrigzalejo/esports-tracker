@@ -256,30 +256,33 @@ export function parseLeagueInfo(leagueInfo: string): string {
     return capitalizeWords(cleanedParts.join(' • '));
 }
 
-// Helper function to clean match names by removing team names
+// Helper function to clean match names by extracting match type before colon
 export function cleanMatchName(matchName: string | undefined | null): string {
     if (!matchName || matchName.trim() === '') return '';
     
     // Split by colon to separate match type from teams
     const parts = matchName.split(':');
-    if (parts.length < 2) {
-        // If no colon, check if it's just a "Team vs Team" pattern
-        const vsPattern = /^[^:]+\s+vs\s+[^:]+$/i;
-        if (vsPattern.test(matchName.trim())) {
-            return ''; // Return empty string for "Team vs Team" patterns
+    
+    if (parts.length >= 2) {
+        // Take the first part (match type) and clean it up
+        const matchType = parts[0].trim();
+        
+        // Check if the match type is just team names (contains "vs" or "v")
+        const teamVsPattern = /^[^:]*\b(vs?|versus)\b[^:]*$/i;
+        if (teamVsPattern.test(matchType)) {
+            return ''; // Return empty string if match type is just team names
         }
-        return matchName;
+        
+        // Use the capitalizeWords function for proper capitalization
+        return capitalizeWords(matchType);
     }
     
-    // Take only the first part (match type) and clean it up
-    const matchType = parts[0].trim();
-    
-    // Check if the match type is just team names (contains "vs" or "v")
-    const teamVsPattern = /^[^:]*\b(vs?|versus)\b[^:]*$/i;
-    if (teamVsPattern.test(matchType)) {
-        return ''; // Return empty string if match type is just team names
+    // If no colon, check if it's just a "Team vs Team" pattern
+    const vsPattern = /^[^:]+\s+vs\s+[^:]+$/i;
+    if (vsPattern.test(matchName.trim())) {
+        return ''; // Return empty string for "Team vs Team" patterns
     }
     
-    // Use the capitalizeWords function for proper capitalization
-    return capitalizeWords(matchType);
+    // If no colon and not a simple vs pattern, return the whole name
+    return capitalizeWords(matchName);
 } 
