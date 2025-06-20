@@ -851,8 +851,8 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     </div>
                                                                 )}
                                                                 
-                                                                {/* Tournament Name and Tier */}
-                                                                <div className="flex items-center space-x-2 flex-wrap">
+                                                                {/* Tournament Name */}
+                                                                <div className="flex items-center space-x-2">
                                                                     <Award className="w-4 h-4 text-orange-400" />
                                                                     <span 
                                                                         className="text-xl font-bold text-white cursor-pointer hover:text-gray-200 transition-colors"
@@ -860,16 +860,20 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     >
                                                                         {parseLeagueInfo(tournament.name)}
                                                                     </span>
-                                                                    {tournament.tier && (() => {
-                                                                        const tierInfo = getTierDisplay(tournament.tier)
-                                                                        return (
-                                                                            <div className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
-                                                                                <Star className="w-4 h-4" />
+                                                                </div>
+                                                                
+                                                                {/* Tier Badge */}
+                                                                {tournament.tier && (() => {
+                                                                    const tierInfo = getTierDisplay(tournament.tier)
+                                                                    return (
+                                                                        <div className="flex items-center mt-1">
+                                                                            <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-semibold ${tierInfo.bgColor} ${tierInfo.borderColor} ${tierInfo.color} border`}>
+                                                                                <Star className="w-3 h-3" />
                                                                                 <span>{tierInfo.label}</span>
                                                                             </div>
-                                                                        )
-                                                                    })()}
-                                                                </div>
+                                                                        </div>
+                                                                    )
+                                                                })()}
                                                             </div>
                                                             
                                                             {/* Tournament Details */}
