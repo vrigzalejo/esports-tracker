@@ -2,12 +2,14 @@ import { Globe, Trophy, Star, Users } from 'lucide-react'
 import { cleanMatchName } from '@/lib/textUtils'
 import { useRouter } from 'next/navigation'
 import type { Match } from '@/types/esports'
+import { getTierDisplay, type TierDisplayInfo } from '@/lib/tierUtils'
 
 interface MatchInfoProps {
     region: string | null
     tournamentStage: string | null
     stageColor: string
     leagueTier: string | null
+    leagueTierInfo?: { raw: string | null; display: TierDisplayInfo | null } | null
     leagueInfo: string
     matchName?: string
     gamesFormat?: string | null
@@ -19,6 +21,7 @@ export default function MatchInfo({
     tournamentStage, 
     stageColor, 
     leagueTier, 
+    leagueTierInfo,
     leagueInfo,
     matchName,
     gamesFormat,
@@ -55,12 +58,15 @@ export default function MatchInfo({
                             <span className="font-medium">{tournamentStage}</span>
                         </div>
                     )}
-                    {leagueTier && (
-                        <div className="flex items-center text-yellow-400 text-xs bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20">
-                            <Star className="w-3 h-3 mr-2" />
-                            <span>{leagueTier}</span>
-                        </div>
-                    )}
+                    {(leagueTierInfo?.display || leagueTier) && (() => {
+                        const tierInfo = leagueTierInfo?.display || getTierDisplay(leagueTierInfo?.raw || 'unknown')
+                        return (
+                            <div className={`flex items-center text-xs px-3 py-1.5 rounded-lg border ${tierInfo.bgColor} ${tierInfo.color} ${tierInfo.borderColor}`}>
+                                <Star className="w-3 h-3 mr-2" />
+                                <span>{tierInfo.label}</span>
+                            </div>
+                        )
+                    })()}
                 </div>
             )}
 

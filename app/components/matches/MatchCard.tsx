@@ -36,6 +36,7 @@ export default function MatchCard({ match }: MatchCardProps) {
         gamesFormat,
         leagueInfo,
         leagueTier,
+        leagueTierInfo,
         region,
         stageColor,
         matchResults,
@@ -173,6 +174,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                         tournamentStage={tournamentStage}
                         stageColor={stageColor}
                         leagueTier={leagueTier}
+                        leagueTierInfo={leagueTierInfo}
                         leagueInfo={leagueInfo}
                         matchName={match.name}
                         gamesFormat={gamesFormat}

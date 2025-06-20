@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { Match } from '@/types/esports'
 import { parseLeagueInfo } from '@/lib/textUtils'
 import { useTimezoneAwareDate } from '@/components/ui/TimezoneAwareDate'
+import { getTierDisplay } from '@/lib/tierUtils'
 
 interface MatchResults {
     team1Score: number
@@ -148,26 +149,10 @@ export function useMatchData(match: Match) {
     const getLeagueTier = () => {
         const tier = match.tournament?.tier || match.league?.tier || match.serie?.tier
 
-        if (!tier) return null
+        if (!tier) return { raw: null, display: null }
 
-        const tierMap: { [key: string]: string } = {
-            's': 'S-Tier',
-            'a': 'A-Tier',
-            'b': 'B-Tier',
-            'c': 'C-Tier',
-            'd': 'D-Tier',
-            'tier_1': 'Tier 1',
-            'tier_2': 'Tier 2',
-            'tier_3': 'Tier 3',
-            'major': 'Major',
-            'premier': 'Premier',
-            'pro': 'Professional',
-            'regional': 'Regional',
-            'local': 'Local'
-        }
-
-        const normalizedTier = tier.toString().toLowerCase().replace(/[-_\s]/g, '')
-        return tierMap[normalizedTier] || `Tier ${tier}`
+        const tierInfo = getTierDisplay(tier)
+        return { raw: tier, display: tierInfo }
     }
 
     // Get complete league information
@@ -299,7 +284,7 @@ export function useMatchData(match: Match) {
     const tournamentStage = getTournamentStage()
     const gamesFormat = getGamesFormat()
     const leagueInfo = getLeagueInfo()
-    const leagueTier = getLeagueTier()
+    const leagueTierInfo = getLeagueTier()
     const region = getRegion()
     const stageColor = getStageColor(tournamentStage)
     const matchResults = getMatchResults()
@@ -320,7 +305,8 @@ export function useMatchData(match: Match) {
         tournamentStage,
         gamesFormat,
         leagueInfo,
-        leagueTier,
+        leagueTier: leagueTierInfo.display?.label || null, // Keep backward compatibility
+        leagueTierInfo, // New tier info with full display data
         region,
         stageColor,
         matchResults,
