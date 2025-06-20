@@ -134,14 +134,14 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
 
     if (loading) {
         return (
-            <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">
+            <div className="bg-gray-700/50 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-gray-600/50">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
                     Recent Matches - {teamName}
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                     {[...Array(3)].map((_, i) => (
                         <div key={i} className="animate-pulse">
-                            <div className="h-16 bg-gray-600 rounded"></div>
+                            <div className="h-14 sm:h-16 bg-gray-600/50 rounded-lg"></div>
                         </div>
                     ))}
                 </div>
@@ -155,8 +155,8 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
 
     if (matches.length === 0) {
         return (
-            <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">
+            <div className="bg-gray-700/50 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-gray-600/50">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
                     Recent Matches - {teamName}
                 </h3>
                 <div className="text-gray-400 text-sm">
@@ -167,11 +167,11 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
     }
 
     return (
-        <div className="bg-gray-700 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-gray-700/50 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-gray-600/50">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
                 Recent Matches - {teamName}
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
                 {matches.map((match) => {
                     const opponent = match.opponents.find(opp => opp.opponent.id !== teamId)?.opponent;
                     const result = getMatchResult(match, teamId);
@@ -181,96 +181,192 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                     return (
                         <div
                             key={match.id}
-                            className="bg-gray-600 rounded-lg p-3 hover:bg-gray-500 transition-colors"
+                            className="bg-gray-600/50 backdrop-blur-sm rounded-lg p-3 hover:bg-gray-500/50 transition-all duration-200 border border-gray-500/30 hover:border-gray-400/50"
                         >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                    {result && (
-                                        <div className="flex items-center space-x-2">
-                                            {/* Modern W/L Badge */}
-                                            <div className={`relative overflow-hidden rounded-full w-8 h-8 min-w-[2rem] min-h-[2rem] flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                                                result.isWinner 
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
-                                                    : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'
-                                            }`} style={{ aspectRatio: '1 / 1' }}>
-                                                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-full" />
-                                                <span className="relative z-10 font-extrabold">{result.result}</span>
-                                            </div>
-                                            
-                                            {/* Score Display */}
-                                            <div className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
-                                                result.isWinner 
-                                                    ? 'bg-green-500/20 text-green-400 border border-green-500/20'
-                                                    : 'bg-red-500/20 text-red-400 border border-red-500/20'
-                                            }`}>
-                                                {result.teamScore} - {result.opponentScore}
-                                            </div>
+                            {/* Mobile Layout */}
+                            <div className="block sm:hidden">
+                                {/* Top Row - Result, Score, Status */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                        {result && (
+                                            <>
+                                                {/* W/L Badge */}
+                                                <div className={`relative overflow-hidden rounded-full w-7 h-7 min-w-[1.75rem] min-h-[1.75rem] flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                                                    result.isWinner 
+                                                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
+                                                        : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'
+                                                }`}>
+                                                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-full" />
+                                                    <span className="relative z-10 font-extrabold">{result.result}</span>
+                                                </div>
+                                                
+                                                {/* Score Display */}
+                                                <div className={`px-2 py-1 rounded text-xs font-bold ${
+                                                    result.isWinner 
+                                                        ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                                                        : 'bg-red-500/20 text-red-400 border border-red-500/20'
+                                                }`}>
+                                                    {result.teamScore} - {result.opponentScore}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Status */}
+                                    <div className={`text-xs font-medium ${getStatusColor(match.status)} flex items-center space-x-1`}>
+                                        {isLive && <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
+                                        <span>{getStatusText(match.status)}</span>
+                                    </div>
+                                </div>
+
+                                {/* Middle Row - Opponent */}
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <span className="text-white text-sm font-medium">vs</span>
+                                    {opponent?.image_url && (
+                                        <div 
+                                            className={`relative w-6 h-6 bg-gradient-to-br from-gray-300 to-gray-400 ${
+                                                match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded'
+                                            } border border-gray-500/50 shadow-lg overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center`}
+                                            onClick={() => {
+                                                const opponentType = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type as 'Player' | 'Team' | undefined;
+                                                handleOpponentClick(opponent.id, opponentType);
+                                            }}
+                                        >
+                                            <Image 
+                                                src={opponent.image_url} 
+                                                alt={opponent.name || 'Team/Player'}
+                                                fill
+                                                className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-0.5'}
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement
+                                                    const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
+                                                    target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                                }}
+                                            />
                                         </div>
                                     )}
-                                    <div className="flex-1">
-                                        <div className="flex items-center space-x-2 text-white font-medium text-sm">
-                                            <span>vs</span>
-                                            {opponent?.image_url && (
-                                                <div 
-                                                    className={`relative w-8 h-8 bg-gradient-to-br from-gray-300 to-gray-400 ${
-                                                        // Check if this is a player by looking at opponent type
-                                                        match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded-lg'
-                                                    } border border-gray-500/50 shadow-lg overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
-                                                    onClick={() => {
-                                                        const opponentType = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type as 'Player' | 'Team' | undefined;
-                                                        handleOpponentClick(opponent.id, opponentType);
-                                                    }}
-                                                >
-                                                    <Image 
-                                                        src={opponent.image_url} 
-                                                        alt={opponent.name || 'Team/Player'}
-                                                        fill
-                                                        className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement
-                                                            const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
-                                                            target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                            <span 
-                                                className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
-                                                onClick={() => {
-                                                    const opponentType = match.opponents.find(opp => opp.opponent.id === opponent?.id)?.type as 'Player' | 'Team' | undefined;
-                                                    handleOpponentClick(opponent?.id || 0, opponentType);
-                                                }}
-                                            >
-                                                {opponent?.acronym || opponent?.name || 'TBD'}
-                                            </span>
+                                    <span 
+                                        className="text-white text-sm font-medium cursor-pointer hover:text-cyan-300 transition-colors duration-200 min-h-[44px] flex items-center"
+                                        onClick={() => {
+                                            const opponentType = match.opponents.find(opp => opp.opponent.id === opponent?.id)?.type as 'Player' | 'Team' | undefined;
+                                            handleOpponentClick(opponent?.id || 0, opponentType);
+                                        }}
+                                    >
+                                        {opponent?.acronym || opponent?.name || 'TBD'}
+                                    </span>
+                                </div>
+
+                                {/* Bottom Row - Match Info */}
+                                <div className="space-y-1">
+                                    {match.name && (
+                                        <div className="text-purple-300 text-xs font-medium">
+                                            {cleanMatchName(match.name)}
                                         </div>
-                                        {match.name && (
-                                            <div className="text-purple-300 text-xs mb-1 font-medium">
-                                                {cleanMatchName(match.name)}
-                                            </div>
-                                        )}
-                                        {competitionInfo && (
-                                            <div className="text-blue-300 text-xs mb-1">
-                                                {competitionInfo}
-                                            </div>
-                                        )}
+                                    )}
+                                    {competitionInfo && (
+                                        <div className="text-blue-300 text-xs">
+                                            {competitionInfo}
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between xs:space-x-2 space-y-1 xs:space-y-0">
                                         <div className="text-gray-300 text-xs">
                                             {!competitionInfo && `${match.league.name} • ${parseLeagueInfo(match.tournament.name)}`}
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className={`text-xs font-medium ${getStatusColor(match.status)} flex items-center justify-end space-x-1`}>
-                                        {isLive && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
-                                        <span>{getStatusText(match.status)}</span>
-                                    </div>
-                                    <div className="text-gray-400 text-xs">
-                                        {formatMatchDateRange(match)}
+                                        <div className="text-gray-400 text-xs">
+                                            {formatMatchDateRange(match)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            
 
+                            {/* Desktop Layout */}
+                            <div className="hidden sm:block">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        {result && (
+                                            <div className="flex items-center space-x-2">
+                                                {/* W/L Badge */}
+                                                <div className={`relative overflow-hidden rounded-full w-8 h-8 min-w-[2rem] min-h-[2rem] flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                                                    result.isWinner 
+                                                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
+                                                        : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'
+                                                }`} style={{ aspectRatio: '1 / 1' }}>
+                                                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-full" />
+                                                    <span className="relative z-10 font-extrabold">{result.result}</span>
+                                                </div>
+                                                
+                                                {/* Score Display */}
+                                                <div className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                                                    result.isWinner 
+                                                        ? 'bg-green-500/20 text-green-400 border border-green-500/20'
+                                                        : 'bg-red-500/20 text-red-400 border border-red-500/20'
+                                                }`}>
+                                                    {result.teamScore} - {result.opponentScore}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <div className="flex items-center space-x-2 text-white font-medium text-sm">
+                                                <span>vs</span>
+                                                {opponent?.image_url && (
+                                                    <div 
+                                                        className={`relative w-8 h-8 bg-gradient-to-br from-gray-300 to-gray-400 ${
+                                                            match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'rounded-full' : 'rounded-lg'
+                                                        } border border-gray-500/50 shadow-lg overflow-hidden backdrop-blur-sm cursor-pointer hover:border-cyan-500/50 transition-all duration-200`}
+                                                        onClick={() => {
+                                                            const opponentType = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type as 'Player' | 'Team' | undefined;
+                                                            handleOpponentClick(opponent.id, opponentType);
+                                                        }}
+                                                    >
+                                                        <Image 
+                                                            src={opponent.image_url} 
+                                                            alt={opponent.name || 'Team/Player'}
+                                                            fill
+                                                            className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement
+                                                                const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
+                                                                target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <span 
+                                                    className="cursor-pointer hover:text-cyan-300 transition-colors duration-200"
+                                                    onClick={() => {
+                                                        const opponentType = match.opponents.find(opp => opp.opponent.id === opponent?.id)?.type as 'Player' | 'Team' | undefined;
+                                                        handleOpponentClick(opponent?.id || 0, opponentType);
+                                                    }}
+                                                >
+                                                    {opponent?.acronym || opponent?.name || 'TBD'}
+                                                </span>
+                                            </div>
+                                            {match.name && (
+                                                <div className="text-purple-300 text-xs mb-1 font-medium">
+                                                    {cleanMatchName(match.name)}
+                                                </div>
+                                            )}
+                                            {competitionInfo && (
+                                                <div className="text-blue-300 text-xs mb-1">
+                                                    {competitionInfo}
+                                                </div>
+                                            )}
+                                            <div className="text-gray-300 text-xs">
+                                                {!competitionInfo && `${match.league.name} • ${parseLeagueInfo(match.tournament.name)}`}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className={`text-xs font-medium ${getStatusColor(match.status)} flex items-center justify-end space-x-1`}>
+                                            {isLive && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+                                            <span>{getStatusText(match.status)}</span>
+                                        </div>
+                                        <div className="text-gray-400 text-xs">
+                                            {formatMatchDateRange(match)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     );
                 })}

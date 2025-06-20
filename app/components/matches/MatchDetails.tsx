@@ -450,7 +450,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
 
                         {/* Team Recent Matches */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                             {match.opponents.map((opponent) => (
                                 opponent.opponent?.id ? (
                                     <TeamMatches
@@ -464,7 +464,7 @@ export default function MatchDetails({ match, onClose }: MatchDetailsProps) {
                         </div>
 
                         {/* Tournament Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                             {match.tournament?.id && (
                                 <>
                                     <TournamentStandings
