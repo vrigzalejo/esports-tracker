@@ -167,6 +167,7 @@ export default function TeamCard({ team }: TeamCardProps) {
                             src={getTeamImage()}
                             alt={team.name}
                             fill
+                            unoptimized
                             className="object-contain p-2"
                             priority={false}
                             onError={(e) => {
@@ -302,6 +303,7 @@ export default function TeamCard({ team }: TeamCardProps) {
                                                 src={getPlayerImage(player)}
                                                 alt={player.name}
                                                 fill
+                                                unoptimized
                                                 className="object-cover"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
@@ -333,6 +335,7 @@ export default function TeamCard({ team }: TeamCardProps) {
                                                                 alt={`${player.nationality} flag`}
                                                                 width={16}
                                                                 height={12}
+                                                                unoptimized
                                                                 className="object-cover rounded-sm"
                                                                 onError={(e) => {
                                                                     const target = e.target as HTMLImageElement;

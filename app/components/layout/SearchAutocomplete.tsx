@@ -471,6 +471,7 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
                                 alt={result.title}
                                 width={32}
                                 height={32}
+                                unoptimized
                                 className={result.type === 'player' ? 'w-full h-full object-cover' : 'w-full h-full object-contain rounded-xl p-1.5'}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement

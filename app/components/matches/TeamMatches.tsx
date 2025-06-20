@@ -232,17 +232,18 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                                 handleOpponentClick(opponent.id, opponentType);
                                             }}
                                         >
-                                            <Image 
-                                                src={opponent.image_url} 
-                                                alt={opponent.name || 'Team/Player'}
-                                                fill
-                                                className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-0.5'}
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement
-                                                    const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
-                                                    target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
-                                                }}
-                                            />
+                                                                            <Image 
+                                    src={opponent.image_url} 
+                                    alt={opponent.name || 'Team/Player'}
+                                    fill
+                                    unoptimized
+                                    className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-0.5'}
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
+                                        target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                    }}
+                                />
                                         </div>
                                     )}
                                     <span 
@@ -318,17 +319,18 @@ export default function TeamMatches({ teamId, teamName, currentMatch }: TeamMatc
                                                             handleOpponentClick(opponent.id, opponentType);
                                                         }}
                                                     >
-                                                        <Image 
-                                                            src={opponent.image_url} 
-                                                            alt={opponent.name || 'Team/Player'}
-                                                            fill
-                                                            className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement
-                                                                const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
-                                                                target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
-                                                            }}
-                                                        />
+                                                                                        <Image 
+                                    src={opponent.image_url} 
+                                    alt={opponent.name || 'Team/Player'}
+                                    fill
+                                    unoptimized
+                                    className={match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-1'}
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement
+                                        const isPlayer = match.opponents.find(opp => opp.opponent.id === opponent.id)?.type === 'Player'
+                                        target.src = isPlayer ? '/images/placeholder-player.svg' : '/images/placeholder-team.svg'
+                                    }}
+                                />
                                                     </div>
                                                 )}
                                                 <span 

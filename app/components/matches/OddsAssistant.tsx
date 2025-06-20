@@ -179,6 +179,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                             src={team1.image_url} 
                                             alt={team1.name} 
                                             fill
+                                            unoptimized
                                             className={match.opponents?.[0]?.type === 'Player' ? 'object-cover' : 'object-contain p-0.5 sm:p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement
@@ -221,6 +222,7 @@ export default function OddsAssistant({ match, isOpen, onClose }: OddsAssistantP
                                             src={team2.image_url} 
                                             alt={team2.name} 
                                             fill
+                                            unoptimized
                                             className={match.opponents?.[1]?.type === 'Player' ? 'object-cover' : 'object-contain p-0.5 sm:p-1'}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement

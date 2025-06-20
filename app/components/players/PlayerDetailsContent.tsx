@@ -478,6 +478,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                                     src={getTournamentImage(tournament.league?.image_url || '')}
                                                                     alt={tournament.league?.name || 'Tournament'}
                                                                     fill
+                                                                    unoptimized
                                                                     className="object-contain"
                                                                     onError={(e) => {
                                                                         const target = e.target as HTMLImageElement
@@ -607,6 +608,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                         src={getPlayerImage(player.image_url || '')} 
                                         alt={player.name}
                                         fill
+                                        unoptimized
                                         className="object-cover object-top"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement
@@ -649,6 +651,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                 src={('image_url' in player.current_team && player.current_team.image_url) || '/images/placeholder-team.svg'}
                                                 alt={player.current_team.name}
                                                 fill
+                                                unoptimized
                                                 className="object-contain p-2"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement
@@ -685,6 +688,7 @@ export default function PlayerDetailsContent({ playerId }: PlayerDetailsContentP
                                                             src={getFlagPath(player.nationality)}
                                                             alt={`${player.nationality} flag`}
                                                             fill
+                                                            unoptimized
                                                             className="object-cover"
                                                             onError={(e) => {
                                                                 const target = e.target as HTMLImageElement;

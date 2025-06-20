@@ -162,6 +162,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId, playerId }:
                                         src={player.image_url || '/images/placeholder-player.svg'}
                                         alt={player.name}
                                         fill
+                                        unoptimized
                                         className="object-cover object-top"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
@@ -196,6 +197,7 @@ export default function TeamRoster({ teamId, teamName, tournamentId, playerId }:
                                                             alt={`${player.nationality} flag`}
                                                             width={16}
                                                             height={12}
+                                                            unoptimized
                                                             className="object-cover rounded-sm"
                                                             onError={(e) => {
                                                                 const target = e.target as HTMLImageElement;

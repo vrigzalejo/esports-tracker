@@ -709,6 +709,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                     src={getTeamImage(team.image_url)}
                                     alt={team.name}
                                     fill
+                                    unoptimized
                                     className="object-contain p-2"
                                     priority
                                     onError={(e) => {
@@ -787,16 +788,17 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             onClick={() => router.push(`/tournaments/${tournament.id}`)}
                                                         >
                                                             <div className="relative w-full h-full">
-                                                                <Image
-                                                                    src={getTournamentImage(tournament.league?.image_url || '')}
-                                                                    alt={tournament.league?.name || 'Tournament'}
-                                                                    fill
-                                                                    className="object-contain"
-                                                                    onError={(e) => {
-                                                                        const target = e.target as HTMLImageElement
-                                                                        target.src = '/images/placeholder-tournament.svg'
-                                                                    }}
-                                                                />
+                                                                                                                <Image
+                                                    src={getTournamentImage(tournament.league?.image_url || '')}
+                                                    alt={tournament.league?.name || 'Tournament'}
+                                                    fill
+                                                    unoptimized
+                                                    className="object-contain"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement
+                                                        target.src = '/images/placeholder-tournament.svg'
+                                                    }}
+                                                />
                                                             </div>
                                                         </div>
                                                         
@@ -924,6 +926,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                                     src={getPlayerImage(player.image_url)}
                                                                                     alt={player.name}
                                                                                     fill
+                                                                                    unoptimized
                                                                                     className="object-cover object-top"
                                                                                     onError={(e) => {
                                                                                         const target = e.target as HTMLImageElement
@@ -963,6 +966,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                                                         alt={`${player.nationality} flag`}
                                                                                                         width={16}
                                                                                                         height={12}
+                                                                                                        unoptimized
                                                                                                         className="object-cover rounded-sm"
                                                                                                         onError={(e) => {
                                                                                                             const target = e.target as HTMLImageElement
@@ -1062,6 +1066,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                             src={getTournamentImage(tournament.league?.image_url || '')}
                                                             alt={tournament.league?.name || 'Tournament'}
                                                             fill
+                                                            unoptimized
                                                             className="object-contain"
                                                             onError={(e) => {
                                                                 const target = e.target as HTMLImageElement
@@ -1217,6 +1222,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                 src={getTournamentImage(match.league?.image_url || '')}
                                                                 alt={match.league?.name || 'Tournament'}
                                                                 fill
+                                                                unoptimized
                                                                 className="object-contain"
                                                                 onError={(e) => {
                                                                     const target = e.target as HTMLImageElement
@@ -1331,6 +1337,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     src={getTeamImage(team.image_url)}
                                                                     alt={team.name}
                                                                     fill
+                                                                    unoptimized
                                                                     className="object-contain p-0.5"
                                                                 />
                                                             </div>
@@ -1351,6 +1358,7 @@ export default function TeamDetailsContent({ teamId }: TeamDetailsContentProps) 
                                                                     src={opponent?.type === 'Player' ? getPlayerImage(opponent?.opponent.image_url || '') : getTeamImage(opponent?.opponent.image_url || '')}
                                                                     alt={opponent?.opponent.name || 'TBD'}
                                                                     fill
+                                                                    unoptimized
                                                                     className={opponent?.type === 'Player' ? 'object-cover object-center' : 'object-contain p-0.5'}
                                                                     onError={(e) => {
                                                                         const target = e.target as HTMLImageElement

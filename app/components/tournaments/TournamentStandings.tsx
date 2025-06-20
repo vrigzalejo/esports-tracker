@@ -193,6 +193,7 @@ export default function TournamentStandings({ tournamentId, tournamentName, team
                                         src={standing.team.image_url || '/images/placeholder-team.svg'} 
                                         alt={standing.team.name}
                                         fill
+                                        unoptimized
                                         className="object-contain p-0.5"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement

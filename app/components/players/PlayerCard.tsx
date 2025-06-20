@@ -45,6 +45,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                     src={player.image_url || '/images/placeholder-player.svg'} 
                     alt={player.name}
                     fill
+                    unoptimized
                     className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                         const target = e.target as HTMLImageElement
@@ -88,6 +89,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                         src={getFlagPath(player.nationality)}
                                         alt={`${player.nationality} flag`}
                                         fill
+                                        unoptimized
                                         className="object-cover"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
@@ -132,6 +134,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                         src={player.current_team.image_url}
                                         alt={`${player.current_team.name} logo`}
                                         fill
+                                        unoptimized
                                         className="object-contain p-0.5"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
