@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPlayers } from '@/lib/pandaScore';
+import { getCachedPlayers } from '@/lib/cachedApi';
 
 export async function GET(request: NextRequest) {
     try {
@@ -12,6 +13,17 @@ export async function GET(request: NextRequest) {
             game: searchParams.get('game') || undefined,
         };
 
+        // Check for force refresh parameter
+        const forceRefresh = searchParams.get('force_refresh') === 'true';
+        
+        // Use cached players if no complex filters are applied (game/search filtering needs direct API)
+        if (!filters.game && !filters.search) {
+            const page = filters.page || 1;
+            const players = await getCachedPlayers(page, { forceRefresh });
+            return NextResponse.json(players || []);
+        }
+
+        // For complex filters, use direct API call
         const players = await getPlayers(filters);
         return NextResponse.json(players);
     } catch (error) {

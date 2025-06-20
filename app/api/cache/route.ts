@@ -59,6 +59,12 @@ export async function DELETE(request: Request) {
                 message = `Cleared ${cleared} players cache entries`;
                 break;
                 
+            case 'home':
+                const homeCleared = await cacheUtils.clearHomeCache();
+                cleared = homeCleared ? 1 : 0;
+                message = `Cleared ${cleared} home page cache entry`;
+                break;
+                
             case 'all':
                 cleared = await cacheUtils.clearAllCache();
                 message = `Cleared ${cleared} total cache entries`;
@@ -66,7 +72,7 @@ export async function DELETE(request: Request) {
                 
             default:
                 return NextResponse.json(
-                    { error: 'Invalid cache type. Use: games, matches, tournaments, teams, players, or all' },
+                    { error: 'Invalid cache type. Use: games, matches, tournaments, teams, players, home, or all' },
                     { status: 400 }
                 );
         }

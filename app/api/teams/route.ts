@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import { getTeams } from '@/lib/pandaScore';
+import { getCachedTeams } from '@/lib/cachedApi';
 import { performSecurityCheck, createSecurityErrorResponse } from '@/lib/apiSecurity';
 import { serverLogger } from '@/lib/logger';
 import type { TeamFilters } from '@/lib/types';
@@ -25,7 +26,17 @@ export async function GET(request: NextRequest) {
             search: searchParams.get('search') || undefined,
         };
 
-        // Get teams data directly from the teams endpoint
+        // Check for force refresh parameter
+        const forceRefresh = searchParams.get('force_refresh') === 'true';
+        
+        // Use cached teams if no complex filters are applied (game/search filtering needs direct API)
+        if (!filters.game && !filters.search) {
+            const page = filters.page || 1;
+            const teams = await getCachedTeams(page, { forceRefresh });
+            return NextResponse.json(teams || []);
+        }
+
+        // For complex filters, use direct API call
         const teamsResponse = await getTeams(filters);
         
         // Handle different response formats from teams API

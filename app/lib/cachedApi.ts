@@ -110,26 +110,160 @@ export async function getCachedMatches(
 }
 
 /**
- * Cached tournaments API
+ * Cached tournaments API - generic
  */
 export async function getCachedTournaments(
-  status: string,
-  page: number = 1,
+  filters: Record<string, unknown> = {},
   options: CacheOptions = {}
 ) {
-  const cacheKey = cacheKeys.tournaments(status, page)
+  const page = (filters.page as number) || 1
+  const cacheKey = cacheKeys.tournaments('all', page)
   
   return cachedFetch(
     cacheKey,
     async () => {
       // Use the existing PandaScore function
       const { getTournaments } = await import('./pandaScore')
-      const tournamentFilters = {
-        page,
-        per_page: 50
+      const tournaments = await getTournaments(filters)
+      logger.info(`Fetched ${tournaments.length} tournaments from API (page ${page})`)
+      return tournaments
+    },
+    {
+      ttl: cacheTTL.tournaments, // 15 minutes cache for tournaments
+      ...options
+    }
+  )
+}
+
+/**
+ * Cached running tournaments API
+ */
+export async function getCachedRunningTournaments(
+  page: number = 1,
+  per_page: number = 20,
+  options: CacheOptions = {}
+) {
+  const cacheKey = cacheKeys.tournaments('running', page)
+  
+  return cachedFetch(
+    cacheKey,
+    async () => {
+      // Direct API call since there's no PandaScore function for this
+      const token = process.env.PANDASCORE_TOKEN
+      if (!token) {
+        throw new Error('PandaScore API token not configured')
       }
-      const tournaments = await getTournaments(tournamentFilters)
-      logger.info(`Fetched ${tournaments.length} ${status} tournaments from API (page ${page})`)
+
+      const params = new URLSearchParams({
+        token,
+        page: page.toString(),
+        per_page: per_page.toString(),
+        include: 'teams',
+        sort: '-begin_at'
+      })
+
+      const response = await fetch(`https://api.pandascore.co/tournaments/running?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch running tournaments: ${response.status}`)
+      }
+
+      const tournaments = await response.json()
+      logger.info(`Fetched ${tournaments.length} running tournaments from API (page ${page})`)
+      return tournaments
+    },
+    {
+      ttl: cacheTTL.tournaments, // 15 minutes cache for tournaments
+      ...options
+    }
+  )
+}
+
+/**
+ * Cached upcoming tournaments API
+ */
+export async function getCachedUpcomingTournaments(
+  page: number = 1,
+  per_page: number = 20,
+  options: CacheOptions = {}
+) {
+  const cacheKey = cacheKeys.tournaments('upcoming', page)
+  
+  return cachedFetch(
+    cacheKey,
+    async () => {
+      // Direct API call since there's no PandaScore function for this
+      const token = process.env.PANDASCORE_TOKEN
+      if (!token) {
+        throw new Error('PandaScore API token not configured')
+      }
+
+      const params = new URLSearchParams({
+        token,
+        page: page.toString(),
+        per_page: per_page.toString(),
+        include: 'teams',
+        sort: 'begin_at'
+      })
+
+      const response = await fetch(`https://api.pandascore.co/tournaments/upcoming?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch upcoming tournaments: ${response.status}`)
+      }
+
+      const tournaments = await response.json()
+      logger.info(`Fetched ${tournaments.length} upcoming tournaments from API (page ${page})`)
+      return tournaments
+    },
+    {
+      ttl: cacheTTL.tournaments, // 15 minutes cache for tournaments
+      ...options
+    }
+  )
+}
+
+/**
+ * Cached past tournaments API
+ */
+export async function getCachedPastTournaments(
+  page: number = 1,
+  per_page: number = 20,
+  options: CacheOptions = {}
+) {
+  const cacheKey = cacheKeys.tournaments('past', page)
+  
+  return cachedFetch(
+    cacheKey,
+    async () => {
+      // Direct API call since there's no PandaScore function for this
+      const token = process.env.PANDASCORE_TOKEN
+      if (!token) {
+        throw new Error('PandaScore API token not configured')
+      }
+
+      const params = new URLSearchParams({
+        token,
+        page: page.toString(),
+        per_page: per_page.toString(),
+        include: 'teams',
+        sort: '-begin_at'
+      })
+
+      const response = await fetch(`https://api.pandascore.co/tournaments/past?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch past tournaments: ${response.status}`)
+      }
+
+      const tournaments = await response.json()
+      logger.info(`Fetched ${tournaments.length} past tournaments from API (page ${page})`)
       return tournaments
     },
     {
@@ -192,6 +326,38 @@ export async function getCachedPlayers(page: number = 1, options: CacheOptions =
 }
 
 /**
+ * Cached home page API - combines matches, tournaments, and teams data
+ */
+export async function getCachedHomeData(options: CacheOptions = {}) {
+  const cacheKey = 'esports:home:data'
+  
+  return cachedFetch(
+    cacheKey,
+    async () => {
+      // Fetch all data in parallel for better performance
+      const [matches, tournaments, teams] = await Promise.all([
+        getCachedMatches(1, { per_page: 100 }),
+        getCachedTournaments({ page: 1, per_page: 50 }),
+        getCachedTeams(1)
+      ])
+
+      logger.info(`Fetched home page data: ${matches.length} matches, ${tournaments.length} tournaments, ${teams.length} teams`)
+      
+      return {
+        matches,
+        tournaments,
+        teams,
+        fetchedAt: new Date().toISOString()
+      }
+    },
+    {
+      ttl: 5 * 60, // 5 minutes cache for home page data
+      ...options
+    }
+  )
+}
+
+/**
  * Cache management utilities
  */
 export const cacheUtils = {
@@ -228,6 +394,13 @@ export const cacheUtils = {
    */
   async clearPlayersCache(): Promise<number> {
     return await redisCache.flushPattern('esports:players:*')
+  },
+
+  /**
+   * Clear home page cache
+   */
+  async clearHomeCache(): Promise<boolean> {
+    return await redisCache.del(cacheKeys.home())
   },
 
   /**

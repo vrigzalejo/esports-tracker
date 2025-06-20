@@ -237,7 +237,8 @@ export const cacheKeys = {
   },
   tournaments: (status: string, page: number) => `esports:tournaments:${status}:page:${page}`,
   teams: (page: number) => `esports:teams:page:${page}`,
-  players: (page: number) => `esports:players:page:${page}`
+  players: (page: number) => `esports:players:page:${page}`,
+  home: () => 'esports:home:data'
 }
 
 // Cache TTL constants (in seconds)

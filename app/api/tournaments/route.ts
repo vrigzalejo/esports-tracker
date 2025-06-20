@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTournaments } from '@/lib/pandaScore';
+import { getCachedTournaments } from '@/lib/cachedApi';
 import type { TournamentFilters } from '@/lib/types';
 import type { Tournament } from '@/types/esports';
 
@@ -14,6 +15,16 @@ export async function GET(request: Request) {
             until: searchParams.get('until') || undefined
         };
 
+        // Check for force refresh parameter
+        const forceRefresh = searchParams.get('force_refresh') === 'true';
+        
+        // Use cached tournaments if no complex filters are applied (game/date filtering needs direct API)
+        if (!filters.game && !filters.since && !filters.until) {
+            const tournaments = await getCachedTournaments(filters as Record<string, unknown>, { forceRefresh });
+            return NextResponse.json(tournaments);
+        }
+
+        // For complex filters, use direct API call
         const tournaments = await getTournaments(filters);
         
         // Handle client-side filtering and pagination

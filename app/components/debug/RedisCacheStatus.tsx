@@ -139,7 +139,7 @@ export default function RedisCacheStatus() {
         {status && status.redis.connected && (
           <div className="mt-3 pt-2 border-t border-gray-700">
             <div className="text-gray-400 mb-2">Clear Cache:</div>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => clearCache('games')}
                 disabled={loading}
@@ -166,6 +166,33 @@ export default function RedisCacheStatus() {
               >
                 <Trash2 className="w-3 h-3" />
                 Tournaments
+              </button>
+              <button
+                onClick={() => clearCache('teams')}
+                disabled={loading}
+                className="px-2 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded text-xs transition-colors flex items-center gap-1"
+                title="Clear teams cache"
+              >
+                <Trash2 className="w-3 h-3" />
+                Teams
+              </button>
+              <button
+                onClick={() => clearCache('players')}
+                disabled={loading}
+                className="px-2 py-1 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 rounded text-xs transition-colors flex items-center gap-1"
+                title="Clear players cache"
+              >
+                <Trash2 className="w-3 h-3" />
+                Players
+              </button>
+              <button
+                onClick={() => clearCache('home')}
+                disabled={loading}
+                className="px-2 py-1 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 rounded text-xs transition-colors flex items-center gap-1"
+                title="Clear home page cache"
+              >
+                <Trash2 className="w-3 h-3" />
+                Home
               </button>
               <button
                 onClick={() => clearCache('all')}

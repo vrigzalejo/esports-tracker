@@ -114,6 +114,7 @@ The application uses different cache durations for different data types:
 - **Tournaments**: 15 minutes
 - **Teams**: 1 hour
 - **Players**: 1 hour
+- **Home Page**: 5 minutes (combined data for dashboard)
 
 ### Cache Keys
 
@@ -121,9 +122,14 @@ All cache keys are prefixed with `esports:` to avoid conflicts:
 
 - Games: `esports:games:all`
 - Matches: `esports:matches:page:1`
-- Tournaments: `esports:tournaments:running:page:1`
+- Tournaments: 
+  - All: `esports:tournaments:all:page:1`
+  - Running: `esports:tournaments:running:page:1`
+  - Upcoming: `esports:tournaments:upcoming:page:1`
+  - Past: `esports:tournaments:past:page:1`
 - Teams: `esports:teams:page:1`
 - Players: `esports:players:page:1`
+- Home Page: `esports:home:data`
 
 ## 🛠️ Development Tools
 
@@ -150,15 +156,26 @@ DELETE /api/cache?type=matches
 DELETE /api/cache?type=tournaments
 DELETE /api/cache?type=teams
 DELETE /api/cache?type=players
+DELETE /api/cache?type=home
 
 # Clear all cache
 DELETE /api/cache?type=all
 ```
 
-#### Force Refresh Games
+#### Force Refresh Data
 ```bash
-GET /api/games?refresh=true
+# Force refresh cached data (bypasses cache)
+GET /api/games?force_refresh=true
+GET /api/teams?force_refresh=true
+GET /api/players?force_refresh=true
+GET /api/tournaments?force_refresh=true
+GET /api/tournaments/running?force_refresh=true
+GET /api/tournaments/upcoming?force_refresh=true
+GET /api/tournaments/past?force_refresh=true
+GET /api/home?force_refresh=true
 ```
+
+
 
 ## 🔍 Troubleshooting
 
