@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { Search, X, Trophy, Users, User, ChevronRight } from 'lucide-react'
 import { logger } from '@/lib/logger'
 
@@ -465,9 +466,11 @@ export default function SearchAutocomplete({ searchTerm, onSearch, className = '
                               : 'bg-gray-600/60 rounded-xl'
                           } border border-gray-700/40 hover:border-gray-600/60 transition-colors duration-200 overflow-hidden`}>
                             {result.image ? (
-                              <img
+                              <Image
                                 src={result.image}
                                 alt={result.title}
+                                width={32}
+                                height={32}
                                 className={result.type === 'player' ? 'w-full h-full object-cover' : 'w-full h-full object-contain rounded-xl p-1.5'}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement

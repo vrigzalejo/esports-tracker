@@ -342,7 +342,7 @@ export function useUpcomingTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!!filters) // Initialize as true if filters provided
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -395,7 +395,7 @@ export function useRunningTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!!filters) // Initialize as true if filters provided
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -448,7 +448,7 @@ export function usePastTournaments(filters?: {
   per_page?: number
 }) {
   const [data, setData] = useState<Tournament[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!!filters) // Initialize as true if filters provided
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
