@@ -136,76 +136,74 @@ export default function RedisCacheStatus() {
           </div>
         )}
 
-        {status && status.redis.connected && (
-          <div className="mt-3 pt-2 border-t border-gray-700">
-            <div className="text-gray-400 mb-2">Clear Cache:</div>
-            <div className="grid grid-cols-3 gap-1">
-              <button
-                onClick={() => clearCache('games')}
-                disabled={loading}
-                className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear games cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Games
-              </button>
-              <button
-                onClick={() => clearCache('matches')}
-                disabled={loading}
-                className="px-2 py-1 bg-green-600/20 hover:bg-green-600/30 text-green-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear matches cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Matches
-              </button>
-              <button
-                onClick={() => clearCache('tournaments')}
-                disabled={loading}
-                className="px-2 py-1 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear tournaments cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Tournaments
-              </button>
-              <button
-                onClick={() => clearCache('teams')}
-                disabled={loading}
-                className="px-2 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear teams cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Teams
-              </button>
-              <button
-                onClick={() => clearCache('players')}
-                disabled={loading}
-                className="px-2 py-1 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear players cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Players
-              </button>
-              <button
-                onClick={() => clearCache('home')}
-                disabled={loading}
-                className="px-2 py-1 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear home page cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                Home
-              </button>
-              <button
-                onClick={() => clearCache('all')}
-                disabled={loading}
-                className="px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-300 rounded text-xs transition-colors flex items-center gap-1"
-                title="Clear all cache"
-              >
-                <Trash2 className="w-3 h-3" />
-                All
-              </button>
-            </div>
+        <div className="mt-3 pt-2 border-t border-gray-700">
+          <div className="text-gray-400 mb-2">Cache Status (Only Games cached):</div>
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              onClick={() => clearCache('games')}
+              disabled={loading}
+              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded text-xs transition-colors flex items-center gap-1"
+              title="Clear games cache (ACTIVE)"
+            >
+              <Trash2 className="w-3 h-3" />
+              Games ✓
+            </button>
+            <button
+              onClick={() => clearCache('matches')}
+              disabled={loading}
+              className="px-2 py-1 bg-gray-600/20 text-gray-500 rounded text-xs transition-colors flex items-center gap-1 cursor-not-allowed"
+              title="Matches caching disabled"
+            >
+              <XCircle className="w-3 h-3" />
+              Matches
+            </button>
+            <button
+              onClick={() => clearCache('tournaments')}
+              disabled={loading}
+              className="px-2 py-1 bg-gray-600/20 text-gray-500 rounded text-xs transition-colors flex items-center gap-1 cursor-not-allowed"
+              title="Tournaments caching disabled"
+            >
+              <XCircle className="w-3 h-3" />
+              Tournaments
+            </button>
+            <button
+              onClick={() => clearCache('teams')}
+              disabled={loading}
+              className="px-2 py-1 bg-gray-600/20 text-gray-500 rounded text-xs transition-colors flex items-center gap-1 cursor-not-allowed"
+              title="Teams caching disabled"
+            >
+              <XCircle className="w-3 h-3" />
+              Teams
+            </button>
+            <button
+              onClick={() => clearCache('players')}
+              disabled={loading}
+              className="px-2 py-1 bg-gray-600/20 text-gray-500 rounded text-xs transition-colors flex items-center gap-1 cursor-not-allowed"
+              title="Players caching disabled"
+            >
+              <XCircle className="w-3 h-3" />
+              Players
+            </button>
+            <button
+              onClick={() => clearCache('home')}
+              disabled={loading}
+              className="px-2 py-1 bg-gray-600/20 text-gray-500 rounded text-xs transition-colors flex items-center gap-1 cursor-not-allowed"
+              title="Home caching disabled"
+            >
+              <XCircle className="w-3 h-3" />
+              Home
+            </button>
+            <button
+              onClick={() => clearCache('all')}
+              disabled={loading}
+              className="px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-300 rounded text-xs transition-colors flex items-center gap-1"
+              title="Clear all cache (only games)"
+            >
+              <Trash2 className="w-3 h-3" />
+              All
+            </button>
           </div>
-        )}
+        </div>
 
         {status && (
           <div className="text-gray-500 text-xs mt-2">
