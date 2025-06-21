@@ -1,6 +1,8 @@
 # Redis Cache Setup Guide
 
-This application supports Redis caching to improve performance and reduce API calls. Redis is **optional** - the application will automatically fall back to direct API calls if Redis is not configured or unavailable.
+This application supports Redis caching **for Games only** to improve performance and reduce API calls. Redis is **optional** - the application will automatically fall back to direct API calls if Redis is not configured or unavailable.
+
+**Note**: Only Games endpoints use Redis caching. All other endpoints (Matches, Tournaments, Teams, Players, Home) fetch directly from the API for real-time data.
 
 ## 🚀 Quick Start
 
@@ -107,29 +109,35 @@ REDIS_PORT=6379
 
 ### Cache TTL (Time To Live)
 
-The application uses different cache durations for different data types:
+**Only Games are cached with Redis:**
 
-- **Games**: 24 hours (games don't change often)
-- **Matches**: 5 minutes (matches change frequently)
-- **Tournaments**: 15 minutes
-- **Teams**: 1 hour
-- **Players**: 1 hour
-- **Home Page**: 5 minutes (combined data for dashboard)
+- **Games**: 24 hours (games don't change often) ✅ **CACHED**
+
+**Direct API calls (no Redis caching):**
+
+- **Matches**: Direct API calls ❌ **NOT CACHED**
+- **Tournaments**: Direct API calls ❌ **NOT CACHED**
+- **Teams**: Direct API calls ❌ **NOT CACHED**
+- **Players**: Direct API calls ❌ **NOT CACHED**
+- **Home Page**: Direct API calls ❌ **NOT CACHED**
 
 ### Cache Keys
 
-All cache keys are prefixed with `esports:` to avoid conflicts:
+**Only Games cache keys are used:**
 
-- Games: `esports:games:all`
-- Matches: `esports:matches:page:1`
+- Games: `esports:games:all` ✅ **ACTIVE**
+
+**Unused cache keys (endpoints bypass Redis):**
+
+- Matches: `esports:matches:page:1` ❌ **DISABLED**
 - Tournaments: 
-  - All: `esports:tournaments:all:page:1`
-  - Running: `esports:tournaments:running:page:1`
-  - Upcoming: `esports:tournaments:upcoming:page:1`
-  - Past: `esports:tournaments:past:page:1`
-- Teams: `esports:teams:page:1`
-- Players: `esports:players:page:1`
-- Home Page: `esports:home:data`
+  - All: `esports:tournaments:all:page:1` ❌ **DISABLED**
+  - Running: `esports:tournaments:running:page:1` ❌ **DISABLED**
+  - Upcoming: `esports:tournaments:upcoming:page:1` ❌ **DISABLED**
+  - Past: `esports:tournaments:past:page:1` ❌ **DISABLED**
+- Teams: `esports:teams:page:1` ❌ **DISABLED**
+- Players: `esports:players:page:1` ❌ **DISABLED**
+- Home Page: `esports:home:data` ❌ **DISABLED**
 
 ## 🛠️ Development Tools
 
@@ -150,29 +158,33 @@ GET /api/cache
 
 #### Clear Cache
 ```bash
-# Clear specific cache types
+# Clear games cache (only active cache)
 DELETE /api/cache?type=games
-DELETE /api/cache?type=matches
-DELETE /api/cache?type=tournaments
-DELETE /api/cache?type=teams
-DELETE /api/cache?type=players
-DELETE /api/cache?type=home
 
-# Clear all cache
+# Other cache types return "disabled" message
+DELETE /api/cache?type=matches      # Returns: "Redis caching disabled"
+DELETE /api/cache?type=tournaments  # Returns: "Redis caching disabled"
+DELETE /api/cache?type=teams        # Returns: "Redis caching disabled"
+DELETE /api/cache?type=players      # Returns: "Redis caching disabled"
+DELETE /api/cache?type=home         # Returns: "Redis caching disabled"
+
+# Clear all cache (only clears games)
 DELETE /api/cache?type=all
 ```
 
 #### Force Refresh Data
 ```bash
-# Force refresh cached data (bypasses cache)
+# Force refresh games cache (only endpoint with caching)
 GET /api/games?force_refresh=true
-GET /api/teams?force_refresh=true
-GET /api/players?force_refresh=true
-GET /api/tournaments?force_refresh=true
-GET /api/tournaments/running?force_refresh=true
-GET /api/tournaments/upcoming?force_refresh=true
-GET /api/tournaments/past?force_refresh=true
-GET /api/home?force_refresh=true
+
+# Other endpoints always fetch fresh data (no caching to bypass)
+GET /api/teams                       # Always fresh
+GET /api/players                     # Always fresh
+GET /api/tournaments                 # Always fresh
+GET /api/tournaments/running         # Always fresh
+GET /api/tournaments/upcoming        # Always fresh
+GET /api/tournaments/past           # Always fresh
+GET /api/home                       # Always fresh
 ```
 
 
@@ -217,12 +229,17 @@ If Redis is not available, the application will:
 
 ## 📊 Performance Benefits
 
-With Redis caching enabled:
+With Redis caching enabled (Games only):
 
-- **Games Dropdown**: Loads instantly after first request (24h cache)
-- **Matches**: Reduced API calls (5min cache)
-- **Tournaments**: Faster loading (15min cache)
-- **Teams/Players**: Improved response times (1h cache)
+- **Games Dropdown**: Loads instantly after first request (24h cache) ✅
+- **Matches**: Always fresh data (no cache) ⚡
+- **Tournaments**: Always fresh data (no cache) ⚡
+- **Teams/Players**: Always fresh data (no cache) ⚡
+
+**Benefits of this approach:**
+- Games are static and benefit from long-term caching
+- Dynamic data (matches, tournaments) is always up-to-date
+- Reduced complexity and cache invalidation issues
 
 ## 🔐 Security Notes
 

@@ -8,6 +8,7 @@ interface CacheOptions {
 
 /**
  * Generic cached fetch function that tries Redis first, then falls back to API
+ * Redis caching is only enabled for Games endpoints
  */
 async function cachedFetch<T>(
   cacheKey: string,
@@ -16,10 +17,13 @@ async function cachedFetch<T>(
 ): Promise<T> {
   const { ttl = cacheTTL.default, forceRefresh = false } = options
 
-  // If force refresh is requested, skip cache
-  if (!forceRefresh) {
+  // Check if this is a Games-related cache key
+  const isGamesCache = cacheKey.startsWith('esports:games:')
+  
+  // If force refresh is requested, or not a games cache, skip cache
+  if (!forceRefresh && isGamesCache) {
     try {
-      // Try to get from Redis cache first
+      // Try to get from Redis cache first (only for games)
       const cachedData = await redisCache.get(cacheKey)
       
       if (cachedData) {
@@ -32,25 +36,31 @@ async function cachedFetch<T>(
       logger.error('Error reading from cache:', error)
       // Continue to API fetch on cache error
     }
+  } else if (!isGamesCache) {
+    logger.debug(`Skipping cache for non-games endpoint: ${cacheKey}`)
   }
 
   // Fetch from API
   logger.debug(`Fetching from API for key: ${cacheKey}`)
   const data = await fetchFunction()
 
-  // Try to cache the result (don't fail if caching fails)
-  try {
-    const serialized = JSON.stringify(data)
-    const cached = await redisCache.set(cacheKey, serialized, ttl)
-    
-    if (cached) {
-      logger.debug(`Cached data for key: ${cacheKey} (TTL: ${ttl}s)`)
-    } else {
-      logger.debug(`Failed to cache data for key: ${cacheKey}`)
+  // Try to cache the result only for games (don't fail if caching fails)
+  if (isGamesCache) {
+    try {
+      const serialized = JSON.stringify(data)
+      const cached = await redisCache.set(cacheKey, serialized, ttl)
+      
+      if (cached) {
+        logger.debug(`Cached data for key: ${cacheKey} (TTL: ${ttl}s)`)
+      } else {
+        logger.debug(`Failed to cache data for key: ${cacheKey}`)
+      }
+    } catch (error) {
+      logger.error('Error caching data:', error)
+      // Don't throw, just log the error
     }
-  } catch (error) {
-    logger.error('Error caching data:', error)
-    // Don't throw, just log the error
+  } else {
+    logger.debug(`Skipping cache storage for non-games endpoint: ${cacheKey}`)
   }
 
   return data
@@ -359,55 +369,63 @@ export async function getCachedHomeData(options: CacheOptions = {}) {
 
 /**
  * Cache management utilities
+ * Note: Redis caching is only enabled for Games endpoints
  */
 export const cacheUtils = {
   /**
-   * Clear all cached games
+   * Clear all cached games (only endpoint with active Redis caching)
    */
   async clearGamesCache(): Promise<boolean> {
     return await redisCache.del(cacheKeys.games())
   },
 
   /**
-   * Clear all cached matches
+   * Clear all cached matches (Note: Redis caching disabled for matches)
    */
   async clearMatchesCache(): Promise<number> {
-    return await redisCache.flushPattern('esports:matches:*')
+    logger.info('Redis caching is disabled for matches - no cache to clear')
+    return 0
   },
 
   /**
-   * Clear all cached tournaments
+   * Clear all cached tournaments (Note: Redis caching disabled for tournaments)
    */
   async clearTournamentsCache(): Promise<number> {
-    return await redisCache.flushPattern('esports:tournaments:*')
+    logger.info('Redis caching is disabled for tournaments - no cache to clear')
+    return 0
   },
 
   /**
-   * Clear all cached teams
+   * Clear all cached teams (Note: Redis caching disabled for teams)
    */
   async clearTeamsCache(): Promise<number> {
-    return await redisCache.flushPattern('esports:teams:*')
+    logger.info('Redis caching is disabled for teams - no cache to clear')
+    return 0
   },
 
   /**
-   * Clear all cached players
+   * Clear all cached players (Note: Redis caching disabled for players)
    */
   async clearPlayersCache(): Promise<number> {
-    return await redisCache.flushPattern('esports:players:*')
+    logger.info('Redis caching is disabled for players - no cache to clear')
+    return 0
   },
 
   /**
-   * Clear home page cache
+   * Clear home page cache (Note: Redis caching disabled for home data)
    */
   async clearHomeCache(): Promise<boolean> {
-    return await redisCache.del(cacheKeys.home())
+    logger.info('Redis caching is disabled for home data - no cache to clear')
+    return false
   },
 
   /**
-   * Clear all esports cache
+   * Clear all esports cache (only games are actually cached)
    */
   async clearAllCache(): Promise<number> {
-    return await redisCache.flushPattern('esports:*')
+    const gamesCleared = await redisCache.del(cacheKeys.games())
+    logger.info('Only games cache cleared - other endpoints have Redis caching disabled')
+    return gamesCleared ? 1 : 0
   },
 
   /**

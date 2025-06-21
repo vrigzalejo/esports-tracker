@@ -30,14 +30,18 @@ This document outlines the caching and request optimization strategies implement
 
 ## Cache Management
 
-### Memory Cache (`app/lib/cache.ts`)
-- **TTL-based expiration**: Automatic cleanup of expired entries
-- **Memory usage monitoring**: Tracks cache size and performance
-- **Configurable limits**: Set maximum cache size and entry TTL
+### Redis Cache (`app/lib/redis.ts` & `app/lib/cachedApi.ts`)
+- **Games-only caching**: Redis caching is enabled only for Games endpoints
+- **TTL-based expiration**: 24-hour cache for games (static data)
+- **Fallback handling**: Graceful fallback to direct API calls when Redis is unavailable
+- **Connection management**: Automatic connection handling with retry logic
 
-### Next.js Route Caching
-- **API route caching**: 5-minute cache for most endpoints
-- **Static data caching**: Longer cache times for relatively static data like games
+### Disabled Caching for Dynamic Data
+- **Matches**: No Redis caching (data changes frequently)
+- **Tournaments**: No Redis caching (status changes often)
+- **Teams**: No Redis caching (roster changes)
+- **Players**: No Redis caching (profile updates)
+- **Home data**: No Redis caching (composite data)
 
 ## Performance Benefits
 
@@ -71,9 +75,10 @@ This document outlines the caching and request optimization strategies implement
 - useMemo is used for expensive computations and filtering
 
 ### Cache Strategy
-- Short TTL (5 minutes) for dynamic data like matches and tournaments
-- Longer TTL for static data like games and player profiles
-- Automatic cleanup prevents memory leaks
+- **Games only**: Redis caching with 24-hour TTL for games (most static data)
+- **No caching**: All other endpoints bypass Redis for real-time data
+- **Direct API calls**: Matches, tournaments, teams, players fetch directly from PandaScore
+- **Fallback handling**: Graceful degradation when Redis is unavailable
 
 ## Monitoring
 

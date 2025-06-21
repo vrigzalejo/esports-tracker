@@ -40,7 +40,7 @@ export function validateOriginHeader(request: NextRequest): { valid: boolean; er
   
   // Get allowed origins from environment or use defaults
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
-    'http://localhost:3000',
+    'http://localhost:300*',
     'https://esports-tracker-three.vercel.app',
     'https://*.vercel.app' // Allow all Vercel preview deployments
   ]
