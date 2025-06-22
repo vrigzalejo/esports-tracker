@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Play, Trophy, Users, TrendingUp, ExternalLink, Clock, User } from 'lucide-react'
@@ -203,6 +203,301 @@ export default function HomePage() {
   const { data: tournaments, loading: tournamentsLoading } = useTournaments({ per_page: 50 })
   const { data: teams, loading: teamsLoading } = useTeams({ per_page: 50 })
 
+  // Enhanced prize pool parsing utility
+  const parsePrizePool = (prizePool: string | undefined | null): number => {
+    if (!prizePool || prizePool.trim() === '') return 0;
+    
+    // Handle common "TBD" or "To be determined" cases
+    const lowerPrizePool = prizePool.toLowerCase().trim();
+    if (lowerPrizePool === 'tbd' || lowerPrizePool === 'to be determined' || lowerPrizePool === 'n/a' || lowerPrizePool === 'unknown') {
+      return 0;
+    }
+    
+    // Start with the original string
+    let numericString = prizePool.trim();
+    
+    // Remove currency symbols first
+    numericString = numericString.replace(/[$€£¥₹₽₩฿]/g, '');
+    
+    // Remove currency names and codes (case insensitive)
+    const currencyNames = [
+      'united states dollar', 'us dollar', 'dollar', 'dollars',
+      'indonesian rupiah', 'rupiah',
+      'euro', 'euros',
+      'british pound', 'pound', 'pounds', 'sterling',
+      'japanese yen', 'yen',
+      'indian rupee', 'rupee', 'rupees',
+      'russian ruble', 'ruble', 'rubles',
+      'chinese yuan', 'yuan', 'renminbi',
+      'korean won', 'won',
+      'thai baht', 'baht',
+      'singapore dollar', 'singapore dollars',
+      'malaysian ringgit', 'ringgit',
+      'philippine peso', 'peso', 'pesos',
+      'vietnamese dong', 'dong',
+      'brazilian real', 'real', 'reais',
+      'mexican peso', 'mexican pesos',
+      'canadian dollar', 'canadian dollars',
+      'australian dollar', 'australian dollars',
+      'new zealand dollar', 'new zealand dollars',
+      'south african rand', 'rand',
+      'turkish lira', 'lira',
+      'polish zloty', 'zloty',
+      'czech koruna', 'koruna',
+      'hungarian forint', 'forint',
+      'norwegian krone', 'krone',
+      'swedish krona', 'krona',
+      'danish krone',
+      'swiss franc', 'franc'
+    ];
+    
+    const currencyCodes = ['usd', 'eur', 'gbp', 'jpy', 'inr', 'rub', 'cny', 'krw', 'thb', 'sgd', 'myr', 'php', 'vnd', 'brl', 'mxn', 'cad', 'aud', 'nzd', 'zar', 'try', 'pln', 'czk', 'huf', 'nok', 'sek', 'dkk', 'chf', 'idr'];
+    
+    // Remove currency names
+    currencyNames.forEach(name => {
+      const regex = new RegExp(`\\b${name}\\b`, 'gi');
+      numericString = numericString.replace(regex, '');
+    });
+    
+    // Remove currency codes
+    currencyCodes.forEach(code => {
+      const regex = new RegExp(`\\b${code}\\b`, 'gi');
+      numericString = numericString.replace(regex, '');
+    });
+    
+    // Clean up extra spaces
+    numericString = numericString.trim();
+    
+         // Check for multiplier suffixes BEFORE removing non-numeric characters
+     const multipliers = {
+       'b': 1000000000,    // billion
+       'bil': 1000000000,  // billion
+       'billion': 1000000000,
+       'billions': 1000000000,
+       'm': 1000000,       // million
+       'mil': 1000000,     // million
+       'million': 1000000,
+       'millions': 1000000,
+       'k': 1000,          // thousand
+       'thousand': 1000,
+       'thousands': 1000
+     };
+    
+    let multiplier = 1;
+    const lowerNumeric = numericString.toLowerCase();
+    
+    // Find the multiplier (check longer strings first to avoid conflicts)
+    const sortedMultipliers = Object.entries(multipliers).sort((a, b) => b[0].length - a[0].length);
+    
+    for (const [suffix, mult] of sortedMultipliers) {
+      if (lowerNumeric.endsWith(suffix)) {
+        multiplier = mult;
+        // Remove the suffix from the string
+        numericString = numericString.substring(0, numericString.length - suffix.length).trim();
+        break;
+      }
+    }
+    
+    // Handle different decimal separators and thousands separators
+    // First, identify the pattern
+    const commaCount = (numericString.match(/,/g) || []).length;
+    const dotCount = (numericString.match(/\./g) || []).length;
+    
+    // Clean the numeric string based on common patterns
+    if (commaCount > 0 && dotCount > 0) {
+      // Pattern like 1,234,567.89 (US format) or 1.234.567,89 (European format)
+      const lastCommaIndex = numericString.lastIndexOf(',');
+      const lastDotIndex = numericString.lastIndexOf('.');
+      
+      if (lastDotIndex > lastCommaIndex) {
+        // US format: 1,234,567.89
+        numericString = numericString.replace(/,/g, ''); // Remove thousands separators
+      } else {
+        // European format: 1.234.567,89
+        numericString = numericString.replace(/\./g, ''); // Remove thousands separators
+        numericString = numericString.replace(',', '.'); // Convert decimal separator
+      }
+    } else if (commaCount > 0) {
+      // Only commas - could be thousands separator or decimal separator
+      const parts = numericString.split(',');
+      if (parts.length === 2 && parts[1].length <= 2) {
+        // Likely decimal separator (e.g., "1000,50")
+        numericString = numericString.replace(',', '.');
+      } else {
+        // Likely thousands separator (e.g., "1,000,000")
+        numericString = numericString.replace(/,/g, '');
+      }
+    } else if (dotCount > 1) {
+      // Multiple dots - likely thousands separator (e.g., "1.000.000")
+      const parts = numericString.split('.');
+      if (parts[parts.length - 1].length <= 2) {
+        // Last part is likely decimals
+        const decimals = parts.pop();
+        numericString = parts.join('') + '.' + decimals;
+      } else {
+        // All dots are thousands separators
+        numericString = numericString.replace(/\./g, '');
+      }
+    }
+    
+    // Remove any remaining non-numeric characters except decimal point
+    numericString = numericString.replace(/[^0-9.]/g, '');
+    
+    // Parse the final number
+    let value = parseFloat(numericString);
+    
+    if (isNaN(value) || value <= 0) return 0;
+    
+    // Apply the multiplier
+    value = value * multiplier;
+    
+    return Math.round(value); // Round to avoid floating point precision issues
+  }
+
+  // Prize pool analysis by currency
+  const analyzePrizepoolsByCurrency = (tournaments: Array<{ id: number; name: string; prizepool?: string; league: { name: string }; videogame: { name: string } }>) => {
+    const currencyGroups: { [key: string]: Array<{ tournament: string; league: string; game: string; originalPrizepool: string; parsedValue: number }> } = {}
+    
+    tournaments?.forEach(tournament => {
+      if (!tournament.prizepool) return
+      
+      const prizePool = tournament.prizepool
+      const parsedValue = parsePrizePool(prizePool)
+      
+      if (parsedValue === 0) return
+      
+      // Detect currency with comprehensive global coverage
+      let currency = 'USD ($)' // Default
+      
+      // Check for currency symbols first (most reliable)
+      if (/€/.test(prizePool)) currency = 'EUR (€)'
+      else if (/£/.test(prizePool)) currency = 'GBP (£)'
+      else if (/¥/.test(prizePool)) currency = 'JPY (¥)'
+      else if (/₹/.test(prizePool)) currency = 'INR (₹)'
+      else if (/₽/.test(prizePool)) currency = 'RUB (₽)'
+      else if (/₩/.test(prizePool)) currency = 'KRW (₩)'
+      else if (/฿/.test(prizePool)) currency = 'THB (฿)'
+      else if (/₱/.test(prizePool)) currency = 'PHP (₱)'
+      else if (/₫/.test(prizePool)) currency = 'VND (₫)'
+      else if (/₪/.test(prizePool)) currency = 'ILS (₪)'
+      else if (/₺/.test(prizePool)) currency = 'TRY (₺)'
+      else if (/₡/.test(prizePool)) currency = 'CRC (₡)'
+      else if (/₦/.test(prizePool)) currency = 'NGN (₦)'
+      else if (/₵/.test(prizePool)) currency = 'GHS (₵)'
+      else if (/₴/.test(prizePool)) currency = 'UAH (₴)'
+      else if (/₸/.test(prizePool)) currency = 'KZT (₸)'
+      else if (/₼/.test(prizePool)) currency = 'AZN (₼)'
+      else if (/₾/.test(prizePool)) currency = 'GEL (₾)'
+      else if (/﷼/.test(prizePool)) currency = 'SAR (﷼)'
+      else if (/R\$/.test(prizePool)) currency = 'BRL (R$)'
+      else if (/S\$/.test(prizePool)) currency = 'SGD (S$)'
+      else if (/C\$/.test(prizePool)) currency = 'CAD (C$)'
+      else if (/A\$/.test(prizePool)) currency = 'AUD (A$)'
+      else if (/NZ\$/.test(prizePool)) currency = 'NZD (NZ$)'
+      else if (/HK\$/.test(prizePool)) currency = 'HKD (HK$)'
+      else if (/Rp/.test(prizePool)) currency = 'IDR (Rp)'
+      else if (/RM/.test(prizePool)) currency = 'MYR (RM)'
+      else if (/R\b/.test(prizePool)) currency = 'ZAR (R)'
+      else if (/kr/.test(prizePool)) currency = 'NOK (kr)' // Default Nordic currency
+      else if (/zł/.test(prizePool)) currency = 'PLN (zł)'
+      else if (/Kč/.test(prizePool)) currency = 'CZK (Kč)'
+      else if (/Ft/.test(prizePool)) currency = 'HUF (Ft)'
+      else if (/lei/.test(prizePool)) currency = 'RON (lei)'
+      else if (/лв/.test(prizePool)) currency = 'BGN (лв)'
+      else if (/kn/.test(prizePool)) currency = 'HRK (kn)'
+      else if (/din/.test(prizePool)) currency = 'RSD (din)'
+      
+      // Check for currency names and codes (comprehensive global coverage)
+      else if (/euro|eur\b/gi.test(prizePool)) currency = 'EUR (€)'
+      else if (/british pound|pound sterling|gbp\b/gi.test(prizePool)) currency = 'GBP (£)'
+      else if (/japanese yen|yen|jpy\b/gi.test(prizePool)) currency = 'JPY (¥)'
+      else if (/chinese yuan|yuan|cny\b/gi.test(prizePool)) currency = 'CNY (¥)'
+      else if (/indian rupee|rupee|inr\b/gi.test(prizePool)) currency = 'INR (₹)'
+      else if (/russian ruble|ruble|rub\b/gi.test(prizePool)) currency = 'RUB (₽)'
+      else if (/korean won|won|krw\b/gi.test(prizePool)) currency = 'KRW (₩)'
+      else if (/thai baht|baht|thb\b/gi.test(prizePool)) currency = 'THB (฿)'
+      else if (/indonesian rupiah|rupiah|idr\b/gi.test(prizePool)) currency = 'IDR (Rp)'
+      else if (/singapore dollar|sgd\b/gi.test(prizePool)) currency = 'SGD (S$)'
+      else if (/malaysian ringgit|ringgit|myr\b/gi.test(prizePool)) currency = 'MYR (RM)'
+      else if (/philippine peso|peso|php\b/gi.test(prizePool)) currency = 'PHP (₱)'
+      else if (/vietnamese dong|dong|vnd\b/gi.test(prizePool)) currency = 'VND (₫)'
+      else if (/brazilian real|real|brl\b/gi.test(prizePool)) currency = 'BRL (R$)'
+      else if (/mexican peso|mxn\b/gi.test(prizePool)) currency = 'MXN ($)'
+      else if (/canadian dollar|cad\b/gi.test(prizePool)) currency = 'CAD (C$)'
+      else if (/australian dollar|aud\b/gi.test(prizePool)) currency = 'AUD (A$)'
+      else if (/new zealand dollar|nzd\b/gi.test(prizePool)) currency = 'NZD (NZ$)'
+      else if (/hong kong dollar|hkd\b/gi.test(prizePool)) currency = 'HKD (HK$)'
+      else if (/swiss franc|chf\b/gi.test(prizePool)) currency = 'CHF (CHF)'
+      else if (/south african rand|rand|zar\b/gi.test(prizePool)) currency = 'ZAR (R)'
+      else if (/turkish lira|lira|try\b/gi.test(prizePool)) currency = 'TRY (₺)'
+      else if (/norwegian krone|krone|nok\b/gi.test(prizePool)) currency = 'NOK (kr)'
+      else if (/swedish krona|krona|sek\b/gi.test(prizePool)) currency = 'SEK (kr)'
+      else if (/danish krone|dkk\b/gi.test(prizePool)) currency = 'DKK (kr)'
+      else if (/israeli shekel|shekel|ils\b/gi.test(prizePool)) currency = 'ILS (₪)'
+      else if (/polish zloty|zloty|pln\b/gi.test(prizePool)) currency = 'PLN (zł)'
+      else if (/czech koruna|koruna|czk\b/gi.test(prizePool)) currency = 'CZK (Kč)'
+      else if (/hungarian forint|forint|huf\b/gi.test(prizePool)) currency = 'HUF (Ft)'
+      else if (/romanian leu|leu|ron\b/gi.test(prizePool)) currency = 'RON (lei)'
+      else if (/bulgarian lev|lev|bgn\b/gi.test(prizePool)) currency = 'BGN (лв)'
+      else if (/croatian kuna|kuna|hrk\b/gi.test(prizePool)) currency = 'HRK (kn)'
+      else if (/serbian dinar|dinar|rsd\b/gi.test(prizePool)) currency = 'RSD (din)'
+      else if (/ukrainian hryvnia|hryvnia|uah\b/gi.test(prizePool)) currency = 'UAH (₴)'
+      else if (/kazakhstani tenge|tenge|kzt\b/gi.test(prizePool)) currency = 'KZT (₸)'
+      else if (/azerbaijani manat|manat|azn\b/gi.test(prizePool)) currency = 'AZN (₼)'
+      else if (/georgian lari|lari|gel\b/gi.test(prizePool)) currency = 'GEL (₾)'
+      else if (/saudi riyal|riyal|sar\b/gi.test(prizePool)) currency = 'SAR (﷼)'
+      else if (/uae dirham|dirham|aed\b/gi.test(prizePool)) currency = 'AED (د.إ)'
+      else if (/egyptian pound|egp\b/gi.test(prizePool)) currency = 'EGP (£)'
+      else if (/nigerian naira|naira|ngn\b/gi.test(prizePool)) currency = 'NGN (₦)'
+      else if (/ghanaian cedi|cedi|ghs\b/gi.test(prizePool)) currency = 'GHS (₵)'
+      else if (/kenyan shilling|shilling|kes\b/gi.test(prizePool)) currency = 'KES (KSh)'
+      else if (/moroccan dirham|mad\b/gi.test(prizePool)) currency = 'MAD (DH)'
+      else if (/tunisian dinar|tnd\b/gi.test(prizePool)) currency = 'TND (د.ت)'
+      else if (/argentine peso|ars\b/gi.test(prizePool)) currency = 'ARS ($)'
+      else if (/chilean peso|clp\b/gi.test(prizePool)) currency = 'CLP ($)'
+      else if (/colombian peso|cop\b/gi.test(prizePool)) currency = 'COP ($)'
+      else if (/peruvian sol|pen\b/gi.test(prizePool)) currency = 'PEN (S/)'
+      else if (/uruguayan peso|uyu\b/gi.test(prizePool)) currency = 'UYU ($)'
+      else if (/venezuelan bolívar|vef\b/gi.test(prizePool)) currency = 'VEF (Bs)'
+      else if (/costa rican colón|colón|crc\b/gi.test(prizePool)) currency = 'CRC (₡)'
+      else if (/guatemalan quetzal|quetzal|gtq\b/gi.test(prizePool)) currency = 'GTQ (Q)'
+      else if (/honduran lempira|lempira|hnl\b/gi.test(prizePool)) currency = 'HNL (L)'
+      else if (/nicaraguan córdoba|córdoba|nio\b/gi.test(prizePool)) currency = 'NIO (C$)'
+      else if (/panamanian balboa|balboa|pab\b/gi.test(prizePool)) currency = 'PAB (B/.)'
+      else if (/jamaican dollar|jmd\b/gi.test(prizePool)) currency = 'JMD (J$)'
+      else if (/trinidad dollar|ttd\b/gi.test(prizePool)) currency = 'TTD (TT$)'
+      else if (/barbadian dollar|bbd\b/gi.test(prizePool)) currency = 'BBD (Bds$)'
+      else if (/icelandic króna|króna|isk\b/gi.test(prizePool)) currency = 'ISK (kr)'
+      else if (/finnish markka|fim\b/gi.test(prizePool)) currency = 'EUR (€)' // Finland uses Euro now
+      else if (/estonian kroon|eek\b/gi.test(prizePool)) currency = 'EUR (€)' // Estonia uses Euro now
+      else if (/latvian lats|lvl\b/gi.test(prizePool)) currency = 'EUR (€)' // Latvia uses Euro now
+      else if (/lithuanian litas|ltl\b/gi.test(prizePool)) currency = 'EUR (€)' // Lithuania uses Euro now
+      else if (/maltese lira|mtl\b/gi.test(prizePool)) currency = 'EUR (€)' // Malta uses Euro now
+      else if (/cypriot pound|cyp\b/gi.test(prizePool)) currency = 'EUR (€)' // Cyprus uses Euro now
+      else if (/slovak koruna|skk\b/gi.test(prizePool)) currency = 'EUR (€)' // Slovakia uses Euro now
+      else if (/slovenian tolar|sit\b/gi.test(prizePool)) currency = 'EUR (€)' // Slovenia uses Euro now
+      
+      if (!currencyGroups[currency]) {
+        currencyGroups[currency] = []
+      }
+      
+      currencyGroups[currency].push({
+        tournament: tournament.name,
+        league: tournament.league.name,
+        game: tournament.videogame.name,
+        originalPrizepool: prizePool,
+        parsedValue
+      })
+    })
+    
+    // Sort each currency group by parsed value (descending)
+    Object.keys(currencyGroups).forEach(currency => {
+      currencyGroups[currency].sort((a, b) => b.parsedValue - a.parsedValue)
+    })
+    
+    return currencyGroups
+  }
+
   // Calculate realistic statistics based on limited sample data
   const stats = {
     liveMatches: matches?.filter(match => match.status === 'running').length || 0,
@@ -213,38 +508,229 @@ export default function HomePage() {
     samplePrizePool: tournaments?.reduce((total, tournament) => {
       if (!tournament.prizepool) return total
       
-      // Handle different currency formats and extract numeric value
-      let prizepool = tournament.prizepool.toLowerCase()
-      let multiplier = 1
-      
-      // Check for K/M suffixes
-      if (prizepool.includes('k') && !prizepool.includes('m')) {
-        multiplier = 1000
-        prizepool = prizepool.replace(/k/g, '')
-      } else if (prizepool.includes('m')) {
-        multiplier = 1000000
-        prizepool = prizepool.replace(/m/g, '')
-      }
-      
-      // Extract numeric value (remove currency symbols and text)
-      const numericValue = parseFloat(prizepool.replace(/[^0-9.]/g, ''))
-      
-      if (isNaN(numericValue)) return total
-      
-      return total + (numericValue * multiplier)
+      const parsedValue = parsePrizePool(tournament.prizepool)
+      return total + parsedValue
     }, 0) || 0
   }
 
-  // Format prize pool display
-  const formatPrizePool = (amount: number): string => {
-    if (amount === 0) return 'TBD'
-    if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(1)}M`
-    } else if (amount >= 1000) {
-      return `$${(amount / 1000).toFixed(0)}K`
-    } else {
-      return `$${amount.toLocaleString()}`
+  // Get prizepool analysis
+  const prizepoolsByCurrency = analyzePrizepoolsByCurrency(tournaments || [])
+  
+  // Debug: Log prizepool analysis (can be removed in production)
+  React.useEffect(() => {
+    if (Object.keys(prizepoolsByCurrency).length > 0) {
+      console.log('Prize Pools by Currency:', prizepoolsByCurrency)
+      console.log('Currency Summary:', Object.entries(prizepoolsByCurrency).map(([currency, tournaments]) => ({
+        currency,
+        count: tournaments.length,
+        totalValue: tournaments.reduce((sum, item) => sum + item.parsedValue, 0),
+        tournaments: tournaments.map(t => ({ name: t.tournament, prizepool: t.originalPrizepool, parsed: t.parsedValue }))
+      })))
+      
+      // Test parsing with various formats
+      console.log('=== PARSING TESTS ===')
+      const testCases = [
+        '$1,000,000',
+        '€2.5M',
+        '£500K',
+        '¥100,000,000',
+        '₹50,00,000',
+        '$2.5 million',
+        '1.000.000 EUR',
+        '1,234,567.89 USD',
+        '2.500.000,50 €',
+        '$500k',
+        'TBD',
+        '1.5B USD',
+        '750 thousand dollars'
+      ]
+      
+      testCases.forEach(testCase => {
+        const parsed = parsePrizePool(testCase)
+        console.log(`"${testCase}" → ${parsed.toLocaleString()}`)
+      })
     }
+  }, [prizepoolsByCurrency])
+
+  // Format prize pool display with multi-currency support
+  const formatPrizePool = (totalAmount: number, prizepoolsByCurrency: { [key: string]: Array<{ tournament: string; league: string; game: string; originalPrizepool: string; parsedValue: number }> }): string => {
+    if (totalAmount === 0) return 'TBD'
+    
+    const currencies = Object.keys(prizepoolsByCurrency)
+    
+    // If only one currency, use that currency's symbol
+    if (currencies.length === 1) {
+      const currency = currencies[0]
+      let currencySymbol = '$' // Default fallback
+      
+      if (currency.includes('(') && currency.includes(')')) {
+        // Extract symbol from parentheses: "USD ($)" -> "$"
+        currencySymbol = currency.split('(')[1].replace(')', '')
+      } else {
+        // For currencies without symbols, use appropriate symbols or codes
+        const currencyMap: { [key: string]: string } = {
+          'IDR': 'Rp',
+          'SGD': 'S$',
+          'MYR': 'RM',
+          'PHP': '₱',
+          'VND': '₫',
+          'BRL': 'R$',
+          'MXN': '$',
+          'CAD': 'C$',
+          'AUD': 'A$',
+          'NZD': 'NZ$',
+          'HKD': 'HK$',
+          'CHF': 'CHF',
+          'ZAR': 'R',
+          'TRY': '₺',
+          'NOK': 'kr',
+          'SEK': 'kr',
+          'DKK': 'kr',
+          'CNY': '¥',
+          'ILS': '₪',
+          'PLN': 'zł',
+          'CZK': 'Kč',
+          'HUF': 'Ft',
+          'RON': 'lei',
+          'BGN': 'лв',
+          'HRK': 'kn',
+          'RSD': 'din',
+          'UAH': '₴',
+          'KZT': '₸',
+          'AZN': '₼',
+          'GEL': '₾',
+          'SAR': '﷼',
+          'AED': 'د.إ',
+          'EGP': '£',
+          'NGN': '₦',
+          'GHS': '₵',
+          'KES': 'KSh',
+          'MAD': 'DH',
+          'TND': 'د.ت',
+          'ARS': '$',
+          'CLP': '$',
+          'COP': '$',
+          'PEN': 'S/',
+          'UYU': '$',
+          'VEF': 'Bs',
+          'CRC': '₡',
+          'GTQ': 'Q',
+          'HNL': 'L',
+          'NIO': 'C$',
+          'PAB': 'B/.',
+          'JMD': 'J$',
+          'TTD': 'TT$',
+          'BBD': 'Bds$',
+          'ISK': 'kr'
+        }
+        currencySymbol = currencyMap[currency] || currency
+      }
+      
+      // Format with single currency
+      if (totalAmount >= 1000000000) {
+        return `${currencySymbol}${(totalAmount / 1000000000).toFixed(1)}B`
+      } else if (totalAmount >= 1000000) {
+        return `${currencySymbol}${(totalAmount / 1000000).toFixed(1)}M`
+      } else if (totalAmount >= 1000) {
+        return `${currencySymbol}${(totalAmount / 1000).toFixed(1)}K`
+      } else {
+        return `${currencySymbol}${Math.round(totalAmount).toLocaleString()}`
+      }
+    }
+    
+    // Multiple currencies - show top currencies
+    const currencyTotals = Object.entries(prizepoolsByCurrency)
+      .map(([currency, tournaments]) => ({
+        currency,
+        total: tournaments.reduce((sum, item) => sum + item.parsedValue, 0)
+      }))
+      .sort((a, b) => b.total - a.total)
+    
+    // Get top 2 currencies
+    const topCurrencies = currencyTotals.slice(0, 2)
+    
+    const formatCurrencyAmount = (amount: number, currency: string) => {
+      let currencySymbol = '$'
+      
+      if (currency.includes('(') && currency.includes(')')) {
+        currencySymbol = currency.split('(')[1].replace(')', '')
+      } else {
+        const currencyMap: { [key: string]: string } = {
+          'IDR': 'Rp',
+          'SGD': 'S$',
+          'MYR': 'RM',
+          'PHP': '₱',
+          'VND': '₫',
+          'BRL': 'R$',
+          'MXN': '$',
+          'CAD': 'C$',
+          'AUD': 'A$',
+          'NZD': 'NZ$',
+          'HKD': 'HK$',
+          'CHF': 'CHF',
+          'ZAR': 'R',
+          'TRY': '₺',
+          'NOK': 'kr',
+          'SEK': 'kr',
+          'DKK': 'kr',
+          'CNY': '¥',
+          'ILS': '₪',
+          'PLN': 'zł',
+          'CZK': 'Kč',
+          'HUF': 'Ft',
+          'RON': 'lei',
+          'BGN': 'лв',
+          'HRK': 'kn',
+          'RSD': 'din',
+          'UAH': '₴',
+          'KZT': '₸',
+          'AZN': '₼',
+          'GEL': '₾',
+          'SAR': '﷼',
+          'AED': 'د.إ',
+          'EGP': '£',
+          'NGN': '₦',
+          'GHS': '₵',
+          'KES': 'KSh',
+          'MAD': 'DH',
+          'TND': 'د.ت',
+          'ARS': '$',
+          'CLP': '$',
+          'COP': '$',
+          'PEN': 'S/',
+          'UYU': '$',
+          'VEF': 'Bs',
+          'CRC': '₡',
+          'GTQ': 'Q',
+          'HNL': 'L',
+          'NIO': 'C$',
+          'PAB': 'B/.',
+          'JMD': 'J$',
+          'TTD': 'TT$',
+          'BBD': 'Bds$',
+          'ISK': 'kr'
+        }
+        currencySymbol = currencyMap[currency] || currency
+      }
+      
+      if (amount >= 1000000000) {
+        return `${currencySymbol}${(amount / 1000000000).toFixed(1)}B`
+      } else if (amount >= 1000000) {
+        return `${currencySymbol}${(amount / 1000000).toFixed(1)}M`
+      } else if (amount >= 1000) {
+        return `${currencySymbol}${(amount / 1000).toFixed(1)}K`
+      } else {
+        return `${currencySymbol}${Math.round(amount).toLocaleString()}`
+      }
+    }
+    
+    if (topCurrencies.length >= 2) {
+      return `${formatCurrencyAmount(topCurrencies[0].total, topCurrencies[0].currency)} + ${formatCurrencyAmount(topCurrencies[1].total, topCurrencies[1].currency)}`
+    } else if (topCurrencies.length === 1) {
+      return formatCurrencyAmount(topCurrencies[0].total, topCurrencies[0].currency)
+    }
+    
+    return 'TBD'
   }
 
   const handleQuickAction = (action: string) => {
@@ -348,14 +834,21 @@ export default function HomePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-orange-300 font-medium">Prize Pool</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{formatPrizePool(stats.samplePrizePool)}</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{formatPrizePool(stats.samplePrizePool, prizepoolsByCurrency)}</p>
                 </div>
                 <div className="bg-orange-500/20 p-1.5 sm:p-2 rounded-lg">
                   <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
                 </div>
               </div>
               <p className="text-xs text-orange-300/70 mt-1">
-                {stats.samplePrizePool > 1000000 ? "Multi-million" : stats.samplePrizePool > 0 ? "Active" : "Current events"}
+                {Object.keys(prizepoolsByCurrency).length > 1 
+                  ? `${Object.keys(prizepoolsByCurrency).length} currencies` 
+                  : stats.samplePrizePool > 1000000 
+                    ? "Multi-million" 
+                    : stats.samplePrizePool > 0 
+                      ? "Active" 
+                      : "Current events"
+                }
               </p>
             </div>
           )}
@@ -411,6 +904,8 @@ export default function HomePage() {
             <p className="text-green-100 text-xs sm:text-sm leading-tight opacity-90 group-hover:opacity-100 transition-opacity duration-200">Discover players</p>
           </button>
         </div>
+
+
 
         {/* Latest Activity - Mobile Responsive - Emphasized */}
         <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border-2 border-blue-500/30 shadow-2xl shadow-blue-500/10">
@@ -590,5 +1085,3 @@ export default function HomePage() {
     </div>
   )
 }
-
-

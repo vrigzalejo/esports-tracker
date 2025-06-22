@@ -228,9 +228,8 @@ export default function TournamentsContent() {
 
     const currentTournaments = filteredTournaments
 
-    // Pagination logic
-    const isFiltering = searchTerm.trim() !== '' || dateFilter !== 'all'
-    const hasMorePages = !isFiltering && tournaments.length === itemsPerPage && currentTournaments.length > 0
+    // Pagination logic - disable next if current page has fewer items than itemsPerPage
+    const hasMorePages = currentTournaments.length === itemsPerPage
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
     const resetPage = () => setCurrentPage(1)
@@ -311,6 +310,54 @@ export default function TournamentsContent() {
                 return 'Custom Range'
             default: return 'All'
         }
+    }
+
+    // Generate descriptive no data message
+    const getNoDataMessage = () => {
+        const statusInfo = getStatusInfo(selectedStatus)
+        let message = `No ${statusInfo.label.toLowerCase()} tournaments found`
+        
+        const filters = []
+        if (searchTerm) filters.push(`matching "${searchTerm}"`)
+        if (dateFilter !== 'all') filters.push(`for ${formatDateFilter().toLowerCase()}`)
+        
+        if (filters.length > 0) {
+            message += ` ${filters.join(' ')}`
+        }
+        
+        return message
+    }
+
+    // Generate helpful suggestions for no data state
+    const getNoDataSuggestions = () => {
+        const suggestions = []
+        
+        if (searchTerm) {
+            suggestions.push("Try different search terms")
+        }
+        
+        if (dateFilter !== 'all') {
+            if (dateFilter === 'today') {
+                suggestions.push("Try 'This Week' or 'This Month'")
+            } else if (dateFilter === 'week') {
+                suggestions.push("Try 'This Month' or 'All' dates")
+            } else {
+                suggestions.push("Try expanding your date range")
+            }
+        }
+        
+        if (selectedStatus === 'upcoming') {
+            suggestions.push("Check 'On-going' or 'Finished' tournaments")
+        } else if (selectedStatus === 'past') {
+            suggestions.push("Check 'Upcoming' or 'On-going' tournaments")
+        }
+        
+        // Only show generic suggestion if no specific ones apply
+        if (suggestions.length === 0) {
+            suggestions.push("Try adjusting your filters")
+        }
+        
+        return suggestions
     }
 
     return (
@@ -431,42 +478,7 @@ export default function TournamentsContent() {
                     </div>
                 )}
 
-                {/* Results info */}
-                {!tournamentsLoading && (
-                    <div className="mb-4 text-gray-400 text-sm">
-                        {currentTournaments.length > 0 ? (
-                            <>
-                                <span className="hidden sm:inline">Page {currentPage} - </span>
-                                Showing {currentTournaments.length} {getStatusInfo(selectedStatus).label.toLowerCase()} tournaments
-                                {searchTerm && (
-                                    <span className="block sm:inline">
-                                        <span className="hidden sm:inline"> (filtered by &ldquo;</span>
-                                        <span className="sm:hidden">Filtered by &ldquo;</span>
-                                        {searchTerm}&rdquo;)
-                                    </span>
-                                )}
-                                {dateFilter !== 'all' && (
-                                    <span className="block sm:inline">
-                                        <span className="hidden sm:inline"> (</span>
-                                        <span className="sm:hidden">Date: </span>
-                                        {formatDateFilter()}
-                                        <span className="hidden sm:inline">)</span>
-                                    </span>
-                                )}
-                                {hasMorePages && <span className="hidden sm:inline"> (more available)</span>}
-                            </>
-                        ) : (
-                            <>
-                                {searchTerm ? (
-                                    `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found matching "${searchTerm}"`
-                                ) : (
-                                    `No ${getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found`
-                                )}
-                                {dateFilter !== 'all' && ` for ${formatDateFilter()}`}
-                            </>
-                        )}
-                    </div>
-                )}
+                
 
                 {tournamentsLoading ? (
                     /* Loading Skeleton - Responsive Grid */
@@ -551,118 +563,111 @@ export default function TournamentsContent() {
                             ))}
                         </div>
 
-                        {/* Pagination - Mobile Responsive */}
-                        {(currentPage > 1 || hasMorePages) && (
-                            <div className="flex flex-col sm:flex-row items-center justify-center mt-6 sm:mt-8 space-y-4 sm:space-y-0 sm:space-x-2">
-                                {/* Mobile: Stack buttons vertically */}
-                                <div className="flex items-center space-x-2 sm:hidden">
-                                    <button
-                                        onClick={() => goToPage(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                        className="flex items-center px-4 py-3 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 min-h-[44px]"
-                                    >
-                                        <ChevronLeft className="w-4 h-4 mr-1" />
-                                        Previous
-                                    </button>
-
-                                    <span className="px-4 py-3 text-sm text-gray-300 bg-gray-800 rounded-lg border border-gray-600 min-h-[44px] flex items-center">
-                                        Page {currentPage}
-                                    </span>
-
-                                    <button
-                                        onClick={() => goToPage(currentPage + 1)}
-                                        disabled={!hasMorePages}
-                                        className="flex items-center px-4 py-3 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 min-h-[44px]"
-                                    >
-                                        Next
-                                        <ChevronRight className="w-4 h-4 ml-1" />
-                                    </button>
+                        {/* No Results State - moved here above pagination */}
+                        {currentTournaments.length === 0 && (
+                            <div className="text-center py-12">
+                                <Trophy className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-gray-400 text-lg mb-3">
+                                    {getNoDataMessage()}
+                                </h3>
+                                
+                                {/* Helpful suggestions */}
+                                <div className="mb-6 space-y-1">
+                                    {getNoDataSuggestions().map((suggestion, index) => (
+                                        <p key={index} className="text-gray-500 text-sm">
+                                            {suggestion}
+                                        </p>
+                                    ))}
                                 </div>
-
-                                {/* Desktop: Horizontal layout */}
-                                <div className="hidden sm:flex items-center space-x-2">
-                                    <button
-                                        onClick={() => goToPage(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
-                                    >
-                                        <ChevronLeft className="w-4 h-4 mr-1" />
-                                        Previous
-                                    </button>
-
-                                    <div className="flex items-center space-x-2 px-4">
-                                        {getPageNumbers().map((pageNum, index) => (
-                                            <span key={index}>
-                                                {pageNum === '...' ? (
-                                                    <span className="text-gray-500 px-2">...</span>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => goToPage(pageNum as number)}
-                                                        className={`px-3 py-1 text-sm rounded-md cursor-pointer transition-all duration-200 ${currentPage === pageNum
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'text-gray-400 hover:text-white hover:bg-gray-600'
-                                                            }`}
-                                                    >
-                                                        {pageNum}
-                                                    </button>
-                                                )}
-                                            </span>
-                                        ))}
+                                
+                                {/* Clear filter buttons */}
+                                {(searchTerm || dateFilter !== 'all') && (
+                                    <div className="flex flex-wrap items-center justify-center gap-2">
+                                        {searchTerm && (
+                                            <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="px-3 py-1.5 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-md transition-all duration-200 cursor-pointer border border-blue-500/20 hover:border-blue-500/40"
+                                            >
+                                                Clear search
+                                            </button>
+                                        )}
+                                        {dateFilter !== 'all' && (
+                                            <button
+                                                onClick={() => {
+                                                    setDateFilter('all')
+                                                    setCustomDateRange({ start: '', end: '' })
+                                                    setCurrentPage(1)
+                                                }}
+                                                className="px-3 py-1.5 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-md transition-all duration-200 cursor-pointer border border-blue-500/20 hover:border-blue-500/40"
+                                            >
+                                                Clear date filter
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => {
+                                                setSearchTerm('')
+                                                setDateFilter('all')
+                                                setCustomDateRange({ start: '', end: '' })
+                                                setCurrentPage(1)
+                                            }}
+                                            className="px-3 py-1.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-md transition-all duration-200 cursor-pointer border border-purple-500/20 hover:border-purple-500/40"
+                                        >
+                                            Clear all
+                                        </button>
                                     </div>
+                                )}
+                            </div>
+                        )}
 
+                        {/* Pagination */}
+                        {(currentPage > 1 || hasMorePages) && (
+                            <div className="flex items-center justify-center space-x-2 mt-8">
+                                <button
+                                    onClick={() => goToPage(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+
+                                {getPageNumbers().map((pageNum, index) => (
                                     <button
-                                        onClick={() => goToPage(currentPage + 1)}
-                                        disabled={!hasMorePages}
-                                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                        key={index}
+                                        onClick={() => typeof pageNum === 'number' ? goToPage(pageNum) : undefined}
+                                        disabled={pageNum === '...'}
+                                        className={`px-3 py-2 rounded-lg transition-colors ${
+                                            pageNum === currentPage
+                                                ? 'bg-blue-600 text-white cursor-pointer'
+                                                : pageNum === '...'
+                                                ? 'text-gray-400 cursor-default'
+                                                : 'bg-gray-800 text-white hover:bg-gray-700 cursor-pointer'
+                                        }`}
                                     >
-                                        Next
-                                        <ChevronRight className="w-4 h-4 ml-1" />
+                                        {pageNum}
                                     </button>
-                                </div>
+                                ))}
+
+                                <button
+                                    onClick={() => goToPage(currentPage + 1)}
+                                    disabled={!hasMorePages}
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
+                                    aria-label="Next page"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Pagination Description */}
+                        {currentTournaments.length > 0 && (
+                            <div className="text-center mt-4">
+                                <p className="text-sm text-gray-500">
+                                    Showing {currentTournaments.length} tournaments per page
+                                </p>
                             </div>
                         )}
                     </>
-                )}
-
-                {/* No Results State */}
-                {currentTournaments.length === 0 && !tournamentsLoading && (
-                    <div className="text-center py-8 sm:py-12">
-                        <p className="text-gray-400 text-base sm:text-lg mb-4">
-                            {searchTerm ? (
-                                <>
-                                    No {getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found matching &ldquo;{searchTerm}&rdquo;
-                                </>
-                            ) : (
-                                <>
-                                    No {getStatusInfo(selectedStatus).label.toLowerCase()} tournaments found
-                                </>
-                            )}
-                        </p>
-                        {(searchTerm || dateFilter !== 'all') && (
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="px-4 py-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all duration-200 cursor-pointer min-h-[44px] sm:min-h-auto flex items-center justify-center border border-blue-500/20 hover:border-blue-500/40"
-                                    >
-                                        Clear search
-                                    </button>
-                                )}
-                                {dateFilter !== 'all' && (
-                                    <button
-                                        onClick={() => {
-                                            setDateFilter('all')
-                                            setCustomDateRange({ start: '', end: '' })
-                                            setCurrentPage(1)
-                                        }}
-                                        className="px-4 py-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all duration-200 cursor-pointer min-h-[44px] sm:min-h-auto flex items-center justify-center border border-blue-500/20 hover:border-blue-500/40"
-                                    >
-                                        Clear date filter
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 )}
             </main>
         </div>

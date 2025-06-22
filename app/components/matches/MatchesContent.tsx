@@ -203,8 +203,8 @@ export default function MatchesContent() {
 
     const currentMatches = filteredMatches
 
-    // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = matches.length === itemsPerPage
+    // Pagination logic - disable next if current page has fewer items than itemsPerPage
+    const hasMorePages = currentMatches.length === itemsPerPage
     const totalPages = hasMorePages ? currentPage + 1 : currentPage
 
     // Reset to first page when filters change
@@ -396,16 +396,6 @@ export default function MatchesContent() {
                     </div>
                 )}
 
-                {/* Results info */}
-                {!matchesLoading && currentMatches.length > 0 && (
-                    <div className="mb-4 text-gray-400 text-sm">
-                        Page {currentPage} - Showing {currentMatches.length} matches
-                        {searchTerm && ` (filtered by "${searchTerm}")`}
-                        {dateFilter !== 'all' && ` (${formatDateFilter()})`}
-                        {hasMorePages && <span> (more available)</span>}
-                    </div>
-                )}
-
                 {matchesLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {[...Array(6)].map((_, i) => (
@@ -525,84 +515,113 @@ export default function MatchesContent() {
                             ))}
                         </div>
 
+                        {/* No Data State */}
+                        {currentMatches.length === 0 && (
+                            <div className="text-center py-8">
+                                <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-300 mb-2">
+                                    {searchTerm ? (
+                                        <>No matches found matching &ldquo;{searchTerm}&rdquo;{dateFilter !== 'all' ? ` for ${formatDateFilter().toLowerCase()}` : ''}</>
+                                    ) : dateFilter !== 'all' ? (
+                                        <>No matches found for {formatDateFilter().toLowerCase()}</>
+                                    ) : (
+                                        <>No matches found</>
+                                    )}
+                                </h3>
+                                
+                                {/* Suggestions */}
+                                <div className="space-y-3">
+                                    <p className="text-gray-400 text-sm">
+                                        {searchTerm ? (
+                                            'Try different search terms'
+                                        ) : dateFilter !== 'all' ? (
+                                            dateFilter === 'today' ? 'Try "This Week" or "This Month"' :
+                                            dateFilter === 'week' ? 'Try "Today" or "This Month"' :
+                                            dateFilter === 'month' ? 'Try "Today" or "This Week"' :
+                                            'Try "Today", "This Week", or "This Month"'
+                                        ) : (
+                                            'Try searching for specific teams or tournaments'
+                                        )}
+                                    </p>
+                                    
+                                    {/* Clear Filters */}
+                                    {(searchTerm || dateFilter !== 'all') && (
+                                        <div className="flex items-center justify-center gap-2 flex-wrap">
+                                            {searchTerm && (
+                                                <button
+                                                    onClick={() => setSearchTerm('')}
+                                                    className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md transition-colors duration-200 cursor-pointer"
+                                                >
+                                                    Clear search
+                                                </button>
+                                            )}
+                                            {dateFilter !== 'all' && (
+                                                <button
+                                                    onClick={() => {
+                                                        setDateFilter('all')
+                                                        setCustomDateRange({ start: '', end: '' })
+                                                        resetPage()
+                                                    }}
+                                                    className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md transition-colors duration-200 cursor-pointer"
+                                                >
+                                                    Clear date filter
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Pagination */}
                         {(currentPage > 1 || hasMorePages) && (
-                            <div className="flex items-center justify-center mt-8 space-x-2">
+                            <div className="flex items-center justify-center space-x-2 mt-8">
                                 <button
                                     onClick={() => goToPage(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
+                                    aria-label="Previous page"
                                 >
-                                    <ChevronLeft className="w-4 h-4 mr-1" />
-                                    Previous
+                                    <ChevronLeft className="w-5 h-5" />
                                 </button>
 
-                                <div className="flex items-center space-x-2 px-4">
-                                    {getPageNumbers().map((pageNum, index) => (
-                                        <span key={index}>
-                                            {pageNum === '...' ? (
-                                                <span className="text-gray-500 px-2">...</span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => goToPage(pageNum as number)}
-                                                    className={`px-3 py-1 text-sm rounded-md cursor-pointer transition-all duration-200 ${currentPage === pageNum
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'text-gray-400 hover:text-white hover:bg-gray-600'
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
+                                {getPageNumbers().map((pageNum, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => typeof pageNum === 'number' ? goToPage(pageNum) : undefined}
+                                        disabled={pageNum === '...'}
+                                        className={`px-3 py-2 rounded-lg transition-colors ${
+                                            pageNum === currentPage
+                                                ? 'bg-blue-600 text-white cursor-pointer'
+                                                : pageNum === '...'
+                                                ? 'text-gray-400 cursor-default'
+                                                : 'bg-gray-800 text-white hover:bg-gray-700 cursor-pointer'
+                                        }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                ))}
 
                                 <button
                                     onClick={() => goToPage(currentPage + 1)}
                                     disabled={!hasMorePages}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                    className="p-2 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors cursor-pointer"
+                                    aria-label="Next page"
                                 >
-                                    Next
-                                    <ChevronRight className="w-4 h-4 ml-1" />
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </div>
                         )}
-                    </>
-                )}
 
-                {currentMatches.length === 0 && !matchesLoading && (
-                    <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">
-                            {searchTerm
-                                ? `No matches found matching "${searchTerm}"`
-                                : "No matches found matching your criteria"
-                            }
-                        </p>
-                        {(searchTerm || dateFilter !== 'all') && (
-                            <div className="mt-4 space-x-2">
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer"
-                                    >
-                                        Clear search
-                                    </button>
-                                )}
-                                {dateFilter !== 'all' && (
-                                    <button
-                                        onClick={() => {
-                                            setDateFilter('all')
-                                            setCustomDateRange({ start: '', end: '' })
-                                            resetPage()
-                                        }}
-                                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer"
-                                    >
-                                        Clear date filter
-                                    </button>
-                                )}
+                        {/* Pagination Description */}
+                        {currentMatches.length > 0 && (
+                            <div className="text-center mt-4">
+                                <p className="text-sm text-gray-500">
+                                    Showing {currentMatches.length} matches per page
+                                </p>
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
             </main>
         </div>

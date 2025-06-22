@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import TeamCard from '@/components/teams/TeamCard'
-import { useTeams } from '@/hooks/useEsportsData'
+
 import type { Team } from '@/types/esports'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 import { trackPageView } from '@/lib/analytics'
@@ -74,19 +74,63 @@ function TeamsContentWithSearchParams() {
         saveDropdownValue('teamItemsPerPage', items)
     }
 
-    // Fetch teams data using the hook
-    const { data: teams, loading: teamsLoading } = useTeams({
-        page: currentPage,
-        per_page: itemsPerPage,
-        search: searchTerm
-    })
+    // Fetch teams data - fetch multiple pages to get more teams
+    const [allTeams, setAllTeams] = useState<Team[]>([])
+    const [isLoadingAllTeams, setIsLoadingAllTeams] = useState(true)
 
-    // Teams are already filtered by the API based on search term
+    // Fetch multiple pages of teams
+    useEffect(() => {
+        const fetchAllTeams = async () => {
+            setIsLoadingAllTeams(true)
+            try {
+                const { getTeams } = await import('@/lib/clientApi')
+                const teams = []
+                let page = 1
+                let hasMore = true
+
+                // Fetch up to 5 pages (250 teams max) to avoid infinite loading
+                while (hasMore && page <= 5) {
+                    const pageTeams = await getTeams({
+                        page,
+                        per_page: 50,
+                        search: searchTerm
+                    })
+                    
+                    if (pageTeams && pageTeams.length > 0) {
+                        teams.push(...pageTeams)
+                        hasMore = pageTeams.length === 50 // Continue if we got a full page
+                        page++
+                    } else {
+                        hasMore = false
+                    }
+                }
+
+                setAllTeams(teams)
+            } catch (error) {
+                console.error('Error fetching all teams:', error)
+                setAllTeams([])
+            } finally {
+                setIsLoadingAllTeams(false)
+            }
+        }
+
+        fetchAllTeams()
+    }, [searchTerm])
+
+    const teamsLoading = isLoadingAllTeams
+
+    // Implement client-side pagination since API returns all results
+    const totalTeams = allTeams.length
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const teams = allTeams.slice(startIndex, endIndex)
     const currentTeams = teams
 
-    // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = teams.length === itemsPerPage
-    const totalPages = hasMorePages ? currentPage + 1 : currentPage
+    // Pagination logic - based on total available data
+    const totalPages = Math.ceil(totalTeams / itemsPerPage)
+    const hasMorePages = currentPage < totalPages
+
+
 
     // Generate page numbers for pagination
     const getPageNumbers = () => {
@@ -130,8 +174,29 @@ function TeamsContentWithSearchParams() {
         return pages
     }
 
-    // Calculate display indices for results info
-    const startIndex = (currentPage - 1) * itemsPerPage + 1
+    // Generate descriptive no data message
+    const getNoDataMessage = () => {
+        let message = "No teams found"
+        if (searchTerm) {
+            message += ` matching "${searchTerm}"`
+        }
+        return message
+    }
+
+    // Generate helpful suggestions for no data state
+    const getNoDataSuggestions = () => {
+        const suggestions = []
+        
+        if (searchTerm) {
+            suggestions.push("Try different search terms")
+        } else {
+            suggestions.push("Try searching for teams or players")
+        }
+        
+        return suggestions
+    }
+
+
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
@@ -229,17 +294,25 @@ function TeamsContentWithSearchParams() {
                             ))}
                         </div>
 
-                        {/* Empty State */}
+
+
+                        {/* Empty State - moved here above pagination */}
                         {currentTeams.length === 0 && (
                             <div className="text-center py-12">
-                                <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                                <div className="text-gray-400 text-lg mb-2">No teams found</div>
-                                <div className="text-gray-500">Try adjusting your search criteria</div>
+                                <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-gray-400 text-lg mb-3">{getNoDataMessage()}</h3>
+                                <div className="space-y-1">
+                                    {getNoDataSuggestions().map((suggestion, index) => (
+                                        <p key={index} className="text-gray-500 text-sm">{suggestion}</p>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
+
+
                         {/* Pagination */}
-                        {totalPages > 1 && (
+                        {(currentPage > 1 || hasMorePages) && (
                             <div className="flex items-center justify-center space-x-2 mt-8">
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
@@ -278,12 +351,14 @@ function TeamsContentWithSearchParams() {
                             </div>
                         )}
 
-                        {/* Results info */}
-                        <div className="text-center text-gray-400 mt-4">
-                            <div>
-                                Showing {startIndex}-{Math.min(currentPage * itemsPerPage, startIndex + currentTeams.length - 1)} teams
+                        {/* Pagination Description */}
+                        {currentTeams.length > 0 && (
+                            <div className="text-center mt-4">
+                                <p className="text-sm text-gray-500">
+                                    Showing {currentTeams.length} teams per page
+                                </p>
                             </div>
-                        </div>
+                        )}
                     </>
                 )}
             </main>
