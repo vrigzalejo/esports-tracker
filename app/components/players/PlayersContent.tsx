@@ -6,7 +6,7 @@ import PlayerCard from './PlayerCard'
 import Header from '@/components/layout/Header'
 import Navigation from '@/components/layout/Navigation'
 import { Users, ChevronLeft, ChevronRight, List } from 'lucide-react'
-import { usePlayers } from '@/hooks/useEsportsData'
+import type { Player } from '@/types/roster'
 import { getDropdownValue, saveDropdownValue } from '@/lib/localStorage'
 import { trackPageView } from '@/lib/analytics'
 
@@ -72,16 +72,62 @@ function PlayersContentWithSearchParams() {
         saveDropdownValue('playerItemsPerPage', items)
     }
 
-    // Fetch players data using the hook
-    const { data: players, loading: playersLoading } = usePlayers({
-        page: currentPage,
-        per_page: itemsPerPage,
-        search: searchTerm
-    })
+    // Fetch players data - fetch multiple pages to get more players
+    const [allPlayers, setAllPlayers] = useState<Player[]>([])
+    const [isLoadingAllPlayers, setIsLoadingAllPlayers] = useState(true)
 
-    // Pagination logic - assuming we have consistent page sizes
-    const hasMorePages = players.length === itemsPerPage
-    const totalPages = hasMorePages ? currentPage + 1 : currentPage
+    // Fetch multiple pages of players
+    useEffect(() => {
+        const fetchAllPlayers = async () => {
+            setIsLoadingAllPlayers(true)
+            try {
+                const { getPlayers } = await import('@/lib/clientApi')
+                const players = []
+                let page = 1
+                let hasMore = true
+
+                // Fetch up to 5 pages (250 players max) to avoid infinite loading
+                while (hasMore && page <= 5) {
+                    const pagePlayers = await getPlayers({
+                        page,
+                        per_page: 50,
+                        search: searchTerm
+                    })
+                    
+                    if (pagePlayers && pagePlayers.length > 0) {
+                        players.push(...pagePlayers)
+                        hasMore = pagePlayers.length === 50 // Continue if we got a full page
+                        page++
+                    } else {
+                        hasMore = false
+                    }
+                }
+
+                setAllPlayers(players)
+            } catch (error) {
+                console.error('Error fetching all players:', error)
+                setAllPlayers([])
+            } finally {
+                setIsLoadingAllPlayers(false)
+            }
+        }
+
+        fetchAllPlayers()
+    }, [searchTerm])
+
+    const playersLoading = isLoadingAllPlayers
+
+    // Implement client-side pagination since API returns all results
+    const totalPlayers = allPlayers.length
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const players = allPlayers.slice(startIndex, endIndex)
+
+    // Pagination logic - based on total available data
+    const totalPages = Math.ceil(totalPlayers / itemsPerPage)
+    const hasMorePages = currentPage < totalPages
+
+
 
     // Generate page numbers for pagination
     const getPageNumbers = () => {
@@ -125,8 +171,29 @@ function PlayersContentWithSearchParams() {
         return pages
     }
 
-    // Calculate display indices for results info
-    const startIndex = (currentPage - 1) * itemsPerPage + 1
+    // Generate descriptive no data message
+    const getNoDataMessage = () => {
+        let message = "No players found"
+        if (searchTerm) {
+            message += ` matching "${searchTerm}"`
+        }
+        return message
+    }
+
+    // Generate helpful suggestions for no data state
+    const getNoDataSuggestions = () => {
+        const suggestions = []
+        
+        if (searchTerm) {
+            suggestions.push("Try different search terms")
+        } else {
+            suggestions.push("Try searching for players or teams")
+        }
+        
+        return suggestions
+    }
+
+
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
@@ -220,17 +287,25 @@ function PlayersContentWithSearchParams() {
                             ))}
                         </div>
 
-                        {/* Empty State */}
+
+
+                        {/* Empty State - moved here above pagination */}
                         {players.length === 0 && (
                             <div className="text-center py-12">
-                                <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                                <div className="text-gray-400 text-lg mb-2">No players found</div>
-                                <div className="text-gray-500">Try adjusting your search criteria</div>
+                                <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-gray-400 text-lg mb-3">{getNoDataMessage()}</h3>
+                                <div className="space-y-1">
+                                    {getNoDataSuggestions().map((suggestion, index) => (
+                                        <p key={index} className="text-gray-500 text-sm">{suggestion}</p>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
+
+
                         {/* Pagination */}
-                        {totalPages > 1 && (
+                        {(currentPage > 1 || hasMorePages) && (
                             <div className="flex items-center justify-center space-x-2 mt-8">
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
@@ -269,12 +344,14 @@ function PlayersContentWithSearchParams() {
                             </div>
                         )}
 
-                        {/* Results info */}
-                        <div className="text-center text-gray-400 mt-4">
-                            <div>
-                                Showing {startIndex}-{Math.min(currentPage * itemsPerPage, startIndex + players.length - 1)} players
+                        {/* Pagination Description */}
+                        {players.length > 0 && (
+                            <div className="text-center mt-4">
+                                <p className="text-sm text-gray-500">
+                                    Showing {players.length} players per page
+                                </p>
                             </div>
-                        </div>
+                        )}
                     </>
                 )}
             </main>
